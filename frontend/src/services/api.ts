@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { AuthTokens, IncidentCreate, IncidentUpdate, User } from '../types'
 
 const API_BASE = '/api'
 
@@ -29,7 +30,7 @@ api.interceptors.response.use(
         const { state } = JSON.parse(stored)
         if (state?.refreshToken) {
           try {
-            const res = await axios.post(`${API_BASE}/auth/refresh`, {
+            const res = await axios.post<AuthTokens>(`${API_BASE}/auth/refresh`, {
               refresh_token: state.refreshToken,
             })
             const { access_token, refresh_token, user } = res.data
@@ -53,10 +54,14 @@ api.interceptors.response.use(
 )
 
 export const authAPI = {
-  login: (data: { email: string; password: string; remember_me?: boolean }) =>
-    api.post('/auth/login', data),
-  register: (data: { email: string; username: string; full_name: string; password: string; role_name?: string }) =>
-    api.post('/auth/register', data),
+  login: (data: { email: string; password: string; remember_me?: boolean }) => api.post('/auth/login', data),
+  register: (data: {
+    email: string
+    username: string
+    full_name: string
+    password: string
+    role_name?: string
+  }) => api.post('/auth/register', data),
   logout: () => api.post('/auth/logout'),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token: string, new_password: string) =>
@@ -68,11 +73,16 @@ export const authAPI = {
 }
 
 export const incidentAPI = {
-  list: (params?: { page?: number; per_page?: number; category?: string; status?: string; priority?: string }) =>
-    api.get('/incidents/', { params }),
+  list: (params?: {
+    page?: number
+    per_page?: number
+    category?: string
+    status?: string
+    priority?: string
+  }) => api.get('/incidents/', { params }),
   get: (id: string) => api.get(`/incidents/${id}`),
-  create: (data: any) => api.post('/incidents/', data),
-  update: (id: string, data: any) => api.put(`/incidents/${id}`, data),
+  create: (data: IncidentCreate) => api.post('/incidents/', data),
+  update: (id: string, data: IncidentUpdate) => api.put(`/incidents/${id}`, data),
   getStats: () => api.get('/incidents/stats'),
   uploadMedia: (incidentId: string, file: File) => {
     const formData = new FormData()
@@ -95,7 +105,7 @@ export const dashboardAPI = {
 export const userAPI = {
   list: (params?: { page?: number; per_page?: number }) => api.get('/users/', { params }),
   get: (id: string) => api.get(`/users/${id}`),
-  update: (id: string, data: any) => api.put(`/users/${id}`, data),
+  update: (id: string, data: Partial<User>) => api.put(`/users/${id}`, data),
   delete: (id: string) => api.delete(`/users/${id}`),
   getRoles: () => api.get('/users/roles/list'),
 }

@@ -1,6 +1,17 @@
 import { motion } from 'framer-motion'
 import { BarChart3, PieChart as PieIcon, Clock, Target, Gauge, Activity } from 'lucide-react'
-import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts'
 
 const monthlyData = [
   { month: 'Jan', incidents: 45, resolved: 40 },
@@ -23,10 +34,34 @@ const categoryStats = [
 ]
 
 const performanceData = [
-  { metric: 'Avg Response Time', value: '12 min', change: '-15%', icon: Clock, color: 'from-blue-500 to-cyan-500' },
-  { metric: 'Resolution Rate', value: '94%', change: '+8%', icon: Target, color: 'from-green-500 to-emerald-500' },
-  { metric: 'Avg Risk Score', value: '0.42', change: '-5%', icon: Gauge, color: 'from-purple-500 to-pink-500' },
-  { metric: 'Active Sensors', value: '847', change: '+12%', icon: Activity, color: 'from-amber-500 to-orange-500' },
+  {
+    metric: 'Avg Response Time',
+    value: '12 min',
+    change: '-15%',
+    icon: Clock,
+    color: 'from-blue-500 to-cyan-500',
+  },
+  {
+    metric: 'Resolution Rate',
+    value: '94%',
+    change: '+8%',
+    icon: Target,
+    color: 'from-green-500 to-emerald-500',
+  },
+  {
+    metric: 'Avg Risk Score',
+    value: '0.42',
+    change: '-5%',
+    icon: Gauge,
+    color: 'from-purple-500 to-pink-500',
+  },
+  {
+    metric: 'Active Sensors',
+    value: '847',
+    change: '+12%',
+    icon: Activity,
+    color: 'from-amber-500 to-orange-500',
+  },
 ]
 
 export default function AnalyticsPage() {
@@ -35,7 +70,9 @@ export default function AnalyticsPage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Analytics & Reports</h1>
-          <p className="text-gray-400 text-sm mt-1">Comprehensive incident analytics and performance metrics</p>
+          <p className="text-gray-400 text-sm mt-1">
+            Comprehensive incident analytics and performance metrics
+          </p>
         </div>
         <div className="uc-chip bg-accent-blue/10 text-accent-blue">
           <BarChart3 className="w-3.5 h-3.5 mr-1" />
@@ -53,10 +90,14 @@ export default function AnalyticsPage() {
             className="uc-card uc-card-hover p-5"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center`}>
+              <div
+                className={`w-9 h-9 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center`}
+              >
                 <metric.icon className="w-4.5 h-4.5 text-white" />
               </div>
-              <span className={`text-xs font-medium ${metric.change.startsWith('+') ? 'text-state-success' : 'text-state-danger'}`}>
+              <span
+                className={`text-xs font-medium ${metric.change.startsWith('+') ? 'text-state-success' : 'text-state-danger'}`}
+              >
                 {metric.change}
               </span>
             </div>
@@ -136,8 +177,13 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-2 gap-2 mt-3">
             {categoryStats.map((cat) => (
               <div key={cat.name} className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
-                <span className="text-xs text-gray-400 truncate">{cat.name}: <span className="text-white font-medium">{cat.value}</span></span>
+                <div
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: cat.color }}
+                />
+                <span className="text-xs text-gray-400 truncate">
+                  {cat.name}: <span className="text-white font-medium">{cat.value}</span>
+                </span>
               </div>
             ))}
           </div>

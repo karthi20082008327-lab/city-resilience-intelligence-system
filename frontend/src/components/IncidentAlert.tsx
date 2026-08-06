@@ -10,7 +10,13 @@ interface IncidentAlertProps {
   onDismiss?: () => void
 }
 
-export default function IncidentAlert({ incident, onAccept, onReject, onDispatch, onDismiss }: IncidentAlertProps) {
+export default function IncidentAlert({
+  incident,
+  onAccept,
+  onReject,
+  onDispatch,
+  onDismiss,
+}: IncidentAlertProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [show, setShow] = useState(false)
 
@@ -19,7 +25,9 @@ export default function IncidentAlert({ incident, onAccept, onReject, onDispatch
       setShow(true)
       try {
         if (!audioRef.current) {
-          audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgip+LdkNCZn+Fj4FfT1Zqe4eXjGNHTGd9h5iOaUxOaH2Jm5FqTE5ofYmbk2pMTmh9iZuTakxOaH2Jm5NqTE5ofYmbk2pMTmh9iZuTakxOaH2Jm5NqTE5ofYmbk2pMTmh9iZuTakxOaA==')
+          audioRef.current = new Audio(
+            'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgip+LdkNCZn+Fj4FfT1Zqe4eXjGNHTGd9h5iOaUxOaH2Jm5FqTE5ofYmbk2pMTmh9iZuTakxOaH2Jm5NqTE5ofYmbk2pMTmh9iZuTakxOaH2Jm5NqTE5ofYmbk2pMTmh9iZuTakxOaA=='
+          )
           audioRef.current.loop = true
           audioRef.current.volume = 0.5
           audioRef.current.play().catch(() => {})
@@ -32,7 +40,12 @@ export default function IncidentAlert({ incident, onAccept, onReject, onDispatch
         audioRef.current = null
       }
     }
-    return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null } }
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
   }, [incident])
 
   if (!incident) return null
@@ -82,7 +95,10 @@ export default function IncidentAlert({ incident, onAccept, onReject, onDispatch
               </div>
             </div>
             <button
-              onClick={() => { setShow(false); onDismiss?.() }}
+              onClick={() => {
+                setShow(false)
+                onDismiss?.()
+              }}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 transition-colors"
             >
               <X className="w-4 h-4" />
@@ -152,19 +168,28 @@ export default function IncidentAlert({ incident, onAccept, onReject, onDispatch
             {/* Actions */}
             <div className="flex gap-2 pt-2">
               <button
-                onClick={() => { onAccept?.(incident.incident_id); setShow(false) }}
+                onClick={() => {
+                  onAccept?.(incident.incident_id)
+                  setShow(false)
+                }}
                 className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"
               >
                 <CheckCircle className="w-3.5 h-3.5" /> Accept
               </button>
               <button
-                onClick={() => { onDispatch?.(incident.incident_id); setShow(false) }}
+                onClick={() => {
+                  onDispatch?.(incident.incident_id)
+                  setShow(false)
+                }}
                 className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
               >
                 <Radio className="w-3.5 h-3.5" /> Dispatch
               </button>
               <button
-                onClick={() => { onReject?.(incident.incident_id); setShow(false) }}
+                onClick={() => {
+                  onReject?.(incident.incident_id)
+                  setShow(false)
+                }}
                 className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-white/5 text-white/50 border border-white/[0.06] hover:bg-white/10"
               >
                 <XCircle className="w-3.5 h-3.5" /> Reject

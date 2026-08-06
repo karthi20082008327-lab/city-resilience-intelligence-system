@@ -144,13 +144,21 @@ export default function LoginPage() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
-                    rememberMe
-                      ? 'bg-blue-500 border-blue-500'
-                      : 'border-white/15 bg-white/[0.03] group-hover:border-white/25'
-                  }`}>
+                  <div
+                    className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
+                      rememberMe
+                        ? 'bg-blue-500 border-blue-500'
+                        : 'border-white/15 bg-white/[0.03] group-hover:border-white/25'
+                    }`}
+                  >
                     {rememberMe && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <svg
+                        className="w-3 h-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     )}

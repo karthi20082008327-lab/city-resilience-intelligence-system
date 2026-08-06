@@ -2,9 +2,22 @@ import { useState, useEffect, useRef } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, Map, Cloud, AlertTriangle, Cctv, Brain,
-  Building2, Users, BarChart3, Settings, Menu, X,
-  Bell, LogOut, ChevronDown, FlaskConical
+  LayoutDashboard,
+  Map,
+  Cloud,
+  AlertTriangle,
+  Cctv,
+  Brain,
+  Building2,
+  Users,
+  BarChart3,
+  Settings,
+  Menu,
+  X,
+  Bell,
+  LogOut,
+  ChevronDown,
+  FlaskConical,
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { UcripLogo } from '../UcripLogo'
@@ -32,8 +45,7 @@ function LiveClock() {
 
   return (
     <div className="text-xs font-mono text-white/40 tracking-wider">
-      {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-      {' '}
+      {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}{' '}
       <span className="text-white/80 font-semibold">
         {time.toLocaleTimeString('en-US', { hour12: false })}
       </span>
@@ -108,7 +120,9 @@ export default function AdminLayout() {
         {/* Navigation */}
         <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto scrollbar-thin">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (item.path === '/admin/dashboard' && location.pathname === '/admin')
+            const isActive =
+              location.pathname === item.path ||
+              (item.path === '/admin/dashboard' && location.pathname === '/admin')
             return (
               <NavLink
                 key={item.path}
@@ -126,9 +140,11 @@ export default function AdminLayout() {
                     transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                   />
                 )}
-                <item.icon className={`w-[18px] h-[18px] flex-shrink-0 transition-colors duration-200 ${
-                  isActive ? 'text-blue-400' : 'text-white/40 group-hover:text-white/60'
-                }`} />
+                <item.icon
+                  className={`w-[18px] h-[18px] flex-shrink-0 transition-colors duration-200 ${
+                    isActive ? 'text-blue-400' : 'text-white/40 group-hover:text-white/60'
+                  }`}
+                />
                 <AnimatePresence>
                   {sidebarOpen && (
                     <motion.span
@@ -153,10 +169,7 @@ export default function AdminLayout() {
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.03] transition-all duration-200"
           >
-            <motion.div
-              animate={{ rotate: sidebarOpen ? 0 : 180 }}
-              transition={{ duration: 0.2 }}
-            >
+            <motion.div animate={{ rotate: sidebarOpen ? 0 : 180 }} transition={{ duration: 0.2 }}>
               <Menu className="w-[18px] h-[18px]" />
             </motion.div>
             <AnimatePresence>
@@ -229,9 +242,9 @@ export default function AdminLayout() {
                       {isActive && (
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-blue-500 rounded-r-full" />
                       )}
-                      <item.icon className={`w-[18px] h-[18px] ${
-                        isActive ? 'text-blue-400' : 'text-white/40'
-                      }`} />
+                      <item.icon
+                        className={`w-[18px] h-[18px] ${isActive ? 'text-blue-400' : 'text-white/40'}`}
+                      />
                       <span className="text-sm">{item.label}</span>
                     </NavLink>
                   )
@@ -284,7 +297,9 @@ export default function AdminLayout() {
                 <span className="hidden md:block text-sm text-white/70 max-w-[100px] truncate">
                   {user?.full_name || 'Admin'}
                 </span>
-                <ChevronDown className={`w-3.5 h-3.5 text-white/30 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-white/30 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
+                />
               </button>
 
               <AnimatePresence>

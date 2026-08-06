@@ -10,19 +10,46 @@ import { formatDate } from '../../utils/helpers'
 const CITY_CENTER: [number, number] = [11.2448, 77.5017]
 
 const categoryColors: Record<string, string> = {
-  accident: '#ef4444', water_leak: '#3b82f6', fire: '#f97316', power_outage: '#eab308',
-  road_damage: '#6b7280', flood: '#06b6d4', gas_leak: '#ef4444', building_collapse: '#dc2626', other: '#6b7280',
+  accident: '#ef4444',
+  water_leak: '#3b82f6',
+  fire: '#f97316',
+  power_outage: '#eab308',
+  road_damage: '#6b7280',
+  flood: '#06b6d4',
+  gas_leak: '#ef4444',
+  building_collapse: '#dc2626',
+  other: '#6b7280',
 }
 
 const departmentLocations = [
-  { name: 'Vijayamangalam Govt Hospital', type: 'hospital', position: [11.2510, 77.5050] as [number, number], icon: '🏥' },
-  { name: 'Police Station', type: 'police', position: [11.2410, 77.4950] as [number, number], icon: '🚔' },
-  { name: 'Fire Station', type: 'fire', position: [11.2480, 77.4970] as [number, number], icon: '🚒' },
-  { name: 'Water Treatment Plant', type: 'water', position: [11.2390, 77.5100] as [number, number], icon: '💧' },
-  { name: 'Power Station', type: 'power', position: [11.2370, 77.4960] as [number, number], icon: '⚡' },
-  { name: 'Traffic Control Center', type: 'traffic', position: [11.2500, 77.5020] as [number, number], icon: '🚦' },
-  { name: 'Disaster Response Center', type: 'disaster', position: [11.2448, 77.4950] as [number, number], icon: '🛡️' },
-  { name: 'Ambulance Station', type: 'ambulance', position: [11.2410, 77.5080] as [number, number], icon: '🚑' },
+  {
+    name: 'Vijayamangalam Govt Hospital',
+    type: 'hospital',
+    position: [11.251, 77.505] as [number, number],
+    icon: '🏥',
+  },
+  { name: 'Police Station', type: 'police', position: [11.241, 77.495] as [number, number], icon: '🚔' },
+  { name: 'Fire Station', type: 'fire', position: [11.248, 77.497] as [number, number], icon: '🚒' },
+  { name: 'Water Treatment Plant', type: 'water', position: [11.239, 77.51] as [number, number], icon: '💧' },
+  { name: 'Power Station', type: 'power', position: [11.237, 77.496] as [number, number], icon: '⚡' },
+  {
+    name: 'Traffic Control Center',
+    type: 'traffic',
+    position: [11.25, 77.502] as [number, number],
+    icon: '🚦',
+  },
+  {
+    name: 'Disaster Response Center',
+    type: 'disaster',
+    position: [11.2448, 77.495] as [number, number],
+    icon: '🛡️',
+  },
+  {
+    name: 'Ambulance Station',
+    type: 'ambulance',
+    position: [11.241, 77.508] as [number, number],
+    icon: '🚑',
+  },
 ]
 
 function createIcon(color: string, size: number = 30) {
@@ -52,7 +79,15 @@ function createDeptIcon(emoji: string) {
   })
 }
 
-function IncidentMarker({ position, color, incident }: { position: [number, number]; color: string; incident: any }) {
+function IncidentMarker({
+  position,
+  color,
+  incident,
+}: {
+  position: [number, number]
+  color: string
+  incident: any
+}) {
   return (
     <Marker position={position} icon={createIcon(color, 32)}>
       <Popup>
@@ -63,13 +98,22 @@ function IncidentMarker({ position, color, incident }: { position: [number, numb
           <h3 className="font-bold text-gray-900 text-sm">{incident.title}</h3>
           <p className="text-[11px] text-gray-400 font-mono mt-0.5">{incident.incident_id}</p>
           <div className="flex gap-1.5 mt-1.5 flex-wrap">
-            <span className="px-2 py-0.5 rounded text-[11px] text-white font-medium" style={{ background: color }}>{incident.priority}</span>
-            <span className="px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-600 capitalize">{incident.category?.replace('_', ' ')}</span>
+            <span
+              className="px-2 py-0.5 rounded text-[11px] text-white font-medium"
+              style={{ background: color }}
+            >
+              {incident.priority}
+            </span>
+            <span className="px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-600 capitalize">
+              {incident.category?.replace('_', ' ')}
+            </span>
           </div>
           <p className="text-[11px] text-gray-500 mt-1.5">{incident.location_address || 'No address'}</p>
           <p className="text-[11px] text-gray-400">{formatDate(incident.created_at)}</p>
           {incident.ai_risk_score && (
-            <p className="text-[11px] text-blue-600 mt-1">AI Confidence: {(incident.ai_risk_score * 100).toFixed(0)}%</p>
+            <p className="text-[11px] text-blue-600 mt-1">
+              AI Confidence: {(incident.ai_risk_score * 100).toFixed(0)}%
+            </p>
           )}
         </div>
       </Popup>
@@ -111,7 +155,9 @@ export default function MapPage() {
       try {
         const res = await incidentAPI.list({ per_page: 100 })
         setIncidents(res.data.incidents)
-      } catch (e) { console.error(e) }
+      } catch (e) {
+        console.error(e)
+      }
     }
     fetchIncidents()
     const interval = setInterval(fetchIncidents, 15000)
@@ -125,10 +171,16 @@ export default function MapPage() {
   })
 
   const filteredIncidents = filter === 'all' ? incidents : incidents.filter((inc) => inc.category === filter)
-  const activeIncidents = filteredIncidents.filter((inc) => ['reported', 'acknowledged', 'in_progress'].includes(inc.status))
+  const activeIncidents = filteredIncidents.filter((inc) =>
+    ['reported', 'acknowledged', 'in_progress'].includes(inc.status)
+  )
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-[calc(100vh-120px)] relative rounded-2xl overflow-hidden border border-white/[0.04]">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="h-[calc(100vh-120px)] relative rounded-2xl overflow-hidden border border-white/[0.04]"
+    >
       {/* Filters */}
       <div className="absolute top-4 left-4 z-[1000] flex gap-1.5 flex-wrap">
         {['all', 'accident', 'fire', 'flood', 'water_leak', 'power_outage', 'road_damage'].map((cat) => (
@@ -156,12 +208,14 @@ export default function MapPage() {
       <div className="absolute bottom-4 left-4 z-[1000] px-3 py-2.5 rounded-xl bg-[rgba(10,15,26,0.85)] backdrop-blur-md border border-white/[0.08]">
         <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Legend</p>
         <div className="space-y-1">
-          {Object.entries(categoryColors).slice(0, 5).map(([cat, color]) => (
-            <div key={cat} className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-              <span className="text-[11px] text-white/40 capitalize">{cat.replace('_', ' ')}</span>
-            </div>
-          ))}
+          {Object.entries(categoryColors)
+            .slice(0, 5)
+            .map(([cat, color]) => (
+              <div key={cat} className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                <span className="text-[11px] text-white/40 capitalize">{cat.replace('_', ' ')}</span>
+              </div>
+            ))}
         </div>
       </div>
 
@@ -169,7 +223,12 @@ export default function MapPage() {
         center={CITY_CENTER}
         zoom={13}
         className="w-full h-full"
-        ref={(ref) => { if (ref) { mapRef.current = ref; setMap(ref) } }}
+        ref={(ref) => {
+          if (ref) {
+            mapRef.current = ref
+            setMap(ref)
+          }
+        }}
         zoomControl={false}
       >
         <TileLayer
@@ -178,34 +237,67 @@ export default function MapPage() {
         />
         {departmentLocations.map((dept, i) => (
           <Marker key={i} position={dept.position} icon={createDeptIcon(dept.icon)}>
-            <Popup><div className="p-1"><h3 className="font-bold text-gray-900 text-sm">{dept.name}</h3><p className="text-[11px] text-gray-500 capitalize">{dept.type}</p></div></Popup>
+            <Popup>
+              <div className="p-1">
+                <h3 className="font-bold text-gray-900 text-sm">{dept.name}</h3>
+                <p className="text-[11px] text-gray-500 capitalize">{dept.type}</p>
+              </div>
+            </Popup>
           </Marker>
         ))}
         {userPosition && (
           <Marker position={userPosition} icon={createLocationIcon()}>
-            <Popup><div className="p-1"><h3 className="font-bold text-gray-900 text-sm">Your Location</h3><p className="text-[11px] text-gray-500">Live position</p></div></Popup>
+            <Popup>
+              <div className="p-1">
+                <h3 className="font-bold text-gray-900 text-sm">Your Location</h3>
+                <p className="text-[11px] text-gray-500">Live position</p>
+              </div>
+            </Popup>
           </Marker>
         )}
         {activeIncidents.map((inc) => {
           if (!inc.latitude || !inc.longitude) return null
-          return <IncidentMarker key={inc.id} position={[inc.latitude, inc.longitude]} color={categoryColors[inc.category] || '#6b7280'} incident={inc} />
-        })}
-        {activeIncidents.filter(i => i.priority === 'critical').map((inc) => (
-          inc.latitude && inc.longitude && (
-            <Circle key={`zone-${inc.id}`} center={[inc.latitude, inc.longitude]} radius={500} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.08, weight: 1 }} />
+          return (
+            <IncidentMarker
+              key={inc.id}
+              position={[inc.latitude, inc.longitude]}
+              color={categoryColors[inc.category] || '#6b7280'}
+              incident={inc}
+            />
           )
-        ))}
+        })}
+        {activeIncidents
+          .filter((i) => i.priority === 'critical')
+          .map(
+            (inc) =>
+              inc.latitude &&
+              inc.longitude && (
+                <Circle
+                  key={`zone-${inc.id}`}
+                  center={[inc.latitude, inc.longitude]}
+                  radius={500}
+                  pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.08, weight: 1 }}
+                />
+              )
+          )}
       </MapContainer>
 
       {/* Controls */}
       <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-1.5">
-        <button onClick={() => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.() }}
-          className="p-2 rounded-lg bg-[rgba(10,15,26,0.8)] backdrop-blur-md border border-white/[0.08] text-white/50 hover:text-white transition-colors">
+        <button
+          onClick={() => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen?.()
+            else document.exitFullscreen?.()
+          }}
+          className="p-2 rounded-lg bg-[rgba(10,15,26,0.8)] backdrop-blur-md border border-white/[0.08] text-white/50 hover:text-white transition-colors"
+        >
           <Maximize2 className="w-4 h-4" />
         </button>
-        <button onClick={centerOnUser}
+        <button
+          onClick={centerOnUser}
           className="p-2 rounded-lg bg-blue-500 border border-white/10 text-white shadow-lg shadow-blue-500/20 transition-colors hover:bg-blue-600"
-          title="Locate me">
+          title="Locate me"
+        >
           <Navigation className="w-4 h-4" />
         </button>
       </div>

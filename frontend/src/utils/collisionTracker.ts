@@ -111,12 +111,13 @@ export class CollisionTracker {
           x: detection.bbox.x + detection.bbox.width / 2,
           y: detection.bbox.y + detection.bbox.height / 2,
         }
-        const velocity = dt > 0
-          ? {
-              x: (newCenter.x - track.center.x) / dt,
-              y: (newCenter.y - track.center.y) / dt,
-            }
-          : track.velocity
+        const velocity =
+          dt > 0
+            ? {
+                x: (newCenter.x - track.center.x) / dt,
+                y: (newCenter.y - track.center.y) / dt,
+              }
+            : track.velocity
 
         this.tracks.set(bestId, {
           ...track,
@@ -168,10 +169,11 @@ export class CollisionTracker {
         const iou = computeIoU(t1.bbox, t2.bbox)
         const dist = centerDistance(t1.bbox, t2.bbox)
 
-        const closingSpeed = -(
-          (t1.center.x - t2.center.x) * (t1.velocity.x - t2.velocity.x) +
-          (t1.center.y - t2.center.y) * (t1.velocity.y - t2.velocity.y)
-        ) / (dist || 1)
+        const closingSpeed =
+          -(
+            (t1.center.x - t2.center.x) * (t1.velocity.x - t2.velocity.x) +
+            (t1.center.y - t2.center.y) * (t1.velocity.y - t2.velocity.y)
+          ) / (dist || 1)
 
         const isOverlapping = iou > this.COLLISION_IOU_THRESHOLD
         const isClosingFast = closingSpeed > this.CLOSING_SPEED_THRESHOLD

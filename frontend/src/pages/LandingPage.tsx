@@ -87,8 +87,8 @@ export default function LandingPage() {
             variants={fadeUp}
             className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-12 text-balance leading-relaxed"
           >
-            AI-powered urban risk prediction and cascading failure analysis.
-            Protecting cities through intelligent monitoring and real-time response coordination.
+            AI-powered urban risk prediction and cascading failure analysis. Protecting cities through
+            intelligent monitoring and real-time response coordination.
           </motion.p>
 
           <motion.div
@@ -129,9 +129,24 @@ export default function LandingPage() {
           className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-5xl w-full"
         >
           {[
-            { icon: MapPin, title: 'Real-Time Monitoring', desc: 'Live incident tracking across all city zones with instant alert propagation', gradient: 'from-blue-500 to-cyan-500' },
-            { icon: Brain, title: 'AI Risk Prediction', desc: 'Machine learning models predict cascading failures before they happen', gradient: 'from-purple-500 to-pink-500' },
-            { icon: Activity, title: 'City Health Score', desc: 'Comprehensive urban health metrics updated in real-time', gradient: 'from-emerald-500 to-green-500' },
+            {
+              icon: MapPin,
+              title: 'Real-Time Monitoring',
+              desc: 'Live incident tracking across all city zones with instant alert propagation',
+              gradient: 'from-blue-500 to-cyan-500',
+            },
+            {
+              icon: Brain,
+              title: 'AI Risk Prediction',
+              desc: 'Machine learning models predict cascading failures before they happen',
+              gradient: 'from-purple-500 to-pink-500',
+            },
+            {
+              icon: Activity,
+              title: 'City Health Score',
+              desc: 'Comprehensive urban health metrics updated in real-time',
+              gradient: 'from-emerald-500 to-green-500',
+            },
           ].map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -142,7 +157,9 @@ export default function LandingPage() {
               whileHover={{ y: -6, scale: 1.02 }}
               className="uc-card uc-card-hover p-7 text-center cursor-default"
             >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mx-auto mb-5 shadow-lg`}>
+              <div
+                className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mx-auto mb-5 shadow-lg`}
+              >
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>

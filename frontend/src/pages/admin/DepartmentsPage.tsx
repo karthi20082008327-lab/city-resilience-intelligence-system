@@ -2,11 +2,51 @@ import { motion } from 'framer-motion'
 import { Flame, Car, Droplets, Zap, Shield, Users, AlertTriangle, CheckCircle } from 'lucide-react'
 
 const departments = [
-  { name: 'Emergency Department', icon: Flame, color: 'from-red-500 to-orange-500', head: 'Dr. Rajesh Kumar', staff: 145, activeIncidents: 12, resolvedToday: 8 },
-  { name: 'Traffic Department', icon: Car, color: 'from-yellow-500 to-amber-500', head: 'Sgt. Priya Sharma', staff: 230, activeIncidents: 18, resolvedToday: 15 },
-  { name: 'Water Department', icon: Droplets, color: 'from-blue-500 to-cyan-500', head: 'Eng. Amit Patel', staff: 95, activeIncidents: 5, resolvedToday: 3 },
-  { name: 'Electricity Department', icon: Zap, color: 'from-purple-500 to-pink-500', head: 'Eng. Sneha Reddy', staff: 120, activeIncidents: 7, resolvedToday: 6 },
-  { name: 'Disaster Management', icon: Shield, color: 'from-teal-500 to-green-500', head: 'Cmdr. Vikram Singh', staff: 85, activeIncidents: 3, resolvedToday: 2 },
+  {
+    name: 'Emergency Department',
+    icon: Flame,
+    color: 'from-red-500 to-orange-500',
+    head: 'Dr. Rajesh Kumar',
+    staff: 145,
+    activeIncidents: 12,
+    resolvedToday: 8,
+  },
+  {
+    name: 'Traffic Department',
+    icon: Car,
+    color: 'from-yellow-500 to-amber-500',
+    head: 'Sgt. Priya Sharma',
+    staff: 230,
+    activeIncidents: 18,
+    resolvedToday: 15,
+  },
+  {
+    name: 'Water Department',
+    icon: Droplets,
+    color: 'from-blue-500 to-cyan-500',
+    head: 'Eng. Amit Patel',
+    staff: 95,
+    activeIncidents: 5,
+    resolvedToday: 3,
+  },
+  {
+    name: 'Electricity Department',
+    icon: Zap,
+    color: 'from-purple-500 to-pink-500',
+    head: 'Eng. Sneha Reddy',
+    staff: 120,
+    activeIncidents: 7,
+    resolvedToday: 6,
+  },
+  {
+    name: 'Disaster Management',
+    icon: Shield,
+    color: 'from-teal-500 to-green-500',
+    head: 'Cmdr. Vikram Singh',
+    staff: 85,
+    activeIncidents: 3,
+    resolvedToday: 2,
+  },
 ]
 
 export default function DepartmentsPage() {
@@ -17,9 +57,7 @@ export default function DepartmentsPage() {
           <h1 className="text-2xl font-bold text-white tracking-tight">Department Management</h1>
           <p className="text-sm text-gray-400 mt-1">All city departments overview and performance</p>
         </div>
-        <div className="uc-chip bg-accent-blue/10 text-accent-blue">
-          {departments.length} Departments
-        </div>
+        <div className="uc-chip bg-accent-blue/10 text-accent-blue">{departments.length} Departments</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -34,7 +72,9 @@ export default function DepartmentsPage() {
               className="uc-card uc-card-hover p-6 group"
             >
               <div className="flex items-center gap-4 mb-5">
-                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${dept.color} flex items-center justify-center shadow-lg flex-shrink-0`}>
+                <div
+                  className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${dept.color} flex items-center justify-center shadow-lg flex-shrink-0`}
+                >
                   <dept.icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="min-w-0">

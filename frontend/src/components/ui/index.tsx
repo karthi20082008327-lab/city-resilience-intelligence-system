@@ -3,10 +3,12 @@ import clsx from 'clsx'
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={clsx(
-      'rounded-2xl border border-white/[0.06] bg-[rgba(10,15,26,0.6)] backdrop-blur-sm',
-      className
-    )}>
+    <div
+      className={clsx(
+        'rounded-2xl border border-white/[0.06] bg-[rgba(10,15,26,0.6)] backdrop-blur-sm',
+        className
+      )}
+    >
       {children}
     </div>
   )
@@ -30,11 +32,13 @@ export function Badge({
     purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   }
   return (
-    <span className={clsx(
-      'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border',
-      colors[color],
-      className
-    )}>
+    <span
+      className={clsx(
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium border',
+        colors[color],
+        className
+      )}
+    >
       {children}
     </span>
   )

@@ -15,7 +15,9 @@ export default function UsersPage() {
         const usersRes = await userAPI.list()
         setUsers(usersRes.data.users)
         setTotal(usersRes.data.total)
-      } catch (e) { console.error(e) }
+      } catch (e) {
+        console.error(e)
+      }
       setLoading(false)
     }
     fetchData()
@@ -51,11 +53,21 @@ export default function UsersPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/5">
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">User</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Role</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Department</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Last Login</th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Department
+                </th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Last Login
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -102,8 +114,12 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-400">{user.department || '-'}</td>
                     <td className="px-6 py-4">
-                      <span className={`uc-chip ${user.is_active ? 'bg-state-success/10 text-state-success' : 'bg-state-danger/10 text-state-danger'}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${user.is_active ? 'bg-state-success' : 'bg-state-danger'}`} />
+                      <span
+                        className={`uc-chip ${user.is_active ? 'bg-state-success/10 text-state-success' : 'bg-state-danger/10 text-state-danger'}`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${user.is_active ? 'bg-state-success' : 'bg-state-danger'}`}
+                        />
                         {user.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>

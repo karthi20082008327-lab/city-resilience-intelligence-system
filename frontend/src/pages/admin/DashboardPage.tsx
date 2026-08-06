@@ -1,11 +1,30 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  AlertTriangle, CheckCircle, Clock,
-  Building2, Droplets, Zap, Flame, Car, Shield,
-  ArrowUp, ArrowDown
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Building2,
+  Droplets,
+  Zap,
+  Flame,
+  Car,
+  Shield,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
-import { AreaChart, Area, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import {
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts'
 import { dashboardAPI, incidentAPI } from '../../services/api'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { getPriorityColor, getStatusColor, getCategoryColor } from '../../utils/helpers'
@@ -33,19 +52,34 @@ function AnimatedCounter({ value, duration = 1.5 }: { value: number; duration?: 
   useEffect(() => {
     let start = 0
     const end = value
-    if (end === 0) { setCount(0); return }
+    if (end === 0) {
+      setCount(0)
+      return
+    }
     const step = Math.max(1, Math.ceil(end / (duration * 40)))
     const timer = setInterval(() => {
       start += step
-      if (start >= end) { setCount(end); clearInterval(timer) }
-      else setCount(start)
+      if (start >= end) {
+        setCount(end)
+        clearInterval(timer)
+      } else setCount(start)
     }, 1000 / 40)
     return () => clearInterval(timer)
   }, [value, duration])
   return <span>{count}</span>
 }
 
-function GaugeRing({ value, size = 120, stroke = 8, color }: { value: number; size?: number; stroke?: number; color: string }) {
+function GaugeRing({
+  value,
+  size = 120,
+  stroke = 8,
+  color,
+}: {
+  value: number
+  size?: number
+  stroke?: number
+  color: string
+}) {
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
   const fill = (value / 100) * circumference
@@ -53,9 +87,21 @@ function GaugeRing({ value, size = 120, stroke = 8, color }: { value: number; si
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg className="w-full h-full -rotate-90" viewBox={`0 0 ${size} ${size}`}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth={stroke} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.04)"
+          strokeWidth={stroke}
+        />
         <motion.circle
-          cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={stroke}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={stroke}
           strokeLinecap="round"
           initial={{ strokeDasharray: `0 ${circumference}` }}
           animate={{ strokeDasharray: `${fill} ${circumference}` }}
@@ -63,7 +109,9 @@ function GaugeRing({ value, size = 120, stroke = 8, color }: { value: number; si
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-white"><AnimatedCounter value={value} /></span>
+        <span className="text-2xl font-bold text-white">
+          <AnimatedCounter value={value} />
+        </span>
         <span className="text-[10px] text-white/30 uppercase tracking-wider mt-0.5">Score</span>
       </div>
     </div>
@@ -89,7 +137,9 @@ export default function DashboardPage() {
       try {
         const [dashRes] = await Promise.all([dashboardAPI.getOverview()])
         setData(dashRes.data)
-      } catch (e) { console.error(e) }
+      } catch (e) {
+        console.error(e)
+      }
       setLoading(false)
     }
     fetchData()
@@ -112,23 +162,33 @@ export default function DashboardPage() {
   })
 
   const handleAcceptIncident = async (id: string) => {
-    try { await incidentAPI.update(id, { status: 'acknowledged' }) } catch {}
+    try {
+      await incidentAPI.update(id, { status: 'acknowledged' })
+    } catch {}
   }
   const handleRejectIncident = async (id: string) => {
-    try { await incidentAPI.update(id, { status: 'closed' }) } catch {}
+    try {
+      await incidentAPI.update(id, { status: 'closed' })
+    } catch {}
   }
   const handleDispatchIncident = async (id: string) => {
-    try { await incidentAPI.update(id, { status: 'in_progress' }) } catch {}
+    try {
+      await incidentAPI.update(id, { status: 'in_progress' })
+    } catch {}
   }
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       </div>
     )
@@ -137,19 +197,55 @@ export default function DashboardPage() {
   if (!data) return null
 
   const statCards = [
-    { label: 'Total Incidents', value: data.total_incidents, icon: AlertTriangle, color: '#3b82f6', trend: '+12%', up: true },
-    { label: 'Active Now', value: data.active_incidents, icon: Clock, color: '#f59e0b', trend: '-5%', up: false },
-    { label: 'Resolved Today', value: data.resolved_today, icon: CheckCircle, color: '#22c55e', trend: '+18%', up: true },
-    { label: 'Critical', value: data.critical_incidents, icon: Flame, color: '#ef4444', trend: '-2%', up: false },
+    {
+      label: 'Total Incidents',
+      value: data.total_incidents,
+      icon: AlertTriangle,
+      color: '#3b82f6',
+      trend: '+12%',
+      up: true,
+    },
+    {
+      label: 'Active Now',
+      value: data.active_incidents,
+      icon: Clock,
+      color: '#f59e0b',
+      trend: '-5%',
+      up: false,
+    },
+    {
+      label: 'Resolved Today',
+      value: data.resolved_today,
+      icon: CheckCircle,
+      color: '#22c55e',
+      trend: '+18%',
+      up: true,
+    },
+    {
+      label: 'Critical',
+      value: data.critical_incidents,
+      icon: Flame,
+      color: '#ef4444',
+      trend: '-2%',
+      up: false,
+    },
   ]
 
   const deptIcons: Record<string, any> = {
-    emergency_department: Flame, traffic_department: Car,
-    water_department: Droplets, electricity_department: Zap, disaster_management: Shield,
+    emergency_department: Flame,
+    traffic_department: Car,
+    water_department: Droplets,
+    electricity_department: Zap,
+    disaster_management: Shield,
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
       <IncidentAlert
         incident={aiAlert}
         onAccept={handleAcceptIncident}
@@ -181,15 +277,22 @@ export default function DashboardPage() {
             className="uc-card p-5 group hover:border-white/10 transition-all"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${stat.color}12` }}>
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center"
+                style={{ background: `${stat.color}12` }}
+              >
                 <stat.icon className="w-4.5 h-4.5" style={{ color: stat.color }} />
               </div>
-              <span className={`text-[11px] font-medium flex items-center gap-0.5 ${stat.up ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span
+                className={`text-[11px] font-medium flex items-center gap-0.5 ${stat.up ? 'text-emerald-400' : 'text-red-400'}`}
+              >
                 {stat.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                 {stat.trend}
               </span>
             </div>
-            <p className="text-2xl font-bold text-white"><AnimatedCounter value={stat.value} /></p>
+            <p className="text-2xl font-bold text-white">
+              <AnimatedCounter value={stat.value} />
+            </p>
             <p className="text-xs text-white/35 mt-1">{stat.label}</p>
           </motion.div>
         ))}
@@ -198,7 +301,12 @@ export default function DashboardPage() {
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* City Status */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="uc-card p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="uc-card p-6"
+        >
           <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-5">City Status</h3>
           <div className="flex items-center justify-around mb-5">
             <div className="text-center">
@@ -213,11 +321,16 @@ export default function DashboardPage() {
           <div className="uc-divider mb-4" />
           <div className="space-y-2">
             {data.ai_insights.slice(0, 3).map((insight: any, i: number) => (
-              <div key={i} className={`px-3 py-2 rounded-lg text-xs ${
-                insight.severity === 'high' ? 'bg-red-500/[0.06] text-red-400' :
-                insight.severity === 'medium' ? 'bg-amber-500/[0.06] text-amber-400' :
-                'bg-emerald-500/[0.06] text-emerald-400'
-              }`}>
+              <div
+                key={i}
+                className={`px-3 py-2 rounded-lg text-xs ${
+                  insight.severity === 'high'
+                    ? 'bg-red-500/[0.06] text-red-400'
+                    : insight.severity === 'medium'
+                      ? 'bg-amber-500/[0.06] text-amber-400'
+                      : 'bg-emerald-500/[0.06] text-emerald-400'
+                }`}
+              >
                 {insight.message}
               </div>
             ))}
@@ -228,7 +341,12 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Trend Chart */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="uc-card p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="uc-card p-6"
+        >
           <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-5">7-Day Trend</h3>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={data.trend_data}>
@@ -239,7 +357,13 @@ export default function DashboardPage() {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" />
-              <XAxis dataKey="date" stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} />
+              <XAxis
+                dataKey="date"
+                stroke="rgba(255,255,255,0.2)"
+                fontSize={11}
+                tickLine={false}
+                axisLine={false}
+              />
               <YAxis stroke="rgba(255,255,255,0.2)" fontSize={11} tickLine={false} axisLine={false} />
               <Tooltip
                 contentStyle={{
@@ -256,11 +380,25 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Category Distribution */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="uc-card p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="uc-card p-6"
+        >
           <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-5">By Category</h3>
           <ResponsiveContainer width="100%" height={180}>
             <PieChart>
-              <Pie data={data.category_data} dataKey="count" nameKey="category" cx="50%" cy="50%" outerRadius={70} innerRadius={45} paddingAngle={3}>
+              <Pie
+                data={data.category_data}
+                dataKey="count"
+                nameKey="category"
+                cx="50%"
+                cy="50%"
+                outerRadius={70}
+                innerRadius={45}
+                paddingAngle={3}
+              >
                 {data.category_data.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
@@ -279,7 +417,10 @@ export default function DashboardPage() {
           <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2">
             {data.category_data.map((item, i) => (
               <span key={i} className="text-[11px] text-white/40 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                />
                 {item.category.replace('_', ' ')}
               </span>
             ))}
@@ -290,25 +431,41 @@ export default function DashboardPage() {
       {/* Bottom Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Departments */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="uc-card p-6">
-          <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Department Status</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="uc-card p-6"
+        >
+          <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">
+            Department Status
+          </h3>
           <div className="space-y-2.5">
             {Object.entries(data.departments).map(([dept, info]: [string, any]) => {
               const Icon = deptIcons[dept] || Building2
               return (
-                <div key={dept} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
+                <div
+                  key={dept}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
                   <div className="w-8 h-8 rounded-lg bg-blue-500/[0.08] flex items-center justify-center flex-shrink-0">
                     <Icon className="w-4 h-4 text-blue-400/70" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-white/80 capitalize truncate">{dept.replace(/_/g, ' ')}</p>
-                    <p className="text-[11px] text-white/30">{info.active} active · {info.resolved} resolved</p>
+                    <p className="text-[11px] text-white/30">
+                      {info.active} active · {info.resolved} resolved
+                    </p>
                   </div>
-                  <span className={`uc-chip ${
-                    info.status === 'operational' ? 'bg-emerald-500/[0.08] text-emerald-400' :
-                    info.status === 'stressed' ? 'bg-amber-500/[0.08] text-amber-400' :
-                    'bg-red-500/[0.08] text-red-400'
-                  }`}>
+                  <span
+                    className={`uc-chip ${
+                      info.status === 'operational'
+                        ? 'bg-emerald-500/[0.08] text-emerald-400'
+                        : info.status === 'stressed'
+                          ? 'bg-amber-500/[0.08] text-amber-400'
+                          : 'bg-red-500/[0.08] text-red-400'
+                    }`}
+                  >
                     {info.status}
                   </span>
                 </div>
@@ -318,12 +475,24 @@ export default function DashboardPage() {
         </motion.div>
 
         {/* Recent Incidents */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="uc-card p-6">
-          <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Recent Incidents</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="uc-card p-6"
+        >
+          <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">
+            Recent Incidents
+          </h3>
           <div className="space-y-2">
             {data.recent_incidents.slice(0, 6).map((inc: any) => (
-              <div key={inc.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${getCategoryColor(inc.category)}`}>
+              <div
+                key={inc.id}
+                className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+              >
+                <div
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${getCategoryColor(inc.category)}`}
+                >
                   <AlertTriangle className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">

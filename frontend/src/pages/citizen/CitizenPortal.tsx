@@ -2,19 +2,56 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Shield, AlertTriangle, Droplets, Flame, Zap, Construction,
-  MapPin, Camera, Phone, Send, CheckCircle, ArrowLeft, Navigation,
-  X, ChevronRight, Home
+  Shield,
+  AlertTriangle,
+  Droplets,
+  Flame,
+  Zap,
+  Construction,
+  MapPin,
+  Camera,
+  Phone,
+  Send,
+  CheckCircle,
+  ArrowLeft,
+  Navigation,
+  X,
+  ChevronRight,
+  Home,
 } from 'lucide-react'
 import { incidentAPI } from '../../services/api'
 import { UcripLogo } from '../../components/UcripLogo'
 
 const reportCategories = [
-  { id: 'accident', label: 'Accident', icon: AlertTriangle, color: 'from-red-500 to-orange-500', desc: 'Road accident or collision' },
-  { id: 'water_leak', label: 'Water Leak', icon: Droplets, color: 'from-blue-500 to-cyan-500', desc: 'Burst pipe or water leak' },
+  {
+    id: 'accident',
+    label: 'Accident',
+    icon: AlertTriangle,
+    color: 'from-red-500 to-orange-500',
+    desc: 'Road accident or collision',
+  },
+  {
+    id: 'water_leak',
+    label: 'Water Leak',
+    icon: Droplets,
+    color: 'from-blue-500 to-cyan-500',
+    desc: 'Burst pipe or water leak',
+  },
   { id: 'fire', label: 'Fire', icon: Flame, color: 'from-orange-500 to-red-500', desc: 'Fire emergency' },
-  { id: 'power_outage', label: 'Power Failure', icon: Zap, color: 'from-yellow-500 to-amber-500', desc: 'Electrical outage or fault' },
-  { id: 'road_damage', label: 'Road Damage', icon: Construction, color: 'from-gray-400 to-gray-500', desc: 'Pothole or road damage' },
+  {
+    id: 'power_outage',
+    label: 'Power Failure',
+    icon: Zap,
+    color: 'from-yellow-500 to-amber-500',
+    desc: 'Electrical outage or fault',
+  },
+  {
+    id: 'road_damage',
+    label: 'Road Damage',
+    icon: Construction,
+    color: 'from-gray-400 to-gray-500',
+    desc: 'Pothole or road damage',
+  },
 ]
 
 interface LocationState {
@@ -63,7 +100,9 @@ export default function CitizenPortal() {
     }
   }
 
-  useEffect(() => { getLocation() }, [])
+  useEffect(() => {
+    getLocation()
+  }, [])
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -169,10 +208,15 @@ export default function CitizenPortal() {
                     transition={{ delay: i * 0.06, duration: 0.3 }}
                     whileHover={{ scale: 1.01, x: 4 }}
                     whileTap={{ scale: 0.99 }}
-                    onClick={() => { setSelectedCategory(cat.id); setStep('report') }}
+                    onClick={() => {
+                      setSelectedCategory(cat.id)
+                      setStep('report')
+                    }}
                     className="w-full uc-card uc-card-hover p-4 flex items-center gap-4 text-left"
                   >
-                    <div className={`w-13 h-13 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                    <div
+                      className={`w-13 h-13 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center flex-shrink-0 shadow-lg`}
+                    >
                       <cat.icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -216,7 +260,9 @@ export default function CitizenPortal() {
             >
               {/* Selected Category Header */}
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${selectedCat?.color || 'from-gray-500 to-gray-600'} flex items-center justify-center shadow-lg`}>
+                <div
+                  className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${selectedCat?.color || 'from-gray-500 to-gray-600'} flex items-center justify-center shadow-lg`}
+                >
                   {selectedCat && <selectedCat.icon className="w-5 h-5 text-white" />}
                 </div>
                 <div>
@@ -286,7 +332,10 @@ export default function CitizenPortal() {
                     <img src={imagePreview} alt="Upload" className="w-full h-48 object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                     <button
-                      onClick={() => { setImageFile(null); setImagePreview(null) }}
+                      onClick={() => {
+                        setImageFile(null)
+                        setImagePreview(null)
+                      }}
                       className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
                     >
                       <X className="w-3.5 h-3.5 text-white" />
@@ -302,7 +351,13 @@ export default function CitizenPortal() {
                       <span className="text-sm text-gray-400">Tap to upload photo</span>
                       <p className="text-[10px] text-gray-600 mt-0.5">JPG, PNG up to 10MB</p>
                     </div>
-                    <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
                   </label>
                 )}
               </div>
@@ -404,10 +459,7 @@ export default function CitizenPortal() {
                 >
                   Report Another Incident
                 </motion.button>
-                <button
-                  onClick={() => navigate('/')}
-                  className="w-full uc-btn uc-btn-ghost py-3 text-sm"
-                >
+                <button onClick={() => navigate('/')} className="w-full uc-btn uc-btn-ghost py-3 text-sm">
                   <Home className="w-4 h-4" />
                   Back to Home
                 </button>

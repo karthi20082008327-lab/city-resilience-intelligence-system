@@ -36,8 +36,16 @@ export default function SettingsPage() {
         </div>
 
         {[
-          { key: 'notifications', label: 'Push Notifications', desc: 'Receive browser notifications for alerts' },
-          { key: 'emailAlerts', label: 'Email Alerts', desc: 'Get email notifications for critical incidents' },
+          {
+            key: 'notifications',
+            label: 'Push Notifications',
+            desc: 'Receive browser notifications for alerts',
+          },
+          {
+            key: 'emailAlerts',
+            label: 'Email Alerts',
+            desc: 'Get email notifications for critical incidents',
+          },
           { key: 'smsAlerts', label: 'SMS Alerts', desc: 'Receive SMS for emergency situations' },
         ].map((item) => (
           <div
@@ -51,9 +59,7 @@ export default function SettingsPage() {
             <button
               onClick={() => toggle(item.key as keyof typeof settings)}
               className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
-                settings[item.key as keyof typeof settings]
-                  ? 'bg-accent-blue'
-                  : 'bg-surface-3'
+                settings[item.key as keyof typeof settings] ? 'bg-accent-blue' : 'bg-surface-3'
               }`}
             >
               <span
@@ -89,7 +95,9 @@ export default function SettingsPage() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm text-gray-400">Risk Alert Threshold</label>
-              <span className="uc-chip bg-accent-blue/10 text-accent-blue font-mono">{settings.riskThreshold}%</span>
+              <span className="uc-chip bg-accent-blue/10 text-accent-blue font-mono">
+                {settings.riskThreshold}%
+              </span>
             </div>
             <div className="relative">
               <input
