@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Settings as SettingsIcon, Save, Bell, Shield, Globe, Database } from 'lucide-react'
+import { Save, Bell, Globe } from 'lucide-react'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({

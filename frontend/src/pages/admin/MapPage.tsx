@@ -2,10 +2,10 @@ import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
 import L from 'leaflet'
 import { motion } from 'framer-motion'
-import { Maximize2, Minimize2, AlertTriangle, Navigation } from 'lucide-react'
+import { Maximize2, AlertTriangle, Navigation } from 'lucide-react'
 import { incidentAPI } from '../../services/api'
 import { useWebSocket } from '../../hooks/useWebSocket'
-import { formatDate, getPriorityColor } from '../../utils/helpers'
+import { formatDate } from '../../utils/helpers'
 
 const CITY_CENTER: [number, number] = [11.2448, 77.5017]
 

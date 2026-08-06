@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
-  Activity, AlertTriangle, CheckCircle, Clock,
+  AlertTriangle, CheckCircle, Clock,
   Building2, Droplets, Zap, Flame, Car, Shield,
   ArrowUp, ArrowDown
 } from 'lucide-react'
 import { AreaChart, Area, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
-import { dashboardAPI, weatherAPI, incidentAPI } from '../../services/api'
+import { dashboardAPI, incidentAPI } from '../../services/api'
 import { useWebSocket } from '../../hooks/useWebSocket'
-import { formatDate, getPriorityColor, getStatusColor, getCategoryColor } from '../../utils/helpers'
+import { getPriorityColor, getStatusColor, getCategoryColor } from '../../utils/helpers'
 import IncidentAlert from '../../components/IncidentAlert'
 
 interface DashboardData {

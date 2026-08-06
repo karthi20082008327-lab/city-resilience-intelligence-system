@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Map, Cloud, AlertTriangle, Cctv, Brain,
   Building2, Users, BarChart3, Settings, Menu, X,
-  Bell, LogOut, ChevronDown, Activity, FlaskConical
+  Bell, LogOut, ChevronDown, FlaskConical
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { UcripLogo } from '../UcripLogo'

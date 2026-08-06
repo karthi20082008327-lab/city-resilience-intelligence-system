@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BarChart3, TrendingUp, PieChart as PieIcon, Clock, Target, Gauge, Activity } from 'lucide-react'
+import { BarChart3, PieChart as PieIcon, Clock, Target, Gauge, Activity } from 'lucide-react'
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 
 const monthlyData = [

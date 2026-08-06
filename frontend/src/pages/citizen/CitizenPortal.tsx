@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Shield, AlertTriangle, Droplets, Flame, Zap, Construction,
   MapPin, Camera, Phone, Send, CheckCircle, ArrowLeft, Navigation,
-  X, Upload, Clock, Radio, ChevronRight, Home
+  X, ChevronRight, Home
 } from 'lucide-react'
 import { incidentAPI } from '../../services/api'
 import { UcripLogo } from '../../components/UcripLogo'

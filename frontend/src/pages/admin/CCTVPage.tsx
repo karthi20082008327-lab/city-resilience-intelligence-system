@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Cctv, WifiOff, Smartphone, ExternalLink, AlertTriangle, Radio, Eye } from 'lucide-react'
+import { Smartphone, ExternalLink, AlertTriangle, Radio } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { incidentAPI } from '../../services/api'
 import { useWebSocket } from '../../hooks/useWebSocket'
@@ -14,7 +14,7 @@ const simulatorCameras = [
 
 const SIMUL_URL = '/simul/'
 
-function SimulatorFeed({ camera, onSelect }: { camera: typeof simulatorCameras[number]; onSelect: () => void }) {
+function SimulatorFeed({ camera }: { camera: typeof simulatorCameras[number] }) {
   return (
     <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="uc-card overflow-hidden group">
       <div className="relative aspect-video bg-[#060a12] flex items-center justify-center overflow-hidden">
@@ -144,7 +144,7 @@ export default function CCTVPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {simulatorCameras.map((camera) => (
-            <SimulatorFeed key={camera.id} camera={camera} onSelect={() => {}} />
+            <SimulatorFeed key={camera.id} camera={camera} />
           ))}
         </div>
       </div>

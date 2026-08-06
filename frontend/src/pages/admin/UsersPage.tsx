@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Users as UsersIcon, Search, Edit, Trash2, Shield } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { userAPI } from '../../services/api'
 
 export default function UsersPage() {
   const [users, setUsers] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [roles, setRoles] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, rolesRes] = await Promise.all([userAPI.list(), userAPI.getRoles()])
+        const usersRes = await userAPI.list()
         setUsers(usersRes.data.users)
         setTotal(usersRes.data.total)
-        setRoles(rolesRes.data)
       } catch (e) { console.error(e) }
       setLoading(false)
     }
