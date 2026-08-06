@@ -2,32 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from app.core.database import get_db
-from app.core.security import verify_token, hash_password
+from app.core.deps import get_current_admin, get_current_user
 from app.models.user import User, Role
 from app.schemas.user import UserResponse, UserUpdate, UserListResponse
 
 router = APIRouter(prefix="/api/users", tags=["Users"])
 
 
-async def get_current_admin(request: Request, db: AsyncSession):
-    auth = request.headers.get("Authorization")
-    if not auth or not auth.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    token = auth.split(" ")[1]
-    payload = verify_token(token)
-    if not payload:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user_id = payload.get("sub")
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return user
-
-
 @router.get("/", response_model=UserListResponse)
-async def list_users(request: Request, page: int = 1, per_page: int = 20, db: AsyncSession = Depends(get_db)):
-    admin = await get_current_admin(request, db)
+async def list_users(request: Request, page: int = 1, per_page: int = 20, db: AsyncSession = Depends(get_db), admin: User = Depends(get_current_admin)):
     offset = (page - 1) * per_page
     result = await db.execute(select(User).offset(offset).limit(per_page))
     users = result.scalars().all()
@@ -49,8 +32,7 @@ async def list_users(request: Request, page: int = 1, per_page: int = 20, db: As
 
 
 @router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    admin = await get_current_admin(request, db)
+async def get_user(user_id: str, request: Request, db: AsyncSession = Depends(get_db), admin: User = Depends(get_current_admin)):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
@@ -68,8 +50,7 @@ async def get_user(user_id: str, request: Request, db: AsyncSession = Depends(ge
 
 
 @router.put("/{user_id}")
-async def update_user(user_id: str, data: UserUpdate, request: Request, db: AsyncSession = Depends(get_db)):
-    admin = await get_current_admin(request, db)
+async def update_user(user_id: str, data: UserUpdate, request: Request, db: AsyncSession = Depends(get_db), admin: User = Depends(get_current_admin)):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:
@@ -89,8 +70,7 @@ async def update_user(user_id: str, data: UserUpdate, request: Request, db: Asyn
 
 
 @router.delete("/{user_id}")
-async def delete_user(user_id: str, request: Request, db: AsyncSession = Depends(get_db)):
-    admin = await get_current_admin(request, db)
+async def delete_user(user_id: str, request: Request, db: AsyncSession = Depends(get_db), admin: User = Depends(get_current_admin)):
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user:

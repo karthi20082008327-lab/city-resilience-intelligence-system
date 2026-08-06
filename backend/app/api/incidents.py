@@ -6,9 +6,11 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 from app.core.database import get_db
 from app.models.incident import Incident, IncidentMedia
+from app.models.user import User
 from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse, IncidentListResponse, IncidentStatsResponse, IncidentMediaResponse
 from app.api.websocket import manager
 from app.core.settings import settings
+from app.core.deps import get_current_user
 
 router = APIRouter(prefix="/api/incidents", tags=["Incidents"])
 
@@ -98,7 +100,7 @@ def incident_to_response(inc: Incident) -> IncidentResponse:
 
 
 @router.post("/", response_model=IncidentResponse)
-async def create_incident(data: IncidentCreate, db: AsyncSession = Depends(get_db)):
+async def create_incident(data: IncidentCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     incident_id = generate_incident_id(data.category)
     priority = calculate_priority(data.category, data.description)
     risk_score = calculate_risk_score(data.category, priority)
@@ -170,6 +172,7 @@ async def upload_media(
     incident_id: str,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     result = await db.execute(select(Incident).where(Incident.incident_id == incident_id))
     incident = result.scalar_one_or_none()
@@ -260,7 +263,7 @@ async def get_incident_stats(db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{incident_id}", response_model=IncidentResponse)
-async def update_incident(incident_id: str, data: IncidentUpdate, db: AsyncSession = Depends(get_db)):
+async def update_incident(incident_id: str, data: IncidentUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(select(Incident).where(Incident.incident_id == incident_id))
     incident = result.scalar_one_or_none()
     if not incident:

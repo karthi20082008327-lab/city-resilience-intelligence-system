@@ -1,5 +1,6 @@
 import uuid
 import os
+import asyncio
 import cv2
 import numpy as np
 from datetime import datetime, timezone
@@ -12,6 +13,8 @@ from app.models.incident import Incident, IncidentMedia
 from app.schemas.incident import IncidentResponse, IncidentMediaResponse
 from app.api.websocket import manager
 from app.core.settings import settings
+from app.core.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/api/collision", tags=["Collision Detection"])
 
@@ -81,9 +84,8 @@ def detect_smoke(img):
     return smoke_ratio > 0.02, min(smoke_ratio * 5, 1.0)
 
 
-@router.post("/detect")
-async def detect_objects(frame: UploadFile = File(...)):
-    contents = await frame.read()
+def run_detection(contents: bytes) -> dict:
+    """Blocking CV detection - must run off the event loop."""
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     if img is None:
@@ -156,6 +158,12 @@ async def detect_objects(frame: UploadFile = File(...)):
     }
 
 
+@router.post("/detect")
+async def detect_objects(frame: UploadFile = File(...)):
+    contents = await frame.read()
+    return await asyncio.get_running_loop().run_in_executor(None, run_detection, contents)
+
+
 @router.post("/report")
 async def report_incident(
     screenshot: UploadFile = File(...),
@@ -169,6 +177,7 @@ async def report_incident(
     confidence: float = Form(default=0.0),
     location_address: str = Form(default=""),
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     now = datetime.now(timezone.utc)
     timestamp = now.strftime("%m%d%H%M%S")

@@ -12,11 +12,12 @@ import logging
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from typing import Optional
 
 from app.ai.pipeline import AIPipeline
 from app.core.settings import settings
+from app.core.deps import get_optional_user
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["AI Stream"])
@@ -167,14 +168,14 @@ async def video_stream(websocket: WebSocket):
 
 
 @router.post("/api/stream/config")
-async def configure_stream(camera_name: str = "Mobile Camera", lat: float = settings.CITY_LAT, lon: float = settings.CITY_LON):
+async def configure_stream(camera_name: str = "Mobile Camera", lat: float = settings.CITY_LAT, lon: float = settings.CITY_LON, current_user=Depends(get_optional_user)):
     pipe = get_pipeline()
     pipe.set_camera_info(camera_name, lat, lon)
     return {"status": "ok", "camera": camera_name, "lat": lat, "lon": lon}
 
 
 @router.post("/api/stream/verify")
-async def verify_stream_frame(payload: dict):
+async def verify_stream_frame(payload: dict, current_user=Depends(get_optional_user)):
     """Verify a CCTV frame (from mobile camera / simulation) and report an incident.
 
     Accepts a base64-encoded frame plus optional metadata. Saves the frame as
@@ -277,5 +278,5 @@ async def verify_stream_frame(payload: dict):
 
 
 @router.get("/api/stream/status")
-async def stream_status():
+async def stream_status(current_user=Depends(get_optional_user)):
     return {"pipeline_active": pipeline is not None, "status": "ready"}
