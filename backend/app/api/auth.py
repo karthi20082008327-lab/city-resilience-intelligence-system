@@ -152,7 +152,7 @@ async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(ge
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
 
     user_id = payload.get("sub")
-    result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
+    result = await db.execute(select(User).where(User.id == str(user_id)))
     user = result.scalar_one_or_none()
     if not user or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
@@ -221,7 +221,7 @@ async def change_password(data: ChangePasswordRequest, request: Request, db: Asy
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user_id = payload.get("sub")
-    result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
+    result = await db.execute(select(User).where(User.id == str(user_id)))
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(data.current_password, user.hashed_password):
@@ -245,7 +245,7 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user_id = payload.get("sub")
-    result = await db.execute(select(User).where(User.id == uuid.UUID(user_id)))
+    result = await db.execute(select(User).where(User.id == str(user_id)))
     user = result.scalar_one_or_none()
 
     if not user:
@@ -283,7 +283,7 @@ async def get_sessions(request: Request, db: AsyncSession = Depends(get_db)):
 
     user_id = payload.get("sub")
     result = await db.execute(
-        select(UserSession).where(UserSession.user_id == uuid.UUID(user_id), UserSession.is_active == True)
+        select(UserSession).where(UserSession.user_id == str(user_id), UserSession.is_active == True)
     )
     sessions = result.scalars().all()
 
