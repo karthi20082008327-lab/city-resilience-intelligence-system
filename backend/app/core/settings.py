@@ -1,6 +1,6 @@
-from pydantic_settings import BaseSettings
-from typing import List
 import os
+
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -13,7 +13,14 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000", "http://0.0.0.0:5173", "https://localhost:5173", "https://10.157.48.198:5173", "http://10.157.48.198:5173"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://0.0.0.0:5173",
+        "https://localhost:5173",
+        "https://10.157.48.198:5173",
+        "http://10.157.48.198:5173",
+    ]
     WEATHER_API_KEY: str = "demo"
     WEATHER_CITY: str = "Vijayamangalam"
 
@@ -39,7 +46,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"
     MAX_UPLOAD_SIZE_MB: int = 20
-    ALLOWED_UPLOAD_TYPES: List[str] = ["image/jpeg", "image/png", "image/webp"]
+    ALLOWED_UPLOAD_TYPES: list[str] = ["image/jpeg", "image/png", "image/webp"]
 
     class Config:
         env_file = ".env"

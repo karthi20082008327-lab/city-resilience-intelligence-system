@@ -1,13 +1,15 @@
+import enum
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text, Enum as SQLEnum
+from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy import String as SAString
 from sqlalchemy.orm import relationship
+
 from app.core.database import Base
-import enum
 
 
-class UserRoleEnum(str, enum.Enum):
+class UserRoleEnum(enum.StrEnum):
     SUPER_ADMIN = "super_admin"
     TRAFFIC_DEPARTMENT = "traffic_department"
     WATER_DEPARTMENT = "water_department"
@@ -23,7 +25,7 @@ class Role(Base):
     name = Column(String(50), unique=True, nullable=False)
     description = Column(Text, nullable=True)
     permissions = Column(Text, nullable=True, default="[]")
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     users = relationship("User", back_populates="role")
 
@@ -43,8 +45,8 @@ class User(Base):
     avatar_url = Column(String(500), nullable=True)
     phone = Column(String(20), nullable=True)
     last_login = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     role = relationship("Role", back_populates="users")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
@@ -61,6 +63,6 @@ class UserSession(Base):
     user_agent = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True)
     expires_at = Column(DateTime(timezone=True), nullable=False)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     user = relationship("User", back_populates="sessions")

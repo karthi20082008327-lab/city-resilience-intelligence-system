@@ -1,4 +1,4 @@
-from app.api.incidents import calculate_priority, calculate_risk_score, get_department, generate_incident_id
+from app.api.incidents import calculate_priority, calculate_risk_score, generate_incident_id, get_department
 
 
 def test_generate_incident_id_prefix():

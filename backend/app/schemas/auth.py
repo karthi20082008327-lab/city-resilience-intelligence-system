@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class LoginRequest(BaseModel):
@@ -50,8 +50,8 @@ class VerifyEmailRequest(BaseModel):
 
 class SessionResponse(BaseModel):
     id: UUID
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
+    ip_address: str | None = None
+    user_agent: str | None = None
     is_active: bool
     created_at: datetime
     expires_at: datetime
@@ -61,4 +61,5 @@ class SessionResponse(BaseModel):
 
 
 from .user import UserResponse
+
 TokenResponse.model_rebuild()

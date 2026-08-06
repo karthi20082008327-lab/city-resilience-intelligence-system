@@ -1,17 +1,26 @@
+import logging
 import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-from app.core.settings import settings
-from app.core.database import init_db
-from app.api import auth_router, users_router, incidents_router, weather_router, dashboard_router, collision_router, stream_router
-from app.api.websocket import router as ws_router
-from app.models.user import Role
-from app.core.database import async_session
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
-import logging
+
+from app.api import (
+    auth_router,
+    collision_router,
+    dashboard_router,
+    incidents_router,
+    stream_router,
+    users_router,
+    weather_router,
+)
+from app.api.websocket import router as ws_router
+from app.core.database import async_session, init_db
+from app.core.settings import settings
+from app.models.user import Role
 
 logging.basicConfig(level=settings.LOG_LEVEL)
 logger = logging.getLogger(__name__)
@@ -39,8 +48,9 @@ async def seed_roles():
 
 
 async def seed_admin():
-    from app.models.user import User
     from app.core.security import hash_password
+    from app.models.user import User
+
     async with async_session() as db:
         result = await db.execute(select(User).where(User.email == "admin@ucrip.gov"))
         if not result.scalar_one_or_none():

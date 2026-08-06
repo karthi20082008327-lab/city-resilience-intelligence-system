@@ -2,17 +2,17 @@
 UCRIP Incident Service
 Creates incidents in DB with deduplication, snapshot, and video clip.
 """
-import os
-import uuid
+
 import logging
-from datetime import datetime, timezone
-from typing import Optional
-from sqlalchemy import select, and_
+import os
+from datetime import UTC, datetime
+
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.websocket import manager
 from app.core.database import async_session
 from app.models.incident import Incident, IncidentMedia
-from app.api.websocket import manager
 
 logger = logging.getLogger(__name__)
 
@@ -24,13 +24,13 @@ class IncidentService:
     """Service for creating and managing AI-detected incidents."""
 
     @staticmethod
-    async def create_incident(data: dict) -> Optional[Incident]:
+    async def create_incident(data: dict) -> Incident | None:
         async with async_session() as db:
             if await IncidentService._is_duplicate(db, data):
                 logger.info(f"Duplicate incident suppressed: {data.get('incident_id')}")
                 return None
 
-            now = datetime.now(timezone.utc)
+            now = datetime.now(UTC)
             incident = Incident(
                 incident_id=data["incident_id"],
                 category=data["category"],
@@ -97,8 +97,12 @@ class IncidentService:
                 "ai_recommendation": incident.ai_recommendation,
                 "reporter_name": incident.reporter_name,
                 "camera_name": data.get("camera_name", ""),
-                "snapshot_url": f"/uploads/{os.path.basename(os.path.dirname(snapshot_path))}/snapshot.jpg" if snapshot_path else None,
-                "video_url": f"/uploads/{os.path.basename(os.path.dirname(video_path))}/clip.mp4" if video_path else None,
+                "snapshot_url": f"/uploads/{os.path.basename(os.path.dirname(snapshot_path))}/snapshot.jpg"
+                if snapshot_path
+                else None,
+                "video_url": f"/uploads/{os.path.basename(os.path.dirname(video_path))}/clip.mp4"
+                if video_path
+                else None,
                 "detection_type": data.get("detection_type", ""),
                 "confidence": data.get("confidence", 0),
                 "object_count": data.get("object_count", 0),
@@ -106,23 +110,25 @@ class IncidentService:
             }
 
             await manager.broadcast_incident(ws_data)
-            await manager.broadcast_alert({
-                "type": f"{data['category']}_alert",
-                "title": incident.title,
-                "incident_id": incident.incident_id,
-                "priority": incident.priority,
-                "latitude": incident.latitude,
-                "longitude": incident.longitude,
-                "snapshot_url": ws_data.get("snapshot_url"),
-                "video_url": ws_data.get("video_url"),
-            })
+            await manager.broadcast_alert(
+                {
+                    "type": f"{data['category']}_alert",
+                    "title": incident.title,
+                    "incident_id": incident.incident_id,
+                    "priority": incident.priority,
+                    "latitude": incident.latitude,
+                    "longitude": incident.longitude,
+                    "snapshot_url": ws_data.get("snapshot_url"),
+                    "video_url": ws_data.get("video_url"),
+                }
+            )
 
             logger.info(f"Incident created: {incident.incident_id} ({incident.category})")
             return incident
 
     @staticmethod
     async def _is_duplicate(db: AsyncSession, data: dict) -> bool:
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         window_start = now.timestamp() - DEDUP_WINDOW_SECONDS
 
         category = data.get("category")
@@ -133,7 +139,7 @@ class IncidentService:
             select(Incident).where(
                 and_(
                     Incident.category == category,
-                    Incident.created_at >= datetime.fromtimestamp(window_start, tz=timezone.utc),
+                    Incident.created_at >= datetime.fromtimestamp(window_start, tz=UTC),
                 )
             )
         )
@@ -143,7 +149,7 @@ class IncidentService:
             if inc.latitude and inc.longitude:
                 dlat = abs(inc.latitude - lat)
                 dlon = abs(inc.longitude - lon)
-                approx_meters = ((dlat ** 2 + dlon ** 2) ** 0.5) * 111000
+                approx_meters = ((dlat**2 + dlon**2) ** 0.5) * 111000
                 if approx_meters < DEDUP_DISTANCE_METERS:
                     return True
         return False

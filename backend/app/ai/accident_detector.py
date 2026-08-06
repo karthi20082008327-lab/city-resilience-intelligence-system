@@ -3,12 +3,11 @@ UCRIP Accident Detector
 Analyzes tracked object trajectories to detect vehicle collisions.
 Logic: Two vehicles in close proximity + sudden velocity change = possible accident.
 """
-import time
+
 import logging
 import math
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Dict
-from collections import defaultdict
+import time
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +20,10 @@ VEHICLE_CLASSES = {"car", "motorcycle", "bus", "truck"}
 
 @dataclass
 class AccidentEvent:
-    track_ids: Tuple[int, ...]
+    track_ids: tuple[int, ...]
     timestamp: float
     confidence: float
-    position: Tuple[int, int]
+    position: tuple[int, int]
     description: str
 
 
@@ -32,9 +31,9 @@ class AccidentDetector:
     """Detects accidents by analyzing velocity changes and proximity of tracked vehicles."""
 
     def __init__(self):
-        self.prev_states: Dict[int, dict] = {}
+        self.prev_states: dict[int, dict] = {}
         self.cooldown_until: float = 0
-        self.active_accidents: Dict[Tuple[int, int], float] = {}
+        self.active_accidents: dict[tuple[int, int], float] = {}
         self.incident_ids: set = set()
 
     def reset(self):
@@ -43,7 +42,7 @@ class AccidentDetector:
         self.active_accidents.clear()
         self.incident_ids.clear()
 
-    def update(self, tracked_objects) -> Optional[AccidentEvent]:
+    def update(self, tracked_objects) -> AccidentEvent | None:
         now = time.time()
         if now < self.cooldown_until:
             return None
@@ -63,7 +62,10 @@ class AccidentDetector:
                     event = self._check_collision(v1, v2, now, dist)
                     if event:
                         pair_key = (min(v1.track_id, v2.track_id), max(v1.track_id, v2.track_id))
-                        if pair_key not in self.active_accidents or (now - self.active_accidents[pair_key]) > COOLDOWN_SECONDS:
+                        if (
+                            pair_key not in self.active_accidents
+                            or (now - self.active_accidents[pair_key]) > COOLDOWN_SECONDS
+                        ):
                             self.active_accidents[pair_key] = now
                             self.cooldown_until = now + COOLDOWN_SECONDS
                             self._update_states(vehicles)
@@ -73,7 +75,7 @@ class AccidentDetector:
         self._update_states(vehicles)
         return None
 
-    def _check_collision(self, v1, v2, now, dist) -> Optional[AccidentEvent]:
+    def _check_collision(self, v1, v2, now, dist) -> AccidentEvent | None:
         prev1 = self.prev_states.get(v1.track_id)
         prev2 = self.prev_states.get(v2.track_id)
 

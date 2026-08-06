@@ -1,16 +1,26 @@
+import os
 import uuid
-from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request, status
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
+
+from app.api.websocket import manager
 from app.core.database import get_db
+from app.core.deps import get_current_user
+from app.core.settings import settings
 from app.models.incident import Incident, IncidentMedia
 from app.models.user import User
-from app.schemas.incident import IncidentCreate, IncidentUpdate, IncidentResponse, IncidentListResponse, IncidentStatsResponse, IncidentMediaResponse
-from app.api.websocket import manager
-from app.core.settings import settings
-from app.core.deps import get_current_user
+from app.schemas.incident import (
+    IncidentCreate,
+    IncidentListResponse,
+    IncidentMediaResponse,
+    IncidentResponse,
+    IncidentStatsResponse,
+    IncidentUpdate,
+)
 
 router = APIRouter(prefix="/api/incidents", tags=["Incidents"])
 
@@ -28,7 +38,7 @@ def generate_incident_id(category: str) -> str:
         "other": "OTH",
     }
     prefix = prefix_map.get(category, "OTH")
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now(UTC).strftime("%Y%m%d%H%M%S")
     random_suffix = str(uuid.uuid4())[:4].upper()
     return f"{prefix}-{timestamp}-{random_suffix}"
 
@@ -47,9 +57,15 @@ def calculate_priority(category: str, description: str = None) -> str:
 
 def calculate_risk_score(category: str, priority: str) -> float:
     base_scores = {
-        "fire": 0.9, "gas_leak": 0.95, "building_collapse": 0.95,
-        "flood": 0.85, "accident": 0.6, "power_outage": 0.4,
-        "water_leak": 0.3, "road_damage": 0.35, "other": 0.2,
+        "fire": 0.9,
+        "gas_leak": 0.95,
+        "building_collapse": 0.95,
+        "flood": 0.85,
+        "accident": 0.6,
+        "power_outage": 0.4,
+        "water_leak": 0.3,
+        "road_damage": 0.35,
+        "other": 0.2,
     }
     priority_multipliers = {"critical": 1.0, "high": 0.8, "medium": 0.6, "low": 0.4}
     score = base_scores.get(category, 0.2) * priority_multipliers.get(priority, 0.6)
@@ -84,23 +100,41 @@ def snapshot_path_to_url(path: str) -> str:
 
 def incident_to_response(inc: Incident) -> IncidentResponse:
     return IncidentResponse(
-        id=inc.id, incident_id=inc.incident_id, category=inc.category, title=inc.title,
-        description=inc.description, status=inc.status, priority=inc.priority,
-        latitude=inc.latitude, longitude=inc.longitude, location_address=inc.location_address,
-        assigned_department=inc.assigned_department, assigned_to=inc.assigned_to,
-        reporter_name=inc.reporter_name, reporter_phone=inc.reporter_phone,
-        ai_risk_score=inc.ai_risk_score, ai_recommendation=inc.ai_recommendation,
+        id=inc.id,
+        incident_id=inc.incident_id,
+        category=inc.category,
+        title=inc.title,
+        description=inc.description,
+        status=inc.status,
+        priority=inc.priority,
+        latitude=inc.latitude,
+        longitude=inc.longitude,
+        location_address=inc.location_address,
+        assigned_department=inc.assigned_department,
+        assigned_to=inc.assigned_to,
+        reporter_name=inc.reporter_name,
+        reporter_phone=inc.reporter_phone,
+        ai_risk_score=inc.ai_risk_score,
+        ai_recommendation=inc.ai_recommendation,
         camera_name=inc.camera_name,
         snapshot_url=snapshot_path_to_url(inc.snapshot_path),
         video_url=snapshot_path_to_url(inc.video_clip_path),
         detection_type=inc.detection_type,
-        media=[IncidentMediaResponse(id=m.id, file_path=m.file_path, file_type=m.file_type, file_size=m.file_size, created_at=m.created_at) for m in (inc.media or [])],
-        created_at=inc.created_at, updated_at=inc.updated_at,
+        media=[
+            IncidentMediaResponse(
+                id=m.id, file_path=m.file_path, file_type=m.file_type, file_size=m.file_size, created_at=m.created_at
+            )
+            for m in (inc.media or [])
+        ],
+        created_at=inc.created_at,
+        updated_at=inc.updated_at,
     )
 
 
 @router.post("/", response_model=IncidentResponse)
-async def create_incident(data: IncidentCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def create_incident(
+    data: IncidentCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
+):
     incident_id = generate_incident_id(data.category)
     priority = calculate_priority(data.category, data.description)
     risk_score = calculate_risk_score(data.category, priority)
@@ -126,23 +160,25 @@ async def create_incident(data: IncidentCreate, db: AsyncSession = Depends(get_d
     await db.commit()
     await db.refresh(incident)
 
-    await manager.broadcast_incident({
-        "action": "created",
-        "id": str(incident.id),
-        "incident_id": incident.incident_id,
-        "category": incident.category,
-        "title": incident.title,
-        "description": incident.description,
-        "status": incident.status,
-        "priority": incident.priority,
-        "latitude": incident.latitude,
-        "longitude": incident.longitude,
-        "location_address": incident.location_address,
-        "assigned_department": incident.assigned_department,
-        "ai_risk_score": incident.ai_risk_score,
-        "reporter_name": incident.reporter_name,
-        "created_at": incident.created_at.isoformat() if incident.created_at else None,
-    })
+    await manager.broadcast_incident(
+        {
+            "action": "created",
+            "id": str(incident.id),
+            "incident_id": incident.incident_id,
+            "category": incident.category,
+            "title": incident.title,
+            "description": incident.description,
+            "status": incident.status,
+            "priority": incident.priority,
+            "latitude": incident.latitude,
+            "longitude": incident.longitude,
+            "location_address": incident.location_address,
+            "assigned_department": incident.assigned_department,
+            "ai_risk_score": incident.ai_risk_score,
+            "reporter_name": incident.reporter_name,
+            "created_at": incident.created_at.isoformat() if incident.created_at else None,
+        }
+    )
 
     return IncidentResponse(
         id=incident.id,
@@ -233,7 +269,9 @@ async def list_incidents(
     total = total_result.scalar()
 
     offset = (page - 1) * per_page
-    query = query.options(selectinload(Incident.media)).order_by(Incident.created_at.desc()).offset(offset).limit(per_page)
+    query = (
+        query.options(selectinload(Incident.media)).order_by(Incident.created_at.desc()).offset(offset).limit(per_page)
+    )
     result = await db.execute(query)
     incidents = result.scalars().all()
 
@@ -246,8 +284,12 @@ async def list_incidents(
 async def get_incident_stats(db: AsyncSession = Depends(get_db)):
     total = (await db.execute(select(func.count(Incident.id)))).scalar() or 0
     reported = (await db.execute(select(func.count(Incident.id)).where(Incident.status == "reported"))).scalar() or 0
-    acknowledged = (await db.execute(select(func.count(Incident.id)).where(Incident.status == "acknowledged"))).scalar() or 0
-    in_progress = (await db.execute(select(func.count(Incident.id)).where(Incident.status == "in_progress"))).scalar() or 0
+    acknowledged = (
+        await db.execute(select(func.count(Incident.id)).where(Incident.status == "acknowledged"))
+    ).scalar() or 0
+    in_progress = (
+        await db.execute(select(func.count(Incident.id)).where(Incident.status == "in_progress"))
+    ).scalar() or 0
     resolved = (await db.execute(select(func.count(Incident.id)).where(Incident.status == "resolved"))).scalar() or 0
     closed = (await db.execute(select(func.count(Incident.id)).where(Incident.status == "closed"))).scalar() or 0
     critical = (await db.execute(select(func.count(Incident.id)).where(Incident.priority == "critical"))).scalar() or 0
@@ -256,14 +298,26 @@ async def get_incident_stats(db: AsyncSession = Depends(get_db)):
     low = (await db.execute(select(func.count(Incident.id)).where(Incident.priority == "low"))).scalar() or 0
 
     return IncidentStatsResponse(
-        total=total, reported=reported, acknowledged=acknowledged,
-        in_progress=in_progress, resolved=resolved, closed=closed,
-        critical=critical, high=high, medium=medium, low=low,
+        total=total,
+        reported=reported,
+        acknowledged=acknowledged,
+        in_progress=in_progress,
+        resolved=resolved,
+        closed=closed,
+        critical=critical,
+        high=high,
+        medium=medium,
+        low=low,
     )
 
 
 @router.put("/{incident_id}", response_model=IncidentResponse)
-async def update_incident(incident_id: str, data: IncidentUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def update_incident(
+    incident_id: str,
+    data: IncidentUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     result = await db.execute(select(Incident).where(Incident.incident_id == incident_id))
     incident = result.scalar_one_or_none()
     if not incident:
@@ -281,12 +335,14 @@ async def update_incident(incident_id: str, data: IncidentUpdate, db: AsyncSessi
         incident.description = data.description
 
     if data.status == "resolved":
-        incident.resolved_at = datetime.now(timezone.utc)
+        incident.resolved_at = datetime.now(UTC)
 
-    incident.updated_at = datetime.now(timezone.utc)
+    incident.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(incident)
 
-    preloaded = await db.execute(select(Incident).where(Incident.incident_id == incident.incident_id).options(selectinload(Incident.media)))
+    preloaded = await db.execute(
+        select(Incident).where(Incident.incident_id == incident.incident_id).options(selectinload(Incident.media))
+    )
     incident = preloaded.scalar_one()
     return incident_to_response(incident)

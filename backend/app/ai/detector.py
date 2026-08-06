@@ -3,14 +3,16 @@ UCRIP AI Object Detector
 Uses OpenCV HOG + SVM for people, DNN/YOLO for vehicles.
 Threaded inference for performance.
 """
+
+import logging
+import threading
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+
 import cv2
 import numpy as np
-import logging
-import time
-import threading
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
-from pathlib import Path
+
 from app.core.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -27,8 +29,8 @@ INPUT_SIZE = (320, 320)
 class Detection:
     class_name: str
     confidence: float
-    bbox: Tuple[int, int, int, int]  # x, y, w, h
-    center: Tuple[int, int] = field(default=(0, 0))
+    bbox: tuple[int, int, int, int]  # x, y, w, h
+    center: tuple[int, int] = field(default=(0, 0))
 
     def __post_init__(self):
         x, y, w, h = self.bbox
@@ -45,7 +47,7 @@ class ObjectDetector:
         self.output_layers = []
         self.lock = threading.Lock()
         self.frame_skip = 0
-        self.last_detections: List[Detection] = []
+        self.last_detections: list[Detection] = []
         self._load_model()
 
     def _load_model(self):
@@ -74,7 +76,7 @@ class ObjectDetector:
             self.vehicle_cascade = cv2.CascadeClassifier(cascade_path)
         logger.info("Using HOG+Haar cascade fallback detector")
 
-    def detect(self, frame: np.ndarray) -> List[Detection]:
+    def detect(self, frame: np.ndarray) -> list[Detection]:
         """Run detection on a single frame. Skips every other frame for performance."""
         with self.lock:
             self.frame_skip += 1
@@ -87,11 +89,11 @@ class ObjectDetector:
             else:
                 detections = self._detect_hog(frame)
             elapsed = time.time() - t0
-            logger.debug(f"Detection took {elapsed*1000:.1f}ms, found {len(detections)} objects")
+            logger.debug(f"Detection took {elapsed * 1000:.1f}ms, found {len(detections)} objects")
             self.last_detections = detections
             return detections
 
-    def _detect_dnn(self, frame: np.ndarray) -> List[Detection]:
+    def _detect_dnn(self, frame: np.ndarray) -> list[Detection]:
         h, w = frame.shape[:2]
         blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, INPUT_SIZE, swapRB=True, crop=False)
         self.net.setInput(blob)
@@ -126,46 +128,52 @@ class ObjectDetector:
         indices = cv2.dnn.NMSBoxes(boxes, confidences, CONFIDENCE_THRESHOLD, NMS_THRESHOLD)
         detections = []
         if len(indices) > 0:
-            for i in indices.flatten() if hasattr(indices, 'flatten') else indices:
+            for i in indices.flatten() if hasattr(indices, "flatten") else indices:
                 idx = int(i) if not isinstance(i, int) else i
                 x, y, bw, bh = boxes[idx]
                 cls_id = class_ids[idx]
                 cls_name = VEHICLE_CLASSES.get(cls_id, "person")
-                detections.append(Detection(
-                    class_name=cls_name,
-                    confidence=confidences[idx],
-                    bbox=(max(0, x), max(0, y), bw, bh),
-                ))
+                detections.append(
+                    Detection(
+                        class_name=cls_name,
+                        confidence=confidences[idx],
+                        bbox=(max(0, x), max(0, y), bw, bh),
+                    )
+                )
         return detections
 
-    def _detect_hog(self, frame: np.ndarray) -> List[Detection]:
+    def _detect_hog(self, frame: np.ndarray) -> list[Detection]:
         detections = []
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         h, w = frame.shape[:2]
 
         try:
-            boxes, weights = self.hog.detectMultiScale(
-                gray, winStride=(8, 8), padding=(4, 4), scale=1.05
-            )
+            boxes, weights = self.hog.detectMultiScale(gray, winStride=(8, 8), padding=(4, 4), scale=1.05)
             for (x, y, bw, bh), weight in zip(boxes, weights):
                 conf = float(min(weight / 1.5, 1.0))
                 if conf > CONFIDENCE_THRESHOLD:
-                    detections.append(Detection(
-                        class_name="person", confidence=conf,
-                        bbox=(int(x), int(y), int(bw), int(bh)),
-                    ))
+                    detections.append(
+                        Detection(
+                            class_name="person",
+                            confidence=conf,
+                            bbox=(int(x), int(y), int(bw), int(bh)),
+                        )
+                    )
         except Exception as e:
             logger.debug(f"HOG detection error: {e}")
 
         if self.vehicle_cascade is not None:
             try:
                 vehicles = self.vehicle_cascade.detectMultiScale(gray, 1.1, 3, 0, (40, 40))
-                for (x, y, bw, bh) in vehicles:
+                for x, y, bw, bh in vehicles:
                     if bw * bh > 800:
-                        detections.append(Detection(
-                            class_name="vehicle", confidence=0.80,
-                            bbox=(int(x), int(y), int(bw), int(bh)),
-                        ))
+                        detections.append(
+                            Detection(
+                                class_name="vehicle",
+                                confidence=0.80,
+                                bbox=(int(x), int(y), int(bw), int(bh)),
+                            )
+                        )
             except Exception as e:
                 logger.debug(f"Haar cascade error: {e}")
 

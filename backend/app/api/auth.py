@@ -1,28 +1,30 @@
-from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+from datetime import UTC, datetime, timedelta
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.database import get_db
 from app.core.security import (
     create_access_token,
     create_refresh_token,
-    verify_token,
     hash_password,
     verify_password,
+    verify_token,
 )
 from app.core.settings import settings
-from app.models.user import User, Role, UserSession
+from app.models.user import Role, User, UserSession
 from app.schemas.auth import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
     LoginRequest,
-    TokenResponse,
     RefreshTokenRequest,
     RegisterRequest,
-    ForgotPasswordRequest,
     ResetPasswordRequest,
-    ChangePasswordRequest,
+    TokenResponse,
 )
 from app.schemas.user import UserResponse
-import uuid
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -42,7 +44,7 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
     expire_days = 30 if data.remember_me else settings.REFRESH_TOKEN_EXPIRE_DAYS
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-    expire = datetime.now(timezone.utc) + timedelta(days=expire_days)
+    expire = datetime.now(UTC) + timedelta(days=expire_days)
     session = UserSession(
         user_id=user.id,
         token=access_token,
@@ -54,7 +56,7 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
     )
     db.add(session)
 
-    user.last_login = datetime.now(timezone.utc)
+    user.last_login = datetime.now(UTC)
     await db.commit()
     await db.refresh(user)
 
@@ -66,7 +68,9 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
         email=user.email,
         username=user.username,
         full_name=user.full_name,
-        role={"id": role.id, "name": role.name, "description": role.description} if role else {"id": user.role_id, "name": "unknown", "description": None},
+        role={"id": role.id, "name": role.name, "description": role.description}
+        if role
+        else {"id": user.role_id, "name": "unknown", "description": None},
         is_active=user.is_active,
         is_verified=user.is_verified,
         avatar_url=user.avatar_url,
@@ -86,7 +90,9 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
 async def register(request: Request, data: RegisterRequest, db: AsyncSession = Depends(get_db)):
     existing = await db.execute(select(User).where((User.email == data.email) | (User.username == data.username)))
     if existing.scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email or username already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="User with this email or username already exists"
+        )
 
     role_result = await db.execute(select(Role).where(Role.name == data.role_name))
     role = role_result.scalar_one_or_none()
@@ -110,7 +116,7 @@ async def register(request: Request, data: RegisterRequest, db: AsyncSession = D
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": str(user.role_id)})
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
-    expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    expire = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
     session = UserSession(
         user_id=user.id,
         token=access_token,
@@ -129,7 +135,9 @@ async def register(request: Request, data: RegisterRequest, db: AsyncSession = D
         email=user.email,
         username=user.username,
         full_name=user.full_name,
-        role={"id": role.id, "name": role.name, "description": role.description} if role else {"id": user.role_id, "name": "unknown", "description": None},
+        role={"id": role.id, "name": role.name, "description": role.description}
+        if role
+        else {"id": user.role_id, "name": "unknown", "description": None},
         is_active=user.is_active,
         is_verified=user.is_verified,
         avatar_url=user.avatar_url,
@@ -168,7 +176,9 @@ async def refresh_token(data: RefreshTokenRequest, db: AsyncSession = Depends(ge
         email=user.email,
         username=user.username,
         full_name=user.full_name,
-        role={"id": role.id, "name": role.name, "description": role.description} if role else {"id": user.role_id, "name": "unknown", "description": None},
+        role={"id": role.id, "name": role.name, "description": role.description}
+        if role
+        else {"id": user.role_id, "name": "unknown", "description": None},
         is_active=user.is_active,
         is_verified=user.is_verified,
         avatar_url=user.avatar_url,
@@ -189,7 +199,7 @@ async def logout(request: Request, db: AsyncSession = Depends(get_db)):
     auth = request.headers.get("Authorization")
     if auth and auth.startswith("Bearer "):
         token = auth.split(" ")[1]
-        result = await db.execute(select(UserSession).where(UserSession.token == token, UserSession.is_active == True))
+        result = await db.execute(select(UserSession).where(UserSession.token == token, UserSession.is_active))
         session = result.scalar_one_or_none()
         if session:
             session.is_active = False
@@ -200,8 +210,11 @@ async def logout(request: Request, db: AsyncSession = Depends(get_db)):
 @router.post("/forgot-password")
 async def forgot_password(data: ForgotPasswordRequest, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
-    user = result.scalar_one_or_none()
-    return {"message": "If the email exists, a reset link has been sent", "token": "mock_reset_token_" + str(uuid.uuid4())[:8]}
+    result.scalar_one_or_none()
+    return {
+        "message": "If the email exists, a reset link has been sent",
+        "token": "mock_reset_token_" + str(uuid.uuid4())[:8],
+    }
 
 
 @router.post("/reset-password")
@@ -282,9 +295,7 @@ async def get_sessions(request: Request, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user_id = payload.get("sub")
-    result = await db.execute(
-        select(UserSession).where(UserSession.user_id == str(user_id), UserSession.is_active == True)
-    )
+    result = await db.execute(select(UserSession).where(UserSession.user_id == str(user_id), UserSession.is_active))
     sessions = result.scalars().all()
 
     return [

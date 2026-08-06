@@ -1,26 +1,26 @@
-import uuid
-import os
 import asyncio
+import os
+import uuid
+from datetime import UTC, datetime
+
 import cv2
 import numpy as np
-from datetime import datetime, timezone
-from fastapi import APIRouter, UploadFile, File, Form, Depends, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.core.database import get_db
-from app.models.incident import Incident, IncidentMedia
-from app.schemas.incident import IncidentResponse, IncidentMediaResponse
+
 from app.api.websocket import manager
-from app.core.settings import settings
+from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.settings import settings
+from app.models.incident import Incident, IncidentMedia
 from app.models.user import User
 
 router = APIRouter(prefix="/api/collision", tags=["Collision Detection"])
 
 vehicle_cascade = None
 for cascade_path in [
-    cv2.data.haarcascades + 'haarcascade_car.xml',
+    cv2.data.haarcascades + "haarcascade_car.xml",
 ]:
     if os.path.exists(cascade_path):
         vehicle_cascade = cv2.CascadeClassifier(cascade_path)
@@ -61,7 +61,8 @@ def detect_fire(img):
             mx = min(merged["x"], r["x"])
             my = min(merged["y"], r["y"])
             merged = {
-                "x": mx, "y": my,
+                "x": mx,
+                "y": my,
                 "width": max(merged["x"] + merged["width"], r["x"] + r["width"]) - mx,
                 "height": max(merged["y"] + merged["height"], r["y"] + r["height"]) - my,
                 "area": merged["area"] + r["area"],
@@ -101,47 +102,65 @@ def run_detection(contents: bytes) -> dict:
     try:
         boxes, weights = hog.detectMultiScale(gray, winStride=(8, 8), padding=(4, 4), scale=1.05)
         for (x, y, bw, bh), weight in zip(boxes, weights):
-            detections.append({
-                "class": "person", "score": float(min(weight / 1.5, 1.0)),
-                "bbox": {"x": int(x), "y": int(y), "width": int(bw), "height": int(bh)},
-            })
+            detections.append(
+                {
+                    "class": "person",
+                    "score": float(min(weight / 1.5, 1.0)),
+                    "bbox": {"x": int(x), "y": int(y), "width": int(bw), "height": int(bh)},
+                }
+            )
     except Exception:
         pass
 
     if vehicle_cascade is not None:
         try:
             vehicles = vehicle_cascade.detectMultiScale(gray, 1.1, 3, 0, (30, 30))
-            for (x, y, bw, bh) in vehicles:
-                detections.append({
-                    "class": "vehicle", "score": 0.85,
-                    "bbox": {"x": int(x), "y": int(y), "width": int(bw), "height": int(bh)},
-                })
+            for x, y, bw, bh in vehicles:
+                detections.append(
+                    {
+                        "class": "vehicle",
+                        "score": 0.85,
+                        "bbox": {"x": int(x), "y": int(y), "width": int(bw), "height": int(bh)},
+                    }
+                )
         except Exception:
             pass
 
     fire_detected, fire_score, fire_bbox = detect_fire(img)
     if fire_detected:
-        detections.append({
-            "class": "fire", "score": fire_score,
-            "bbox": fire_bbox or {"x": 0, "y": 0, "width": w, "height": h},
-        })
-        alerts.append({
-            "type": "fire", "severity": "critical" if fire_score > 0.5 else "high",
-            "confidence": fire_score,
-            "message": "Fire detected in camera feed",
-        })
+        detections.append(
+            {
+                "class": "fire",
+                "score": fire_score,
+                "bbox": fire_bbox or {"x": 0, "y": 0, "width": w, "height": h},
+            }
+        )
+        alerts.append(
+            {
+                "type": "fire",
+                "severity": "critical" if fire_score > 0.5 else "high",
+                "confidence": fire_score,
+                "message": "Fire detected in camera feed",
+            }
+        )
 
     smoke_detected, smoke_score = detect_smoke(img)
     if smoke_detected:
-        detections.append({
-            "class": "smoke", "score": smoke_score,
-            "bbox": {"x": 0, "y": 0, "width": w, "height": int(h * 0.5)},
-        })
-        alerts.append({
-            "type": "smoke", "severity": "high",
-            "confidence": smoke_score,
-            "message": "Smoke detected in camera feed",
-        })
+        detections.append(
+            {
+                "class": "smoke",
+                "score": smoke_score,
+                "bbox": {"x": 0, "y": 0, "width": w, "height": int(h * 0.5)},
+            }
+        )
+        alerts.append(
+            {
+                "type": "smoke",
+                "severity": "high",
+                "confidence": smoke_score,
+                "message": "Smoke detected in camera feed",
+            }
+        )
 
     vehicle_count = sum(1 for d in detections if d["class"] == "vehicle")
     people_count = sum(1 for d in detections if d["class"] == "person")
@@ -179,7 +198,7 @@ async def report_incident(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     timestamp = now.strftime("%m%d%H%M%S")
     random_suffix = str(uuid.uuid4())[:4].upper()
 
@@ -201,10 +220,7 @@ async def report_incident(
         title = "Smoke Detected - Investigation Required"
         department = "emergency_department"
         risk_score = 0.75
-        recommendation = (
-            "Smoke detected in camera feed. "
-            "Investigate potential fire hazard. Monitor for escalation."
-        )
+        recommendation = "Smoke detected in camera feed. Investigate potential fire hazard. Monitor for escalation."
     else:
         incident_id = f"COL-{timestamp}-{random_suffix}"
         category = "accident"
@@ -217,7 +233,7 @@ async def report_incident(
             "Dispatch emergency services to the reported location."
         )
 
-    description_parts = [f"Automated report from mobile CCTV camera."]
+    description_parts = ["Automated report from mobile CCTV camera."]
     if vehicle_count > 0:
         description_parts.append(f"Vehicles detected: {vehicle_count}")
     if people_count > 0:
@@ -287,21 +303,26 @@ async def report_incident(
     }
     await manager.broadcast_incident(incident_data)
 
-    await manager.broadcast_alert({
-        "type": f"{incident_type}_alert",
-        "title": title,
-        "incident_id": incident.incident_id,
-        "priority": priority,
-        "latitude": latitude,
-        "longitude": longitude,
-    })
+    await manager.broadcast_alert(
+        {
+            "type": f"{incident_type}_alert",
+            "title": title,
+            "incident_id": incident.incident_id,
+            "priority": priority,
+            "latitude": latitude,
+            "longitude": longitude,
+        }
+    )
 
-    return JSONResponse(status_code=201, content={
-        "id": str(incident.id),
-        "incident_id": incident.incident_id,
-        "category": category,
-        "title": title,
-        "status": incident.status,
-        "priority": priority,
-        "message": f"{incident_type.capitalize()} incident reported and broadcast to admin dashboard",
-    })
+    return JSONResponse(
+        status_code=201,
+        content={
+            "id": str(incident.id),
+            "incident_id": incident.incident_id,
+            "category": category,
+            "title": title,
+            "status": incident.status,
+            "priority": priority,
+            "message": f"{incident_type.capitalize()} incident reported and broadcast to admin dashboard",
+        },
+    )

@@ -4,22 +4,24 @@ Orchestrates detection -> tracking -> accident/fire analysis -> incident creatio
 Maintains a circular frame buffer for video clip capture.
 Threaded inference for 25+ FPS.
 """
-import cv2
-import numpy as np
-import time
+
 import logging
-import threading
 import os
+import threading
+import time
 import uuid
 from collections import deque
-from datetime import datetime, timezone
-from typing import Optional, Callable, Any
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import datetime
 
-from app.ai.detector import ObjectDetector, Detection
-from app.ai.tracker import ObjectTracker, TrackedObject
+import cv2
+import numpy as np
+
 from app.ai.accident_detector import AccidentDetector, AccidentEvent
-from app.ai.fire_detector import FireDetector, FireAlert
+from app.ai.detector import ObjectDetector
+from app.ai.fire_detector import FireAlert, FireDetector
+from app.ai.tracker import ObjectTracker
 from app.core.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -35,8 +37,8 @@ class PipelineResult:
     frame: np.ndarray
     detections: list
     tracked_objects: list
-    accident: Optional[AccidentEvent] = None
-    fire_alert: Optional[FireAlert] = None
+    accident: AccidentEvent | None = None
+    fire_alert: FireAlert | None = None
     fps: float = 0.0
     timestamp: float = 0.0
 
@@ -44,7 +46,7 @@ class PipelineResult:
 class AIPipeline:
     """Main AI pipeline: detect -> track -> analyze -> report incidents."""
 
-    def __init__(self, on_incident: Optional[Callable] = None):
+    def __init__(self, on_incident: Callable | None = None):
         self.detector = ObjectDetector()
         self.tracker = ObjectTracker()
         self.accident_detector = AccidentDetector()
@@ -67,7 +69,7 @@ class AIPipeline:
         self.camera_lat = lat
         self.camera_lon = lon
 
-    def process_frame(self, frame: np.ndarray) -> Optional[PipelineResult]:
+    def process_frame(self, frame: np.ndarray) -> PipelineResult | None:
         if frame is None:
             return None
 
@@ -207,8 +209,12 @@ class AIPipeline:
     def annotate_frame(self, frame: np.ndarray, tracked_objects: list, fps: float) -> np.ndarray:
         annotated = frame.copy()
         class_colors = {
-            "person": (0, 255, 0), "car": (255, 0, 0), "motorcycle": (0, 255, 255),
-            "bus": (255, 255, 0), "truck": (0, 128, 255), "vehicle": (255, 0, 0),
+            "person": (0, 255, 0),
+            "car": (255, 0, 0),
+            "motorcycle": (0, 255, 255),
+            "bus": (255, 255, 0),
+            "truck": (0, 128, 255),
+            "vehicle": (255, 0, 0),
         }
 
         for obj in tracked_objects:

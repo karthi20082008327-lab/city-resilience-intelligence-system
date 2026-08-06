@@ -1,5 +1,6 @@
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+
 from app.core.settings import settings
 from app.schemas.incident import WeatherData
 
@@ -29,13 +30,27 @@ async def fetch_weather_open_meteo(lat: float, lon: float) -> dict:
 
 
 WMO_CODES = {
-    0: ("Clear sky", "01d"), 1: ("Mainly clear", "01d"), 2: ("Partly cloudy", "02d"),
-    3: ("Overcast", "03d"), 45: ("Foggy", "50d"), 48: ("Rime fog", "50d"),
-    51: ("Light drizzle", "09d"), 53: ("Moderate drizzle", "09d"), 55: ("Dense drizzle", "09d"),
-    61: ("Slight rain", "10d"), 63: ("Moderate rain", "10d"), 65: ("Heavy rain", "10d"),
-    71: ("Slight snow", "13d"), 73: ("Moderate snow", "13d"), 75: ("Heavy snow", "13d"),
-    80: ("Slight showers", "09d"), 81: ("Moderate showers", "09d"), 82: ("Violent showers", "09d"),
-    95: ("Thunderstorm", "11d"), 96: ("Thunderstorm with hail", "11d"), 99: ("Thunderstorm with heavy hail", "11d"),
+    0: ("Clear sky", "01d"),
+    1: ("Mainly clear", "01d"),
+    2: ("Partly cloudy", "02d"),
+    3: ("Overcast", "03d"),
+    45: ("Foggy", "50d"),
+    48: ("Rime fog", "50d"),
+    51: ("Light drizzle", "09d"),
+    53: ("Moderate drizzle", "09d"),
+    55: ("Dense drizzle", "09d"),
+    61: ("Slight rain", "10d"),
+    63: ("Moderate rain", "10d"),
+    65: ("Heavy rain", "10d"),
+    71: ("Slight snow", "13d"),
+    73: ("Moderate snow", "13d"),
+    75: ("Heavy snow", "13d"),
+    80: ("Slight showers", "09d"),
+    81: ("Moderate showers", "09d"),
+    82: ("Violent showers", "09d"),
+    95: ("Thunderstorm", "11d"),
+    96: ("Thunderstorm with hail", "11d"),
+    99: ("Thunderstorm with heavy hail", "11d"),
 }
 
 
@@ -46,11 +61,19 @@ async def get_weather(city: str = None):
 
     try:
         data = await fetch_weather_open_meteo(coords["lat"], coords["lon"])
-    except Exception as e:
+    except Exception:
         return WeatherData(
-            temperature=32.0, humidity=65.0, wind_speed=12.0, pressure=1013.0,
-            description="Partly cloudy", icon="02d", rain_probability=20.0,
-            uv_index=6.0, air_quality=50.0, city=city_name.title(), country=coords["country"],
+            temperature=32.0,
+            humidity=65.0,
+            wind_speed=12.0,
+            pressure=1013.0,
+            description="Partly cloudy",
+            icon="02d",
+            rain_probability=20.0,
+            uv_index=6.0,
+            air_quality=50.0,
+            city=city_name.title(),
+            country=coords["country"],
         )
 
     current = data.get("current", {})
@@ -63,7 +86,9 @@ async def get_weather(city: str = None):
     weather_code = current.get("weather_code", 0)
 
     description, icon = WMO_CODES.get(weather_code, ("Unknown", "03d"))
-    rain_prob = (daily.get("precipitation_probability_max", [0.0]))[0] if daily.get("precipitation_probability_max") else 0.0
+    rain_prob = (
+        (daily.get("precipitation_probability_max", [0.0]))[0] if daily.get("precipitation_probability_max") else 0.0
+    )
     uv_index = (daily.get("uv_index_max", [0.0]))[0] if daily.get("uv_index_max") else 0.0
 
     return WeatherData(
@@ -106,7 +131,9 @@ async def weather_risk_assessment(city: str = None):
         "flood_risk": flood_risk,
         "uv_risk": min(weather.uv_index / 11.0, 1.0),
         "wind_risk": min(weather.wind_speed / 60.0, 1.0),
-        "overall_risk": round((flood_risk + min(weather.uv_index / 11.0, 1.0) + min(weather.wind_speed / 60.0, 1.0)) / 3, 2),
+        "overall_risk": round(
+            (flood_risk + min(weather.uv_index / 11.0, 1.0) + min(weather.wind_speed / 60.0, 1.0)) / 3, 2
+        ),
         "recommendation": recommendation,
         "weather": weather,
     }

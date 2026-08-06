@@ -1,10 +1,10 @@
 from fastapi import Depends, HTTPException, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.security import verify_token
-from app.models.user import User, Role
+from app.models.user import Role, User
 
 
 async def get_current_user(

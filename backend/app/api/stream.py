@@ -3,33 +3,35 @@ UCRIP Video Stream Endpoint
 WebSocket endpoint for receiving live video frames from mobile CCTV.
 Processes frames through AI pipeline in a thread pool to avoid blocking.
 """
-import cv2
-import numpy as np
-import json
-import base64
+
 import asyncio
+import base64
+import json
 import logging
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from typing import Optional
+
+import cv2
+import numpy as np
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 
 from app.ai.pipeline import AIPipeline
-from app.core.settings import settings
 from app.core.deps import get_optional_user
+from app.core.settings import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["AI Stream"])
 
 UPLOAD_DIR = settings.UPLOAD_DIR
 
-pipeline: Optional[AIPipeline] = None
+pipeline: AIPipeline | None = None
 executor = ThreadPoolExecutor(max_workers=2)
 
 
 async def _on_incident(data: dict):
     from app.services.incident_service import IncidentService
+
     await IncidentService.create_incident(data)
 
 
@@ -131,8 +133,8 @@ async def video_stream(websocket: WebSocket):
 
                         if result.accident:
                             annotated = pipe.annotate_frame(frame, result.tracked_objects, result.fps)
-                            _, buf = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                            response["annotated_frame"] = base64.b64encode(buf).decode('utf-8')
+                            _, buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                            response["annotated_frame"] = base64.b64encode(buf).decode("utf-8")
                             response["alert"] = {
                                 "type": "accident",
                                 "confidence": result.accident.confidence,
@@ -140,8 +142,8 @@ async def video_stream(websocket: WebSocket):
                             }
                         elif result.fire_alert:
                             annotated = pipe.annotate_frame(frame, result.tracked_objects, result.fps)
-                            _, buf = cv2.imencode('.jpg', annotated, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                            response["annotated_frame"] = base64.b64encode(buf).decode('utf-8')
+                            _, buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 50])
+                            response["annotated_frame"] = base64.b64encode(buf).decode("utf-8")
                             response["alert"] = {
                                 "type": result.fire_alert.alert_type,
                                 "confidence": result.fire_alert.confidence,
@@ -168,7 +170,12 @@ async def video_stream(websocket: WebSocket):
 
 
 @router.post("/api/stream/config")
-async def configure_stream(camera_name: str = "Mobile Camera", lat: float = settings.CITY_LAT, lon: float = settings.CITY_LON, current_user=Depends(get_optional_user)):
+async def configure_stream(
+    camera_name: str = "Mobile Camera",
+    lat: float = settings.CITY_LAT,
+    lon: float = settings.CITY_LON,
+    current_user=Depends(get_optional_user),
+):
     pipe = get_pipeline()
     pipe.set_camera_info(camera_name, lat, lon)
     return {"status": "ok", "camera": camera_name, "lat": lat, "lon": lon}
@@ -181,9 +188,9 @@ async def verify_stream_frame(payload: dict, current_user=Depends(get_optional_u
     Accepts a base64-encoded frame plus optional metadata. Saves the frame as
     snapshot evidence and creates an incident for the admin dashboard.
     """
-    import os
-    from datetime import datetime
     import uuid
+    from datetime import datetime
+
     from app.services.incident_service import IncidentService
 
     frame_b64 = payload.get("image") or payload.get("frame")
@@ -224,7 +231,9 @@ async def verify_stream_frame(payload: dict, current_user=Depends(get_optional_u
     if not priority:
         critical_categories = ["fire", "gas_leak", "building_collapse", "flood"]
         high_categories = ["accident", "power_outage"]
-        priority = "critical" if category in critical_categories else ("high" if category in high_categories else "medium")
+        priority = (
+            "critical" if category in critical_categories else ("high" if category in high_categories else "medium")
+        )
 
     if not assigned_department:
         dept_map = {
@@ -241,7 +250,9 @@ async def verify_stream_frame(payload: dict, current_user=Depends(get_optional_u
         assigned_department = dept_map.get(category, "emergency_department")
 
     if not ai_recommendation:
-        ai_recommendation = "Automated CCTV detection. Immediate response required. Dispatch relevant department to the location."
+        ai_recommendation = (
+            "Automated CCTV detection. Immediate response required. Dispatch relevant department to the location."
+        )
 
     incident_data = {
         "incident_id": incident_id,

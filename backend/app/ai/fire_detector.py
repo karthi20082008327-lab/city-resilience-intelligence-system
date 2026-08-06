@@ -3,12 +3,13 @@ UCRIP Fire/Smoke Detector
 Multi-channel fire detection: HSV color analysis + motion + texture.
 Not dependent on a single color range - uses multiple fire signatures.
 """
+
+import logging
+import time
+from dataclasses import dataclass
+
 import cv2
 import numpy as np
-import time
-import logging
-from dataclasses import dataclass
-from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ SMOKE_COOLDOWN = 30
 class FireAlert:
     alert_type: str  # "fire" or "smoke"
     confidence: float
-    bbox: Tuple[int, int, int, int]
+    bbox: tuple[int, int, int, int]
     timestamp: float
 
 
@@ -39,7 +40,7 @@ class FireDetector:
         self.fire_cooldown_until = 0.0
         self.smoke_cooldown_until = 0.0
 
-    def detect(self, frame: np.ndarray) -> Optional[FireAlert]:
+    def detect(self, frame: np.ndarray) -> FireAlert | None:
         now = time.time()
 
         fire_alert = self._detect_fire(frame, now)
@@ -53,7 +54,7 @@ class FireDetector:
         self.prev_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         return None
 
-    def _detect_fire(self, frame, now) -> Optional[FireAlert]:
+    def _detect_fire(self, frame, now) -> FireAlert | None:
         if now < self.fire_cooldown_until:
             return None
 
@@ -99,11 +100,7 @@ class FireDetector:
         flicker_score = self._detect_flicker(fire_mask)
 
         fire_confidence = min(
-            0.3 * min(fire_ratio * 8, 1.0) +
-            0.25 * motion_score +
-            0.25 * brightness +
-            0.2 * flicker_score,
-            0.99
+            0.3 * min(fire_ratio * 8, 1.0) + 0.25 * motion_score + 0.25 * brightness + 0.2 * flicker_score, 0.99
         )
 
         if fire_confidence > 0.55 and fire_ratio > 0.003:
@@ -119,7 +116,7 @@ class FireDetector:
             )
         return None
 
-    def _detect_smoke(self, frame, now) -> Optional[FireAlert]:
+    def _detect_smoke(self, frame, now) -> FireAlert | None:
         if now < self.smoke_cooldown_until:
             return None
 

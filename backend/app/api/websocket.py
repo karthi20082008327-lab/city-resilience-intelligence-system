@@ -1,8 +1,8 @@
 import json
 import logging
-from datetime import datetime, timezone
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
-from typing import List, Dict
+from datetime import UTC, datetime
+
+from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
 logger = logging.getLogger(__name__)
 
@@ -14,16 +14,16 @@ HEARTBEAT_IDLE_SECONDS = 5 * 60
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
-        self.connection_info: Dict[WebSocket, dict] = {}
+        self.active_connections: list[WebSocket] = []
+        self.connection_info: dict[WebSocket, dict] = {}
 
     async def connect(self, websocket: WebSocket, client_type: str = "admin"):
         await websocket.accept()
         self.active_connections.append(websocket)
         self.connection_info[websocket] = {
             "type": client_type,
-            "connected_at": datetime.now(timezone.utc).isoformat(),
-            "last_activity": datetime.now(timezone.utc),
+            "connected_at": datetime.now(UTC).isoformat(),
+            "last_activity": datetime.now(UTC),
         }
         logger.info("[WS] Client connected: %s (total: %d)", client_type, len(self.active_connections))
 
@@ -36,13 +36,13 @@ class ConnectionManager:
 
     def touch(self, websocket: WebSocket):
         if websocket in self.connection_info:
-            self.connection_info[websocket]["last_activity"] = datetime.now(timezone.utc)
+            self.connection_info[websocket]["last_activity"] = datetime.now(UTC)
 
     def is_stale(self, websocket: WebSocket) -> bool:
         info = self.connection_info.get(websocket)
         if not info:
             return False
-        delta = (datetime.now(timezone.utc) - info["last_activity"]).total_seconds()
+        delta = (datetime.now(UTC) - info["last_activity"]).total_seconds()
         return delta > HEARTBEAT_IDLE_SECONDS
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
@@ -63,36 +63,44 @@ class ConnectionManager:
             self.disconnect(conn)
 
     async def broadcast_incident(self, incident_data: dict):
-        message = json.dumps({
-            "type": "incident",
-            "action": incident_data.get("action", "created"),
-            "data": incident_data,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        message = json.dumps(
+            {
+                "type": "incident",
+                "action": incident_data.get("action", "created"),
+                "data": incident_data,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
         await self.broadcast(message)
 
     async def broadcast_weather(self, weather_data: dict):
-        message = json.dumps({
-            "type": "weather",
-            "data": weather_data,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        message = json.dumps(
+            {
+                "type": "weather",
+                "data": weather_data,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
         await self.broadcast(message)
 
     async def broadcast_alert(self, alert_data: dict):
-        message = json.dumps({
-            "type": "alert",
-            "data": alert_data,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        message = json.dumps(
+            {
+                "type": "alert",
+                "data": alert_data,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
         await self.broadcast(message)
 
     async def broadcast_risk_update(self, risk_data: dict):
-        message = json.dumps({
-            "type": "risk_update",
-            "data": risk_data,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        message = json.dumps(
+            {
+                "type": "risk_update",
+                "data": risk_data,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
         await self.broadcast(message)
 
     def get_connection_count(self) -> int:
@@ -134,30 +142,38 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str = Query(defa
 
                 if msg_type == "ping":
                     await manager.send_personal_message(
-                        json.dumps({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()}),
+                        json.dumps({"type": "pong", "timestamp": datetime.now(UTC).isoformat()}),
                         websocket,
                     )
                 elif msg_type == "subscribe":
                     await manager.send_personal_message(
-                        json.dumps({"type": "subscribed", "channels": message.get("channels", []),
-                                    "timestamp": datetime.now(timezone.utc).isoformat()}),
+                        json.dumps(
+                            {
+                                "type": "subscribed",
+                                "channels": message.get("channels", []),
+                                "timestamp": datetime.now(UTC).isoformat(),
+                            }
+                        ),
                         websocket,
                     )
                 elif msg_type == "incident_update":
                     await manager.broadcast_incident(message.get("data", {}))
                 elif msg_type == "location_update":
                     await manager.broadcast(
-                        json.dumps({"type": "location", "data": message.get("data", {}),
-                                    "timestamp": datetime.now(timezone.utc).isoformat()})
+                        json.dumps(
+                            {
+                                "type": "location",
+                                "data": message.get("data", {}),
+                                "timestamp": datetime.now(UTC).isoformat(),
+                            }
+                        )
                     )
                 elif msg_type == "bye":
                     await websocket.close()
                     break
 
             except json.JSONDecodeError:
-                await manager.send_personal_message(
-                    json.dumps({"type": "error", "message": "Invalid JSON"}), websocket
-                )
+                await manager.send_personal_message(json.dumps({"type": "error", "message": "Invalid JSON"}), websocket)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)

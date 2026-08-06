@@ -1,34 +1,36 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 
 
 class IncidentCreate(BaseModel):
-    category: str = Field(..., pattern="^(accident|water_leak|fire|power_outage|road_damage|flood|gas_leak|building_collapse|other)$")
+    category: str = Field(
+        ..., pattern="^(accident|water_leak|fire|power_outage|road_damage|flood|gas_leak|building_collapse|other)$"
+    )
     title: str = Field(..., min_length=5, max_length=255)
-    description: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    location_address: Optional[str] = None
-    reporter_name: Optional[str] = None
-    reporter_phone: Optional[str] = None
-    reporter_email: Optional[str] = None
+    description: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+    location_address: str | None = None
+    reporter_name: str | None = None
+    reporter_phone: str | None = None
+    reporter_email: str | None = None
 
 
 class IncidentUpdate(BaseModel):
-    status: Optional[str] = None
-    priority: Optional[str] = None
-    assigned_department: Optional[str] = None
-    assigned_to: Optional[str] = None
-    description: Optional[str] = None
+    status: str | None = None
+    priority: str | None = None
+    assigned_department: str | None = None
+    assigned_to: str | None = None
+    description: str | None = None
 
 
 class IncidentMediaResponse(BaseModel):
     id: UUID
     file_path: str
     file_type: str
-    file_size: Optional[int] = None
+    file_size: int | None = None
     created_at: datetime
 
     class Config:
@@ -40,25 +42,25 @@ class IncidentResponse(BaseModel):
     incident_id: str
     category: str
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     status: str
     priority: str
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    location_address: Optional[str] = None
-    assigned_department: Optional[str] = None
-    assigned_to: Optional[str] = None
-    reporter_name: Optional[str] = None
-    reporter_phone: Optional[str] = None
+    latitude: float | None = None
+    longitude: float | None = None
+    location_address: str | None = None
+    assigned_department: str | None = None
+    assigned_to: str | None = None
+    reporter_name: str | None = None
+    reporter_phone: str | None = None
     ai_risk_score: float = 0.0
-    ai_recommendation: Optional[str] = None
-    camera_name: Optional[str] = None
-    snapshot_url: Optional[str] = None
-    video_url: Optional[str] = None
-    detection_type: Optional[str] = None
-    confidence: Optional[float] = None
-    object_count: Optional[int] = None
-    media: List[IncidentMediaResponse] = []
+    ai_recommendation: str | None = None
+    camera_name: str | None = None
+    snapshot_url: str | None = None
+    video_url: str | None = None
+    detection_type: str | None = None
+    confidence: float | None = None
+    object_count: int | None = None
+    media: list[IncidentMediaResponse] = []
     created_at: datetime
     updated_at: datetime
 

@@ -3,14 +3,14 @@ UCRIP Object Tracker
 Kalman-filter based multi-object tracker (ByteTrack-inspired).
 Assigns persistent IDs and tracks velocity/trajectory for each object.
 """
-import numpy as np
+
 import logging
-import time
 import math
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple
-from scipy.optimize import linear_sum_assignment
+
+import numpy as np
 from filterpy.kalman import KalmanFilter
+from scipy.optimize import linear_sum_assignment
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,8 @@ def iou_batch(bb_test, bb_gt):
     yy1 = np.maximum(bb_test[:, :, 1], bb_gt[:, :, 1])
     xx2 = np.minimum(bb_test[:, :, 0] + bb_test[:, :, 2], bb_gt[:, :, 0] + bb_gt[:, :, 2])
     yy2 = np.minimum(bb_test[:, :, 1] + bb_test[:, :, 3], bb_gt[:, :, 1] + bb_gt[:, :, 3])
-    w = np.maximum(0., xx2 - xx1)
-    h = np.maximum(0., yy2 - yy1)
+    w = np.maximum(0.0, xx2 - xx1)
+    h = np.maximum(0.0, yy2 - yy1)
     inter = w * h
     area_test = bb_test[:, :, 2] * bb_test[:, :, 3]
     area_gt = bb_gt[:, :, 2] * bb_gt[:, :, 3]
@@ -47,16 +47,16 @@ def linear_assignment(cost_matrix):
 class TrackedObject:
     track_id: int
     class_name: str
-    bbox: Tuple[int, int, int, int]
-    center: Tuple[int, int]
+    bbox: tuple[int, int, int, int]
+    center: tuple[int, int]
     confidence: float
     age: int = 0
     hits: int = 1
     time_since_update: int = 0
-    velocity: Tuple[float, float] = (0.0, 0.0)
+    velocity: tuple[float, float] = (0.0, 0.0)
     trajectory: list = field(default_factory=list)
     is_confirmed: bool = False
-    kf: Optional[KalmanFilter] = field(default=None, repr=False)
+    kf: KalmanFilter | None = field(default=None, repr=False)
 
     def __post_init__(self):
         self.trajectory.append(self.center)
@@ -72,21 +72,25 @@ class KalmanBoxTracker:
         self.confidence = confidence
 
         self.kf = KalmanFilter(dim_x=7, dim_z=4)
-        self.kf.F = np.array([
-            [1, 0, 0, 0, 1, 0, 0],
-            [0, 1, 0, 0, 0, 1, 0],
-            [0, 0, 1, 0, 0, 0, 1],
-            [0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 1],
-        ])
-        self.kf.H = np.array([
-            [1, 0, 0, 0, 0, 0, 0],
-            [0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0],
-        ])
+        self.kf.F = np.array(
+            [
+                [1, 0, 0, 0, 1, 0, 0],
+                [0, 1, 0, 0, 0, 1, 0],
+                [0, 0, 1, 0, 0, 0, 1],
+                [0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0],
+                [0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 0, 1],
+            ]
+        )
+        self.kf.H = np.array(
+            [
+                [1, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 1, 0, 0, 0, 0],
+                [0, 0, 0, 1, 0, 0, 0],
+            ]
+        )
         self.kf.R *= 10.0
         self.kf.P[4:, 4:] *= 1000.0
         self.kf.P *= 10.0
@@ -139,7 +143,7 @@ class KalmanBoxTracker:
             track_id=self.track_id,
             class_name=self.class_name,
             bbox=(max(0, x), max(0, y), int(abs(w)), int(abs(h))),
-            center=self.last_center if hasattr(self, 'last_center') else (int(cx), int(cy)),
+            center=self.last_center if hasattr(self, "last_center") else (int(cx), int(cy)),
             confidence=self.confidence,
             age=self.age,
             hits=self.hits,
@@ -155,11 +159,11 @@ class ObjectTracker:
     """Multi-object tracker using Kalman filters + Hungarian assignment."""
 
     def __init__(self):
-        self.trackers: List[KalmanBoxTracker] = []
+        self.trackers: list[KalmanBoxTracker] = []
         self.frame_count = 0
         self._id_counter = 0
 
-    def update(self, detections) -> List[TrackedObject]:
+    def update(self, detections) -> list[TrackedObject]:
         self.frame_count += 1
         if not detections:
             for t in self.trackers:
@@ -168,8 +172,8 @@ class ObjectTracker:
             return self._get_confirmed()
 
         bbox_list = np.array([d.bbox for d in detections], dtype=np.float32)
-        class_map = {i: d.class_name for i, d in enumerate(detections)}
-        conf_map = {i: d.confidence for i, d in enumerate(detections)}
+        {i: d.class_name for i, d in enumerate(detections)}
+        {i: d.confidence for i, d in enumerate(detections)}
 
         for t in self.trackers:
             t.predict()

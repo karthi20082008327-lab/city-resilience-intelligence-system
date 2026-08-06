@@ -1,13 +1,15 @@
+import enum
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, Float, Text, Integer, ForeignKey
+from datetime import UTC, datetime
+
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import String as SAString
 from sqlalchemy.orm import relationship
+
 from app.core.database import Base
-import enum
 
 
-class IncidentCategory(str, enum.Enum):
+class IncidentCategory(enum.StrEnum):
     ACCIDENT = "accident"
     WATER_LEAK = "water_leak"
     FIRE = "fire"
@@ -19,7 +21,7 @@ class IncidentCategory(str, enum.Enum):
     OTHER = "other"
 
 
-class IncidentStatus(str, enum.Enum):
+class IncidentStatus(enum.StrEnum):
     REPORTED = "reported"
     ACKNOWLEDGED = "acknowledged"
     IN_PROGRESS = "in_progress"
@@ -27,7 +29,7 @@ class IncidentStatus(str, enum.Enum):
     CLOSED = "closed"
 
 
-class IncidentPriority(str, enum.Enum):
+class IncidentPriority(enum.StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -59,8 +61,8 @@ class Incident(Base):
     video_clip_path = Column(String(500), nullable=True)
     detection_type = Column(String(50), nullable=True)
     resolved_at = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
     media = relationship("IncidentMedia", back_populates="incident", cascade="all, delete-orphan")
 
@@ -73,6 +75,6 @@ class IncidentMedia(Base):
     file_path = Column(String(500), nullable=False)
     file_type = Column(String(50), nullable=False)
     file_size = Column(Integer, nullable=True)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     incident = relationship("Incident", back_populates="media", foreign_keys=[incident_id])
