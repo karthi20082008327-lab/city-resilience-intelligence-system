@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './stores/authStore'
+import { ErrorBoundary } from './components/common/ErrorBoundary'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/auth/LoginPage'
 import CitizenPortal from './pages/citizen/CitizenPortal'
@@ -36,7 +37,9 @@ export default function App() {
         path="/admin"
         element={
           <ProtectedRoute>
-            <AdminLayout />
+            <ErrorBoundary>
+              <AdminLayout />
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       >
