@@ -1,10 +1,15 @@
 import json
+import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from typing import List, Dict
-import asyncio
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["WebSocket"])
+
+MAX_MESSAGE_BYTES = 8 * 1024 * 1024  # 8 MB hard cap per frame/message
+HEARTBEAT_IDLE_SECONDS = 5 * 60
 
 
 class ConnectionManager:
@@ -18,15 +23,27 @@ class ConnectionManager:
         self.connection_info[websocket] = {
             "type": client_type,
             "connected_at": datetime.now(timezone.utc).isoformat(),
+            "last_activity": datetime.now(timezone.utc),
         }
-        print(f"[WS] Client connected: {client_type} (total: {len(self.active_connections)})")
+        logger.info("[WS] Client connected: %s (total: %d)", client_type, len(self.active_connections))
 
     def disconnect(self, websocket: WebSocket):
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
         if websocket in self.connection_info:
             del self.connection_info[websocket]
-        print(f"[WS] Client disconnected (total: {len(self.active_connections)})")
+        logger.info("[WS] Client disconnected (total: %d)", len(self.active_connections))
+
+    def touch(self, websocket: WebSocket):
+        if websocket in self.connection_info:
+            self.connection_info[websocket]["last_activity"] = datetime.now(timezone.utc)
+
+    def is_stale(self, websocket: WebSocket) -> bool:
+        info = self.connection_info.get(websocket)
+        if not info:
+            return False
+        delta = (datetime.now(timezone.utc) - info["last_activity"]).total_seconds()
+        return delta > HEARTBEAT_IDLE_SECONDS
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
         try:
@@ -86,31 +103,78 @@ manager = ConnectionManager()
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, client_type: str = "admin"):
-    await manager.connect(websocket, client_type)
+async def websocket_endpoint(websocket: WebSocket, client_type: str = Query(default="admin")):
+    # Reject obviously malformed client types early.
+    allowed_types = {"admin", "mobile", "camera"}
+    safe_type = client_type if client_type in allowed_types else "admin"
+
+    await manager.connect(websocket, safe_type)
     try:
         while True:
             data = await websocket.receive_text()
+
+            # Enforce a maximum message size to avoid memory abuse.
+            if len(data.encode("utf-8")) > MAX_MESSAGE_BYTES:
+                await manager.send_personal_message(
+                    json.dumps({"type": "error", "message": "Message too large"}), websocket
+                )
+                continue
+
+            manager.touch(websocket)
             try:
                 message = json.loads(data)
                 msg_type = message.get("type", "")
 
+                # Client heartbeat avoiding stale connections. The client sends a
+                # "ping" at least every few minutes; if it goes silent beyond the
+                # idle window, drop the connection.
+                if manager.is_stale(websocket):
+                    await websocket.close()
+                    break
+
                 if msg_type == "ping":
-                    await manager.send_personal_message(json.dumps({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()}), websocket)
+                    await manager.send_personal_message(
+                        json.dumps({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()}),
+                        websocket,
+                    )
                 elif msg_type == "subscribe":
-                    await manager.send_personal_message(json.dumps({"type": "subscribed", "channels": message.get("channels", []), "timestamp": datetime.now(timezone.utc).isoformat()}), websocket)
+                    await manager.send_personal_message(
+                        json.dumps({"type": "subscribed", "channels": message.get("channels", []),
+                                    "timestamp": datetime.now(timezone.utc).isoformat()}),
+                        websocket,
+                    )
                 elif msg_type == "incident_update":
                     await manager.broadcast_incident(message.get("data", {}))
                 elif msg_type == "location_update":
-                    await manager.broadcast(json.dumps({"type": "location", "data": message.get("data", {}), "timestamp": datetime.now(timezone.utc).isoformat()}))
+                    await manager.broadcast(
+                        json.dumps({"type": "location", "data": message.get("data", {}),
+                                    "timestamp": datetime.now(timezone.utc).isoformat()})
+                    )
+                elif msg_type == "bye":
+                    await websocket.close()
+                    break
 
             except json.JSONDecodeError:
-                await manager.send_personal_message(json.dumps({"type": "error", "message": "Invalid JSON"}), websocket)
+                await manager.send_personal_message(
+                    json.dumps({"type": "error", "message": "Invalid JSON"}), websocket
+                )
 
     except WebSocketDisconnect:
+        manager.disconnect(websocket)
+    except Exception:
+        logger.exception("[WS] Unexpected error, disconnecting")
         manager.disconnect(websocket)
 
 
 @router.get("/ws/status")
 async def ws_status():
-    return {"active_connections": manager.get_connection_count()}
+    return {
+        "active_connections": manager.get_connection_count(),
+        "connections": [
+            {
+                "type": info.get("type"),
+                "connected_at": info.get("connected_at"),
+            }
+            for info in manager.connection_info.values()
+        ],
+    }
