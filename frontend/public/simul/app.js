@@ -263,6 +263,7 @@ class VehicleManager {
     vehicles.forEach(v => {
       const u = v.userData
       if (u.stopped) { u.stopTimer -= dt; if (u.stopTimer <= 0) u.stopped = false; return }
+      if (u.wrecked) return // permanently stopped at crash site
 
       let shouldStop = false
 
@@ -790,6 +791,10 @@ class App {
       this.emergency.spawn(result.type, result.pos)
       // Auto-camera focus
       this.cinematic.focusOn(result.pos)
+      // Visual crash scene for accident
+      if (e === 'accident') this.createCrashScene(result.pos)
+      // Fight crowd for fight event
+      if (e === 'fight') this.createFightScene(result.pos)
     }
     window.resetSim = () => this.resetSim()
     window.toggleFullscreen = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen() }
@@ -817,6 +822,8 @@ class App {
     this.events.effects = []; this.events.count = 0
     this.emergency.clear()
     this.cinematic.mode = 'idle'; this.controls.enabled = true
+    // Unwreck all vehicles
+    this.vehicles.vehicles.forEach(v => { v.userData.wrecked = false; v.userData.stopped = false; v.userData.stopTimer = 0; v.rotation.z = 0 })
     document.getElementById('incident-count').textContent = '0'
     document.getElementById('status-text').textContent = 'All systems normal'
     document.getElementById('status-dot').className = 'status-dot green'
@@ -824,6 +831,90 @@ class App {
     document.getElementById('scene-tag').className = 'viewport-tag'
     const panel = document.getElementById('incident-panel'); if (panel) panel.remove()
     this.weather.set('sunny')
+  }
+
+  createCrashScene(pos) {
+    const allVehicles = this.vehicles.vehicles
+    if (allVehicles.length < 2) return
+
+    // Find two nearest vehicles to the incident
+    const sorted = [...allVehicles].sort((a, b) => a.position.distanceTo(pos) - b.position.distanceTo(pos))
+    const v1 = sorted[0], v2 = sorted[1]
+
+    // Stop them and mark as wrecked
+    v1.userData.stopped = true; v1.userData.wrecked = true; v1.userData.stopTimer = 999
+    v2.userData.stopped = true; v2.userData.wrecked = true; v2.userData.stopTimer = 999
+
+    // Position them at the crash site, angled into each other
+    const angle1 = Math.random() * Math.PI * 0.3 - 0.15
+    const angle2 = Math.PI + Math.random() * Math.PI * 0.3 - 0.15
+    v1.position.set(pos.x - 1.5, 0.01, pos.z)
+    v1.rotation.y = angle1
+    v1.rotation.z = 0.05 // slight tilt
+    v2.position.set(pos.x + 1.5, 0.01, pos.z + 0.8)
+    v2.rotation.y = angle2
+    v2.rotation.z = -0.04
+
+    // Add smoke particles at crash point
+    this.addSmokeEffect(pos)
+
+    // Add debris chunks
+    this.addDebris(pos)
+  }
+
+  addSmokeEffect(pos) {
+    const N = 40, geo = new THREE.BufferGeometry(), p = new Float32Array(N * 3), v = []
+    for (let i = 0; i < N; i++) {
+      p[i * 3] = pos.x + (Math.random() - 0.5) * 2
+      p[i * 3 + 1] = Math.random() * 3
+      p[i * 3 + 2] = pos.z + (Math.random() - 0.5) * 2
+      v.push({ x: (Math.random() - 0.5) * 0.01, y: Math.random() * 0.03 + 0.01, z: (Math.random() - 0.5) * 0.01, life: Math.random() })
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(p, 3))
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x6b7280, size: 0.2, transparent: true, opacity: 0.6, depthWrite: false, sizeAttenuation: true }))
+    this.scene.add(pts)
+    this.events.effects.push({ points: pts, velocities: v, origin: pos.clone(), life: 8 })
+  }
+
+  addDebris(pos) {
+    const debrisGroup = new THREE.Group()
+    for (let i = 0; i < 8; i++) {
+      const size = 0.1 + Math.random() * 0.25
+      const chunk = new THREE.Mesh(
+        new THREE.BoxGeometry(size, size * 0.5, size),
+        new THREE.MeshStandardMaterial({ color: Math.random() > 0.5 ? 0x374151 : 0x1e293b, roughness: 0.8 })
+      )
+      chunk.position.set(
+        pos.x + (Math.random() - 0.5) * 4,
+        size * 0.25,
+        pos.z + (Math.random() - 0.5) * 4
+      )
+      chunk.rotation.set(Math.random(), Math.random(), Math.random())
+      debrisGroup.add(chunk)
+    }
+    this.scene.add(debrisGroup)
+    this.events.effects.push({ marker: debrisGroup, life: 10 })
+  }
+
+  createFightScene(pos) {
+    // Spawn 4-5 pedestrian figures clustered around the fight
+    const fightGroup = new THREE.Group()
+    const count = 4 + Math.floor(Math.random() * 2)
+    for (let i = 0; i < count; i++) {
+      const p = makePedestrian()
+      const angle = (i / count) * Math.PI * 2
+      const r = 1 + Math.random() * 0.8
+      p.position.set(Math.cos(angle) * r, 0.08, Math.sin(angle) * r)
+      p.rotation.y = angle + Math.PI
+      // Make them face each other (aggressive stance)
+      p.children.forEach((c, idx) => {
+        if (idx >= 6) c.rotation.z = (idx % 2 === 0 ? -1 : 1) * 0.4 // arms up
+      })
+      fightGroup.add(p)
+    }
+    fightGroup.position.copy(pos)
+    this.scene.add(fightGroup)
+    this.events.effects.push({ marker: fightGroup, life: 10 })
   }
 
   animate() {
