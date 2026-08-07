@@ -50,7 +50,7 @@ export default function SettingsPage() {
         ].map((item) => (
           <div
             key={item.key}
-            className="flex items-center justify-between p-3.5 rounded-xl hover:bg-surface-2/40 transition-colors"
+            className="flex items-center justify-between p-3.5 rounded-xl hover:bg-slate-100 transition-colors"
           >
             <div className="min-w-0 mr-4">
               <p className="text-sm font-medium text-slate-900">{item.label}</p>
@@ -59,7 +59,7 @@ export default function SettingsPage() {
             <button
               onClick={() => toggle(item.key as keyof typeof settings)}
               className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${
-                settings[item.key as keyof typeof settings] ? 'bg-accent-blue' : 'bg-surface-3'
+                settings[item.key as keyof typeof settings] ? 'bg-accent-blue' : 'bg-slate-200'
               }`}
             >
               <span
@@ -106,10 +106,10 @@ export default function SettingsPage() {
                 max="100"
                 value={settings.riskThreshold}
                 onChange={(e) => setSettings({ ...settings, riskThreshold: parseInt(e.target.value) })}
-                className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-surface-3
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-slate-200
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4
                   [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent-blue [&::-webkit-slider-thumb]:shadow-lg
-                  [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-surface-0
+                  [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
                   [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:duration-150
                   [&::-webkit-slider-thumb]:hover:scale-110"
               />

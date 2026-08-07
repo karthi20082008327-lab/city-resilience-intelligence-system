@@ -1263,14 +1263,10 @@ this.emergencyVehicles.forEach((ev, i) => {
     });
 
     panel.querySelector("#btn-overspeed").addEventListener("click", () => {
+      // ⚠️ Minor traffic event (realistic): overspeed alone is NOT reported as an
+      // incident to the admin. It only escalates to an incident if it truly leads
+      // to a collision (handled by CCTV verification). Prevents dashboard spam.
       this.triggerNaturalOverspeed();
-      this.captureAndReport(
-        "accident",
-        "Vehicle Overspeed & Tailgating",
-        "Vehicle lost control at high speed on simulation city road, risk of collision.",
-        1,
-        { confidence: 0.88, object_count: 1 }
-      );
       app.updateSubsystemGauges();
       app.autoFocusCamera(1);
     });
@@ -1289,11 +1285,14 @@ const slider = panel.querySelector("#road-slider");
       const val = Number(slider.value);
       this.setProgressiveRoadDamage(val);
       label.textContent = roadLabels[val];
-      if (val >= 4) {
+      // ⚠️ Realistic reporting: road damage is only reported to the admin as an
+      // incident at Stage 5 (deep structural collapse). Stages 1-4 are minor road
+      // wear shown visually only — no admin incident is created.
+      if (val === 5) {
         this.captureAndReport(
           "road_damage",
           "Major Road Collapse",
-          `Stage ${val} road damage — deep structural collapse detected on simulation city highway.`,
+          "Stage 5 road damage — deep structural road collapse detected on simulation city highway.",
           2,
           { confidence: 0.9 }
         );

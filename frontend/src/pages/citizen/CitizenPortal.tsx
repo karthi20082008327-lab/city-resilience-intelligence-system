@@ -148,13 +148,13 @@ export default function CitizenPortal() {
   const selectedCat = reportCategories.find((c) => c.id === selectedCategory)
 
   return (
-    <div className="min-h-screen bg-surface-0">
+    <div className="min-h-screen bg-[#f4f6fb]">
       {/* Header */}
       <header className="sticky top-0 z-30 uc-glass-strong border-b border-slate-200 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={() => (step === 'select' ? navigate('/') : setStep('select'))}
-            className="w-9 h-9 rounded-xl bg-surface-2/60 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-surface-3/60 transition-all"
+            className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -176,7 +176,7 @@ export default function CitizenPortal() {
                   className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
                     (step === 'select' && i === 0) || (step === 'report' && i <= 1)
                       ? 'bg-accent-blue'
-                      : 'bg-surface-3'
+                      : 'bg-slate-200'
                   }`}
                 />
               </div>
@@ -313,7 +313,7 @@ export default function CitizenPortal() {
                   </button>
                 </div>
                 {location.latitude ? (
-                  <div className="p-3 rounded-xl bg-surface-2/40">
+                  <div className="p-3 rounded-xl bg-slate-50">
                     <p className="text-sm text-slate-600">{location.address}</p>
                     <p className="text-xs text-slate-500 mt-1 font-mono">
                       {location.latitude.toFixed(4)}, {location.longitude?.toFixed(4)}
@@ -343,8 +343,8 @@ export default function CitizenPortal() {
                     <p className="absolute bottom-2 left-3 text-xs text-white/80">{imageFile?.name}</p>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center gap-2.5 p-8 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-accent-blue/30 hover:bg-surface-2/20 transition-all">
-                    <div className="w-12 h-12 rounded-2xl bg-surface-3/60 flex items-center justify-center">
+                  <label className="flex flex-col items-center gap-2.5 p-8 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-accent-blue/30 hover:bg-slate-50 transition-all">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
                       <Camera className="w-5 h-5 text-slate-500" />
                     </div>
                     <div className="text-center">

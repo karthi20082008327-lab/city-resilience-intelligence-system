@@ -6,7 +6,7 @@ const departments = [
     name: 'Emergency Department',
     icon: Flame,
     color: 'from-red-500 to-orange-500',
-    head: 'Dr. Rajesh Kumar',
+    head: 'Abishek',
     staff: 145,
     activeIncidents: 12,
     resolvedToday: 8,
@@ -15,7 +15,7 @@ const departments = [
     name: 'Traffic Department',
     icon: Car,
     color: 'from-yellow-500 to-amber-500',
-    head: 'Sgt. Priya Sharma',
+    head: 'Sunilkumar',
     staff: 230,
     activeIncidents: 18,
     resolvedToday: 15,
@@ -24,7 +24,7 @@ const departments = [
     name: 'Water Department',
     icon: Droplets,
     color: 'from-blue-500 to-cyan-500',
-    head: 'Eng. Amit Patel',
+    head: 'Karthikeyan',
     staff: 95,
     activeIncidents: 5,
     resolvedToday: 3,
@@ -33,7 +33,7 @@ const departments = [
     name: 'Electricity Department',
     icon: Zap,
     color: 'from-purple-500 to-pink-500',
-    head: 'Eng. Sneha Reddy',
+    head: 'Gowtham',
     staff: 120,
     activeIncidents: 7,
     resolvedToday: 6,
@@ -42,7 +42,7 @@ const departments = [
     name: 'Disaster Management',
     icon: Shield,
     color: 'from-teal-500 to-green-500',
-    head: 'Cmdr. Vikram Singh',
+    head: 'Shanmuga Priyan',
     staff: 85,
     activeIncidents: 3,
     resolvedToday: 2,
@@ -84,17 +84,17 @@ export default function DepartmentsPage() {
               </div>
 
               <div className="grid grid-cols-3 gap-2 mb-5">
-                <div className="text-center p-3 rounded-xl bg-surface-2/60">
+                <div className="text-center p-3 rounded-xl bg-slate-100">
                   <Users className="w-4 h-4 text-slate-500 mx-auto mb-1.5" />
                   <p className="text-lg font-bold text-slate-900 leading-none">{dept.staff}</p>
                   <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Staff</p>
                 </div>
-                <div className="text-center p-3 rounded-xl bg-surface-2/60">
+                <div className="text-center p-3 rounded-xl bg-slate-100">
                   <AlertTriangle className="w-4 h-4 text-state-warning mx-auto mb-1.5" />
                   <p className="text-lg font-bold text-slate-900 leading-none">{dept.activeIncidents}</p>
                   <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Active</p>
                 </div>
-                <div className="text-center p-3 rounded-xl bg-surface-2/60">
+                <div className="text-center p-3 rounded-xl bg-slate-100">
                   <CheckCircle className="w-4 h-4 text-state-success mx-auto mb-1.5" />
                   <p className="text-lg font-bold text-slate-900 leading-none">{dept.resolvedToday}</p>
                   <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Resolved</p>
@@ -106,7 +106,7 @@ export default function DepartmentsPage() {
                   <span>Load</span>
                   <span className="font-medium text-slate-900">{Math.round(loadPct)}%</span>
                 </div>
-                <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${loadPct}%` }}

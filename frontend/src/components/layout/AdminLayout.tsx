@@ -83,7 +83,7 @@ export default function AdminLayout() {
   }, [location.pathname])
 
   return (
-    <div className="min-h-screen bg-[#f4f6fb] flex overflow-hidden">
+    <div className="h-screen bg-[#f4f6fb] flex overflow-hidden">
       {/* Ambient Background Gradient */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-400/20 rounded-full blur-[128px]" />
@@ -256,7 +256,7 @@ export default function AdminLayout() {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen relative z-10">
+      <div className="flex-1 flex flex-col h-full min-w-0 relative z-10">
         {/* Top Bar */}
         <header className="uc-glass h-14 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-20 border-b border-slate-200/80">
           <div className="flex items-center gap-4">
@@ -330,7 +330,7 @@ export default function AdminLayout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto min-h-0">
           <Outlet />
         </main>
       </div>
