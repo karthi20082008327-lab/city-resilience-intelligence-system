@@ -1489,8 +1489,17 @@ this.bindUI();
     }
 
     const isDanger = this.sim.trafficState === "ACCIDENT" || this.sim.gridBlackout || this.sim.roadDamageLevel >= 4;
-    sceneTag.textContent = isDanger ? "CRITICAL RISK EVENT" : "SYSTEM OPERATIONAL";
-    sceneTag.className = "scene-tag" + (isDanger ? " danger" : "");
+
+    // Calculate city risk percentage
+    let risk = 0;
+    if (this.sim.trafficState === "ACCIDENT") risk += 25;
+    if (this.sim.gridBlackout) risk += 20;
+    if (this.sim.waterLeakActive) risk += 15;
+    if (this.sim.roadDamageLevel >= 1) risk += this.sim.roadDamageLevel * 10;
+    risk = Math.min(risk, 100);
+
+    sceneTag.textContent = `CITY RISK: ${risk}%`;
+    sceneTag.className = "scene-tag" + (risk >= 60 ? " danger" : risk >= 30 ? " warning" : "");
   }
 
   onResize() {
