@@ -179,7 +179,7 @@ export default function MapPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="h-[calc(100vh-120px)] relative rounded-2xl overflow-hidden border border-white/[0.04]"
+      className="h-[calc(100vh-120px)] relative rounded-2xl overflow-hidden border border-slate-100"
     >
       {/* Filters */}
       <div className="absolute top-4 left-4 z-[1000] flex gap-1.5 flex-wrap">
@@ -190,7 +190,7 @@ export default function MapPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all backdrop-blur-md ${
               filter === cat
                 ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                : 'bg-[rgba(10,15,26,0.8)] text-white/60 border border-white/[0.08] hover:text-white hover:border-white/15'
+                : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900 hover:border-slate-300'
             }`}
           >
             {cat === 'all' ? 'All' : cat.replace('_', ' ')}
@@ -199,21 +199,21 @@ export default function MapPage() {
       </div>
 
       {/* Count */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] px-4 py-2 rounded-xl bg-[rgba(10,15,26,0.85)] backdrop-blur-md border border-white/[0.08] flex items-center gap-2">
-        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-        <span className="text-xs text-white/70 font-medium">{activeIncidents.length} Active</span>
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] px-4 py-2 rounded-xl bg-white backdrop-blur-md border border-slate-200 flex items-center gap-2">
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+        <span className="text-xs text-slate-700 font-medium">{activeIncidents.length} Active</span>
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 z-[1000] px-3 py-2.5 rounded-xl bg-[rgba(10,15,26,0.85)] backdrop-blur-md border border-white/[0.08]">
-        <p className="text-[10px] font-semibold text-white/40 uppercase tracking-wider mb-1.5">Legend</p>
+      <div className="absolute bottom-4 left-4 z-[1000] px-3 py-2.5 rounded-xl bg-white backdrop-blur-md border border-slate-200">
+        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Legend</p>
         <div className="space-y-1">
           {Object.entries(categoryColors)
             .slice(0, 5)
             .map(([cat, color]) => (
               <div key={cat} className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                <span className="text-[11px] text-white/40 capitalize">{cat.replace('_', ' ')}</span>
+                <span className="text-[11px] text-slate-500 capitalize">{cat.replace('_', ' ')}</span>
               </div>
             ))}
         </div>
@@ -289,13 +289,13 @@ export default function MapPage() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen?.()
             else document.exitFullscreen?.()
           }}
-          className="p-2 rounded-lg bg-[rgba(10,15,26,0.8)] backdrop-blur-md border border-white/[0.08] text-white/50 hover:text-white transition-colors"
+          className="p-2 rounded-lg bg-white backdrop-blur-md border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
         >
           <Maximize2 className="w-4 h-4" />
         </button>
         <button
           onClick={centerOnUser}
-          className="p-2 rounded-lg bg-blue-500 border border-white/10 text-white shadow-lg shadow-blue-500/20 transition-colors hover:bg-blue-600"
+          className="p-2 rounded-lg bg-blue-500 border border-slate-300 text-white shadow-lg shadow-blue-500/20 transition-colors hover:bg-blue-600"
           title="Locate me"
         >
           <Navigation className="w-4 h-4" />

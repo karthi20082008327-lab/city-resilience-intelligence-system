@@ -54,8 +54,8 @@ export default function DepartmentsPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Department Management</h1>
-          <p className="text-sm text-gray-400 mt-1">All city departments overview and performance</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Department Management</h1>
+          <p className="text-sm text-slate-500 mt-1">All city departments overview and performance</p>
         </div>
         <div className="uc-chip bg-accent-blue/10 text-accent-blue">{departments.length} Departments</div>
       </div>
@@ -78,33 +78,33 @@ export default function DepartmentsPage() {
                   <dept.icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-base font-semibold text-white truncate">{dept.name}</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">{dept.head}</p>
+                  <h3 className="text-base font-semibold text-slate-900 truncate">{dept.name}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">{dept.head}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-2 mb-5">
                 <div className="text-center p-3 rounded-xl bg-surface-2/60">
-                  <Users className="w-4 h-4 text-gray-400 mx-auto mb-1.5" />
-                  <p className="text-lg font-bold text-white leading-none">{dept.staff}</p>
-                  <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Staff</p>
+                  <Users className="w-4 h-4 text-slate-500 mx-auto mb-1.5" />
+                  <p className="text-lg font-bold text-slate-900 leading-none">{dept.staff}</p>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Staff</p>
                 </div>
                 <div className="text-center p-3 rounded-xl bg-surface-2/60">
                   <AlertTriangle className="w-4 h-4 text-state-warning mx-auto mb-1.5" />
-                  <p className="text-lg font-bold text-white leading-none">{dept.activeIncidents}</p>
-                  <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Active</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none">{dept.activeIncidents}</p>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Active</p>
                 </div>
                 <div className="text-center p-3 rounded-xl bg-surface-2/60">
                   <CheckCircle className="w-4 h-4 text-state-success mx-auto mb-1.5" />
-                  <p className="text-lg font-bold text-white leading-none">{dept.resolvedToday}</p>
-                  <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Resolved</p>
+                  <p className="text-lg font-bold text-slate-900 leading-none">{dept.resolvedToday}</p>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider">Resolved</p>
                 </div>
               </div>
 
               <div>
-                <div className="flex items-center justify-between text-xs text-gray-400 mb-1.5">
+                <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
                   <span>Load</span>
-                  <span className="font-medium text-white">{Math.round(loadPct)}%</span>
+                  <span className="font-medium text-slate-900">{Math.round(loadPct)}%</span>
                 </div>
                 <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
                   <motion.div

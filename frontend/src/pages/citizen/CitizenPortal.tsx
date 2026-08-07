@@ -150,11 +150,11 @@ export default function CitizenPortal() {
   return (
     <div className="min-h-screen bg-surface-0">
       {/* Header */}
-      <header className="sticky top-0 z-30 uc-glass-strong border-b border-white/5 px-4 py-3">
+      <header className="sticky top-0 z-30 uc-glass-strong border-b border-slate-200 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={() => (step === 'select' ? navigate('/') : setStep('select'))}
-            className="w-9 h-9 rounded-xl bg-surface-2/60 flex items-center justify-center text-gray-400 hover:text-white hover:bg-surface-3/60 transition-all"
+            className="w-9 h-9 rounded-xl bg-surface-2/60 flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-surface-3/60 transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -195,8 +195,8 @@ export default function CitizenPortal() {
               transition={{ duration: 0.3 }}
             >
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-white mb-2">Report an Incident</h1>
-                <p className="text-sm text-gray-400">Select the type of incident you want to report</p>
+                <h1 className="text-2xl font-bold text-slate-900 mb-2">Report an Incident</h1>
+                <p className="text-sm text-slate-500">Select the type of incident you want to report</p>
               </div>
 
               <div className="space-y-3">
@@ -220,10 +220,10 @@ export default function CitizenPortal() {
                       <cat.icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-white">{cat.label}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">{cat.desc}</p>
+                      <h3 className="text-base font-semibold text-slate-900">{cat.label}</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">{cat.desc}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-slate-500 flex-shrink-0" />
                   </motion.button>
                 ))}
               </div>
@@ -240,8 +240,8 @@ export default function CitizenPortal() {
                     <Phone className="w-5 h-5 text-state-danger" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">Emergency? Call 112</p>
-                    <p className="text-xs text-gray-400">For immediate life-threatening emergencies</p>
+                    <p className="text-sm font-semibold text-slate-900">Emergency? Call 112</p>
+                    <p className="text-xs text-slate-500">For immediate life-threatening emergencies</p>
                   </div>
                 </div>
               </motion.div>
@@ -266,15 +266,15 @@ export default function CitizenPortal() {
                   {selectedCat && <selectedCat.icon className="w-5 h-5 text-white" />}
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">{selectedCat?.label}</h2>
-                  <p className="text-xs text-gray-400">Fill in the details below</p>
+                  <h2 className="text-lg font-bold text-slate-900">{selectedCat?.label}</h2>
+                  <p className="text-xs text-slate-500">Fill in the details below</p>
                 </div>
               </div>
 
               {/* Title */}
               <div className="uc-card p-4 space-y-3">
                 <div>
-                  <label className="text-sm text-gray-400 mb-1.5 block">Incident Title *</label>
+                  <label className="text-sm text-slate-500 mb-1.5 block">Incident Title *</label>
                   <input
                     type="text"
                     value={formData.title}
@@ -286,7 +286,7 @@ export default function CitizenPortal() {
                 </div>
 
                 <div>
-                  <label className="text-sm text-gray-400 mb-1.5 block">Description</label>
+                  <label className="text-sm text-slate-500 mb-1.5 block">Description</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -301,7 +301,7 @@ export default function CitizenPortal() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-accent-blue" />
-                    <span className="text-sm font-medium text-white">Location</span>
+                    <span className="text-sm font-medium text-slate-900">Location</span>
                   </div>
                   <button
                     onClick={getLocation}
@@ -314,19 +314,19 @@ export default function CitizenPortal() {
                 </div>
                 {location.latitude ? (
                   <div className="p-3 rounded-xl bg-surface-2/40">
-                    <p className="text-sm text-gray-200">{location.address}</p>
-                    <p className="text-xs text-gray-500 mt-1 font-mono">
+                    <p className="text-sm text-slate-600">{location.address}</p>
+                    <p className="text-xs text-slate-500 mt-1 font-mono">
                       {location.latitude.toFixed(4)}, {location.longitude?.toFixed(4)}
                     </p>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 py-2">Tap Update to get your current location</p>
+                  <p className="text-sm text-slate-500 py-2">Tap Update to get your current location</p>
                 )}
               </div>
 
               {/* Image Upload */}
               <div className="uc-card p-4">
-                <label className="text-sm text-gray-400 mb-2.5 block">Photo Evidence</label>
+                <label className="text-sm text-slate-500 mb-2.5 block">Photo Evidence</label>
                 {imagePreview ? (
                   <div className="relative rounded-xl overflow-hidden">
                     <img src={imagePreview} alt="Upload" className="w-full h-48 object-cover" />
@@ -336,20 +336,20 @@ export default function CitizenPortal() {
                         setImageFile(null)
                         setImagePreview(null)
                       }}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-slate-900/50 flex items-center justify-center hover:bg-slate-900/60 transition-colors"
                     >
                       <X className="w-3.5 h-3.5 text-white" />
                     </button>
                     <p className="absolute bottom-2 left-3 text-xs text-white/80">{imageFile?.name}</p>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center gap-2.5 p-8 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-accent-blue/30 hover:bg-surface-2/20 transition-all">
+                  <label className="flex flex-col items-center gap-2.5 p-8 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-accent-blue/30 hover:bg-surface-2/20 transition-all">
                     <div className="w-12 h-12 rounded-2xl bg-surface-3/60 flex items-center justify-center">
-                      <Camera className="w-5 h-5 text-gray-500" />
+                      <Camera className="w-5 h-5 text-slate-500" />
                     </div>
                     <div className="text-center">
-                      <span className="text-sm text-gray-400">Tap to upload photo</span>
-                      <p className="text-[10px] text-gray-600 mt-0.5">JPG, PNG up to 10MB</p>
+                      <span className="text-sm text-slate-500">Tap to upload photo</span>
+                      <p className="text-[10px] text-slate-600 mt-0.5">JPG, PNG up to 10MB</p>
                     </div>
                     <input
                       type="file"
@@ -365,12 +365,12 @@ export default function CitizenPortal() {
               {/* Contact Info */}
               <div className="uc-card p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Shield className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-medium text-white">Contact Information</span>
+                  <Shield className="w-4 h-4 text-slate-500" />
+                  <span className="text-sm font-medium text-slate-900">Contact Information</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs text-gray-400 mb-1 block">Your Name</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Your Name</label>
                     <input
                       type="text"
                       value={formData.reporter_name}
@@ -380,7 +380,7 @@ export default function CitizenPortal() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-400 mb-1 block">Phone Number</label>
+                    <label className="text-xs text-slate-500 mb-1 block">Phone Number</label>
                     <input
                       type="tel"
                       value={formData.reporter_phone}
@@ -436,13 +436,13 @@ export default function CitizenPortal() {
                 </motion.div>
               </motion.div>
 
-              <h2 className="text-2xl font-bold text-white mb-2">Report Submitted!</h2>
-              <p className="text-sm text-gray-400 mb-8">Your incident has been reported successfully</p>
+              <h2 className="text-2xl font-bold text-slate-900 mb-2">Report Submitted!</h2>
+              <p className="text-sm text-slate-500 mb-8">Your incident has been reported successfully</p>
 
               <div className="uc-card p-6 max-w-sm mx-auto mb-8">
-                <p className="text-xs text-gray-400 uppercase tracking-wider mb-2">Your Incident ID</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Your Incident ID</p>
                 <p className="text-2xl font-bold font-mono uc-gradient-text">{submittedId}</p>
-                <p className="text-[10px] text-gray-500 mt-2">Save this ID for tracking</p>
+                <p className="text-[10px] text-slate-500 mt-2">Save this ID for tracking</p>
               </div>
 
               <div className="space-y-3 max-w-sm mx-auto">

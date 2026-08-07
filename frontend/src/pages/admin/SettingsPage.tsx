@@ -21,8 +21,8 @@ export default function SettingsPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 max-w-3xl">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Settings</h1>
-          <p className="text-gray-400 text-sm mt-1">System configuration and preferences</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Settings</h1>
+          <p className="text-slate-500 text-sm mt-1">System configuration and preferences</p>
         </div>
       </div>
 
@@ -32,7 +32,7 @@ export default function SettingsPage() {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-blue to-accent-cyan flex items-center justify-center">
             <Bell className="w-4.5 h-4.5 text-white" />
           </div>
-          <h3 className="text-base font-semibold text-white">Notifications</h3>
+          <h3 className="text-base font-semibold text-slate-900">Notifications</h3>
         </div>
 
         {[
@@ -53,8 +53,8 @@ export default function SettingsPage() {
             className="flex items-center justify-between p-3.5 rounded-xl hover:bg-surface-2/40 transition-colors"
           >
             <div className="min-w-0 mr-4">
-              <p className="text-sm font-medium text-white">{item.label}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
+              <p className="text-sm font-medium text-slate-900">{item.label}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
             </div>
             <button
               onClick={() => toggle(item.key as keyof typeof settings)}
@@ -78,12 +78,12 @@ export default function SettingsPage() {
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent-purple to-accent-pink flex items-center justify-center">
             <Globe className="w-4.5 h-4.5 text-white" />
           </div>
-          <h3 className="text-base font-semibold text-white">General</h3>
+          <h3 className="text-base font-semibold text-slate-900">General</h3>
         </div>
 
         <div className="space-y-5">
           <div>
-            <label className="text-sm text-gray-400 mb-1.5 block">City</label>
+            <label className="text-sm text-slate-500 mb-1.5 block">City</label>
             <input
               type="text"
               value={settings.city}
@@ -94,7 +94,7 @@ export default function SettingsPage() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm text-gray-400">Risk Alert Threshold</label>
+              <label className="text-sm text-slate-500">Risk Alert Threshold</label>
               <span className="uc-chip bg-accent-blue/10 text-accent-blue font-mono">
                 {settings.riskThreshold}%
               </span>
@@ -121,7 +121,7 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="text-sm text-gray-400 mb-1.5 block">Weather Refresh Interval (minutes)</label>
+            <label className="text-sm text-slate-500 mb-1.5 block">Weather Refresh Interval (minutes)</label>
             <input
               type="number"
               min="1"

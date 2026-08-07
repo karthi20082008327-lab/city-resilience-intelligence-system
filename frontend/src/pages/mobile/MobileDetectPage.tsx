@@ -166,21 +166,21 @@ export default function MobileDetectPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white">
-      <header className="bg-[rgba(10,15,26,0.9)] backdrop-blur-xl border-b border-white/[0.06] px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+    <div className="min-h-screen bg-[#f4f6fb] text-slate-900">
+      <header className="bg-white backdrop-blur-xl border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-2.5">
           <UcripLogo className="w-8 h-8" />
           <h1 className="text-sm font-bold">UCRIP CCTV</h1>
         </div>
         <div className="flex items-center gap-3 text-xs">
-          <span className="text-white/40 font-mono">{fps} FPS</span>
+          <span className="text-slate-500 font-mono">{fps} FPS</span>
           <span
             className={`px-2 py-0.5 rounded-full font-medium ${
               wsStatus === 'connected'
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 : wsStatus === 'connecting'
-                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                  : 'bg-white/[0.04] text-white/30 border border-white/[0.06]'
+                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                  : 'bg-slate-100 text-slate-400 border border-slate-200'
             }`}
           >
             {wsStatus === 'connected'
@@ -202,11 +202,11 @@ export default function MobileDetectPage() {
           <canvas ref={canvasRef} className="hidden" />
 
           {!cameraActive && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50">
               <div className="text-center px-6">
-                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-4">
                   <svg
-                    className="w-8 h-8 text-white/20"
+                    className="w-8 h-8 text-slate-400"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -219,9 +219,9 @@ export default function MobileDetectPage() {
                     />
                   </svg>
                 </div>
-                <p className="text-white/50 mb-1 text-sm">AI-Powered CCTV</p>
-                <p className="text-white/20 text-xs mb-5">Accident + Fire Detection via AI Pipeline</p>
-                {errorMessage && <p className="text-red-400 text-sm mb-3">{errorMessage}</p>}
+                <p className="text-slate-600 mb-1 text-sm">AI-Powered CCTV</p>
+                <p className="text-slate-400 text-xs mb-5">Accident + Fire Detection via AI Pipeline</p>
+                {errorMessage && <p className="text-red-600 text-sm mb-3">{errorMessage}</p>}
                 <button onClick={startCamera} className="uc-btn uc-btn-primary px-6 py-2.5">
                   Start Monitoring
                 </button>
@@ -272,26 +272,26 @@ export default function MobileDetectPage() {
         <div className="p-4 space-y-4">
           <div className="grid grid-cols-3 gap-3">
             <div className="uc-card p-3 text-center">
-              <p className="text-xl font-bold text-blue-400">{objectCount}</p>
-              <p className="text-[11px] text-white/25 mt-0.5">Tracked</p>
+              <p className="text-xl font-bold text-blue-600">{objectCount}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Tracked</p>
             </div>
             <div className="uc-card p-3 text-center">
-              <p className="text-xl font-bold text-emerald-400">{fps}</p>
-              <p className="text-[11px] text-white/25 mt-0.5">FPS</p>
+              <p className="text-xl font-bold text-emerald-600">{fps}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">FPS</p>
             </div>
             <div className="uc-card p-3 text-center">
               <p
-                className={`text-xl font-bold ${wsStatus === 'connected' ? 'text-purple-400' : 'text-white/20'}`}
+                className={`text-xl font-bold ${wsStatus === 'connected' ? 'text-purple-600' : 'text-slate-400'}`}
               >
                 {wsStatus === 'connected' ? 'ON' : 'OFF'}
               </p>
-              <p className="text-[11px] text-white/25 mt-0.5">AI Engine</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">AI Engine</p>
             </div>
           </div>
 
           {trackedObjects.length > 0 && (
             <div className="uc-card p-4">
-              <h3 className="text-xs font-medium text-white/40 mb-2">Live Tracking</h3>
+              <h3 className="text-xs font-medium text-slate-500 mb-2">Live Tracking</h3>
               <div className="space-y-1.5 max-h-40 overflow-y-auto">
                 {trackedObjects.map((obj) => (
                   <div key={obj.id} className="flex justify-between text-sm items-center py-1">
@@ -300,10 +300,10 @@ export default function MobileDetectPage() {
                         className="w-2 h-2 rounded-full"
                         style={{ backgroundColor: classColors[obj.class] || '#fff' }}
                       />
-                      <span className="text-white/50 capitalize text-xs">{obj.class}</span>
-                      <span className="text-white/20 text-[10px]">#{obj.id}</span>
+                      <span className="text-slate-600 capitalize text-xs">{obj.class}</span>
+                      <span className="text-slate-400 text-[10px]">#{obj.id}</span>
                     </div>
-                    <span className="text-emerald-400 font-mono text-xs">
+                    <span className="text-emerald-600 font-mono text-xs">
                       {(obj.confidence * 100).toFixed(0)}%
                     </span>
                   </div>
@@ -316,7 +316,7 @@ export default function MobileDetectPage() {
             {cameraActive ? (
               <button
                 onClick={stopCamera}
-                className="flex-1 py-3 rounded-xl text-sm font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                className="flex-1 py-3 rounded-xl text-sm font-medium bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
               >
                 Stop Monitoring
               </button>

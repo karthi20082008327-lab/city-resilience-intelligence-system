@@ -69,8 +69,8 @@ export default function AnalyticsPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Analytics & Reports</h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Analytics & Reports</h1>
+          <p className="text-slate-500 text-sm mt-1">
             Comprehensive incident analytics and performance metrics
           </p>
         </div>
@@ -101,8 +101,8 @@ export default function AnalyticsPage() {
                 {metric.change}
               </span>
             </div>
-            <p className="text-2xl font-bold text-white leading-none">{metric.value}</p>
-            <p className="text-xs text-gray-400 mt-1.5">{metric.metric}</p>
+            <p className="text-2xl font-bold text-slate-900 leading-none">{metric.value}</p>
+            <p className="text-xs text-slate-500 mt-1.5">{metric.metric}</p>
           </motion.div>
         ))}
       </div>
@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
         >
           <div className="flex items-center gap-2 mb-5">
             <BarChart3 className="w-4.5 h-4.5 text-accent-blue" />
-            <h3 className="text-base font-semibold text-white">Monthly Incident Trend</h3>
+            <h3 className="text-base font-semibold text-slate-900">Monthly Incident Trend</h3>
           </div>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={monthlyData} barGap={4}>
@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
         >
           <div className="flex items-center gap-2 mb-5">
             <PieIcon className="w-4.5 h-4.5 text-accent-purple" />
-            <h3 className="text-base font-semibold text-white">Incidents by Category</h3>
+            <h3 className="text-base font-semibold text-slate-900">Incidents by Category</h3>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -181,8 +181,8 @@ export default function AnalyticsPage() {
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                   style={{ backgroundColor: cat.color }}
                 />
-                <span className="text-xs text-gray-400 truncate">
-                  {cat.name}: <span className="text-white font-medium">{cat.value}</span>
+                <span className="text-xs text-slate-500 truncate">
+                  {cat.name}: <span className="text-slate-900 font-medium">{cat.value}</span>
                 </span>
               </div>
             ))}

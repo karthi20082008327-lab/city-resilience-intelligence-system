@@ -64,17 +64,17 @@ export default function IncidentAlert({
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className="fixed top-4 right-4 z-[9999] w-[400px] overflow-hidden"
           style={{
-            background: 'rgba(10, 15, 26, 0.95)',
+            background: 'rgba(255, 255, 255, 0.96)',
             backdropFilter: 'blur(24px)',
-            border: `1px solid ${accentColor}30`,
+            border: `1px solid ${accentColor}50`,
             borderRadius: '16px',
-            boxShadow: `0 24px 48px rgba(0,0,0,0.5), 0 0 40px ${accentColor}15`,
+            boxShadow: `0 24px 48px rgba(15,23,42,0.15), 0 0 40px ${accentColor}20`,
           }}
         >
           {/* Header */}
           <div
             className="px-5 py-4 flex items-center justify-between"
-            style={{ background: `${accentColor}10`, borderBottom: `1px solid ${accentColor}20` }}
+            style={{ background: `${accentColor}12`, borderBottom: `1px solid ${accentColor}30` }}
           >
             <div className="flex items-center gap-3">
               <div
@@ -88,10 +88,10 @@ export default function IncidentAlert({
                 )}
               </div>
               <div>
-                <p className="text-white font-bold text-sm tracking-wide uppercase">
+                <p className="text-slate-900 font-bold text-sm tracking-wide uppercase">
                   {isAccident ? 'Accident Detected' : isFire ? 'Fire Detected' : 'Smoke Detected'}
                 </p>
-                <p className="text-white/40 text-xs font-mono mt-0.5">{incident.incident_id}</p>
+                <p className="text-slate-500 text-xs font-mono mt-0.5">{incident.incident_id}</p>
               </div>
             </div>
             <button
@@ -99,7 +99,7 @@ export default function IncidentAlert({
                 setShow(false)
                 onDismiss?.()
               }}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white/30 hover:text-white hover:bg-white/5 transition-colors"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -107,7 +107,7 @@ export default function IncidentAlert({
 
           {/* Snapshot */}
           {incident.snapshot_url && (
-            <div className="relative h-44 bg-black/50">
+            <div className="relative h-44 bg-slate-900">
               <img src={incident.snapshot_url} alt="Incident" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 backdrop-blur-sm">
@@ -131,16 +131,16 @@ export default function IncidentAlert({
           {/* Details */}
           <div className="p-5 space-y-3">
             <div className="flex items-center gap-2.5 text-sm">
-              <MapPin className="w-4 h-4 text-white/30 flex-shrink-0" />
-              <span className="text-white/70">{incident.location_address || 'Location unknown'}</span>
+              <MapPin className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <span className="text-slate-700">{incident.location_address || 'Location unknown'}</span>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
-              <Clock className="w-4 h-4 text-white/30 flex-shrink-0" />
-              <span className="text-white/70">{new Date(incident.created_at).toLocaleString()}</span>
+              <Clock className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <span className="text-slate-700">{new Date(incident.created_at).toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-2.5 text-sm">
-              <Radio className="w-4 h-4 text-white/30 flex-shrink-0" />
-              <span className="text-white/70">{incident.camera_name || 'AI Camera'}</span>
+              <Radio className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              <span className="text-slate-700">{incident.camera_name || 'AI Camera'}</span>
             </div>
 
             <div className="flex items-center gap-3 pt-1">
@@ -154,13 +154,13 @@ export default function IncidentAlert({
               >
                 {incident.priority}
               </span>
-              <span className="text-xs text-white/40">
+              <span className="text-xs text-slate-500">
                 Confidence: {((incident.ai_risk_score || incident.confidence || 0) * 100).toFixed(0)}%
               </span>
             </div>
 
             {incident.ai_recommendation && (
-              <p className="text-xs text-white/50 bg-white/[0.03] rounded-xl p-3 border border-white/[0.04]">
+              <p className="text-xs text-slate-600 bg-slate-50 rounded-xl p-3 border border-slate-200">
                 {incident.ai_recommendation}
               </p>
             )}
@@ -172,7 +172,7 @@ export default function IncidentAlert({
                   onAccept?.(incident.incident_id)
                   setShow(false)
                 }}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20"
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100"
               >
                 <CheckCircle className="w-3.5 h-3.5" /> Accept
               </button>
@@ -181,7 +181,7 @@ export default function IncidentAlert({
                   onDispatch?.(incident.incident_id)
                   setShow(false)
                 }}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20"
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-300 hover:bg-blue-100"
               >
                 <Radio className="w-3.5 h-3.5" /> Dispatch
               </button>
@@ -190,7 +190,7 @@ export default function IncidentAlert({
                   onReject?.(incident.incident_id)
                   setShow(false)
                 }}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-white/5 text-white/50 border border-white/[0.06] hover:bg-white/10"
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200"
               >
                 <XCircle className="w-3.5 h-3.5" /> Reject
               </button>

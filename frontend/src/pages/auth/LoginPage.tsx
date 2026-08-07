@@ -33,7 +33,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f6fb] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
@@ -55,7 +55,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: -16 }}
         animate={{ opacity: 1, x: 0 }}
         onClick={() => navigate('/')}
-        className="fixed top-6 left-6 flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors z-20 text-sm"
+        className="fixed top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors z-20 text-sm"
       >
         <ArrowLeft className="w-4 h-4" />
         Back
@@ -80,8 +80,8 @@ export default function LoginPage() {
           </motion.div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-            <p className="text-white/40 mt-2 text-sm">Sign in to the Command Center</p>
+            <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
+            <p className="text-slate-500 mt-2 text-sm">Sign in to the Command Center</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -89,7 +89,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-red-500/[0.08] border border-red-500/20 text-red-400 text-sm"
+                className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm"
               >
                 {error}
               </motion.div>
@@ -97,9 +97,9 @@ export default function LoginPage() {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-white/40 uppercase tracking-wider">Email</label>
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
                   value={email}
@@ -113,9 +113,9 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-white/40 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -127,7 +127,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/60 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -148,7 +148,7 @@ export default function LoginPage() {
                     className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
                       rememberMe
                         ? 'bg-blue-500 border-blue-500'
-                        : 'border-white/15 bg-white/[0.03] group-hover:border-white/25'
+                        : 'border-slate-300 bg-slate-50 group-hover:border-slate-400'
                     }`}
                   >
                     {rememberMe && (
@@ -164,9 +164,9 @@ export default function LoginPage() {
                     )}
                   </div>
                 </div>
-                <span className="text-sm text-white/40">Remember me</span>
+                <span className="text-sm text-slate-500">Remember me</span>
               </label>
-              <button type="button" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+              <button type="button" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
                 Forgot password?
               </button>
             </div>

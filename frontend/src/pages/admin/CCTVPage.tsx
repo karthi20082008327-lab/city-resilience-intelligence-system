@@ -79,8 +79,8 @@ export default function CCTVPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">CCTV Surveillance</h1>
-          <p className="text-white/35 text-sm mt-0.5">
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">CCTV Surveillance</h1>
+          <p className="text-slate-500 text-sm mt-0.5">
             {simulatorCameras.length} simulation cameras live · City Digital Twin
           </p>
         </div>
@@ -98,7 +98,7 @@ export default function CCTVPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="uc-card p-6 border border-blue-500/10"
+        className="uc-card p-6 border border-blue-200"
       >
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
@@ -106,8 +106,8 @@ export default function CCTVPage() {
               <Smartphone className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Mobile Collision Detection</h3>
-              <p className="text-xs text-white/35">Use your phone camera as an AI-powered detector</p>
+              <h3 className="text-sm font-semibold text-slate-900">Mobile Collision Detection</h3>
+              <p className="text-xs text-slate-500">Use your phone camera as an AI-powered detector</p>
             </div>
           </div>
           <a
@@ -135,35 +135,35 @@ export default function CCTVPage() {
               text: 'When a collision is detected, a screenshot is captured and an incident is created.',
             },
           ].map((item) => (
-            <div key={item.label} className="bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
-              <p className="text-[11px] text-white/30 mb-1 uppercase tracking-wider">{item.label}</p>
-              <p className="text-xs text-white/50 leading-relaxed">{item.text}</p>
+            <div key={item.label} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+              <p className="text-[11px] text-slate-400 mb-1 uppercase tracking-wider">{item.label}</p>
+              <p className="text-xs text-slate-600 leading-relaxed">{item.text}</p>
             </div>
           ))}
         </div>
 
         {collisionIncidents.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-xs font-medium text-white/40 mb-2">Recent Collision Reports</h4>
+            <h4 className="text-xs font-medium text-slate-500 mb-2">Recent Collision Reports</h4>
             <div className="space-y-1.5">
               {collisionIncidents.map((inc: any) => (
                 <div
                   key={inc.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-red-500/[0.04] border border-red-500/10"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-red-50 border border-red-200"
                 >
-                  <AlertTriangle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                  <AlertTriangle className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white/70 truncate">{inc.title}</p>
-                    <p className="text-[11px] text-white/30 font-mono">{inc.incident_id}</p>
+                    <p className="text-sm text-slate-700 truncate">{inc.title}</p>
+                    <p className="text-[11px] text-slate-400 font-mono">{inc.incident_id}</p>
                   </div>
                   {inc.snapshot_url && (
                     <img
                       src={inc.snapshot_url}
                       alt=""
-                      className="w-9 h-9 rounded-lg object-cover ring-1 ring-white/10"
+                      className="w-9 h-9 rounded-lg object-cover ring-1 ring-slate-300"
                     />
                   )}
-                  <span className="uc-chip bg-red-500/10 text-red-400">{inc.priority}</span>
+                  <span className="uc-chip bg-red-50 text-red-700">{inc.priority}</span>
                 </div>
               ))}
             </div>
@@ -174,11 +174,11 @@ export default function CCTVPage() {
       {/* Simulator Camera Grid */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider">
+          <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             City Digital Twin — Live Cameras
           </h2>
-          <div className="flex items-center gap-2 text-xs text-white/30">
-            <Radio className="w-3.5 h-3.5 text-blue-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Radio className="w-3.5 h-3.5 text-blue-600" />
             <span>Any incident in the twin auto-captures a snapshot & reports it to the Incidents page</span>
           </div>
         </div>

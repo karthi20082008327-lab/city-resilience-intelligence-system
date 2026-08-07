@@ -16,7 +16,7 @@ export default function LandingPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-[#030712] relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f6fb] relative overflow-hidden">
       {/* Ambient background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
@@ -62,7 +62,7 @@ export default function LandingPage() {
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/[0.08] border border-blue-500/20 text-blue-400 text-sm mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-sm mb-8"
           >
             <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
             AI-Powered Urban Intelligence Platform
@@ -77,7 +77,7 @@ export default function LandingPage() {
           >
             <span className="uc-gradient-text">Smart City</span>
             <br />
-            <span className="text-white">Command Center</span>
+            <span className="text-slate-900">Command Center</span>
           </motion.h1>
 
           <motion.p
@@ -85,7 +85,7 @@ export default function LandingPage() {
             initial="hidden"
             animate="visible"
             variants={fadeUp}
-            className="text-lg md:text-xl text-white/40 max-w-2xl mx-auto mb-12 text-balance leading-relaxed"
+            className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 text-balance leading-relaxed"
           >
             AI-powered urban risk prediction and cascading failure analysis. Protecting cities through
             intelligent monitoring and real-time response coordination.
@@ -113,7 +113,7 @@ export default function LandingPage() {
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate('/admin/login')}
-              className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-white font-semibold transition-all border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/15"
+              className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-slate-900 font-semibold transition-all border border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-slate-400"
             >
               <Shield className="w-5 h-5" />
               Admin Access
@@ -162,15 +162,15 @@ export default function LandingPage() {
               >
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-              <p className="text-white/40 text-sm leading-relaxed">{feature.desc}</p>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">{feature.title}</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">{feature.desc}</p>
             </motion.div>
           ))}
         </motion.div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 text-center py-8 text-white/20 text-sm">
+      <footer className="relative z-10 text-center py-8 text-slate-400 text-sm">
         © 2024 UCRIP — Urban Cascade Risk Intelligence Platform
       </footer>
     </div>

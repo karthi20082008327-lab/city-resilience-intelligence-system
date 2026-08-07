@@ -28,12 +28,12 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         this.props.fallback || (
           <div className="min-h-[40vh] flex flex-col items-center justify-center gap-4 p-8 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-red-50 border border-red-200 flex items-center justify-center text-2xl">
               ⚠️
             </div>
             <div>
-              <h2 className="text-white font-semibold text-lg">Something went wrong</h2>
-              <p className="text-gray-400 text-sm mt-1 break-words">
+              <h2 className="text-slate-900 font-semibold text-lg">Something went wrong</h2>
+              <p className="text-slate-500 text-sm mt-1 break-words">
                 {this.state.message || 'An unexpected error occurred.'}
               </p>
             </div>
