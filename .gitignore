@@ -9,6 +9,7 @@ backend/venv/
 *.sqlite3
 .env
 backend/.env
+docker/.env
 
 # Node
 node_modules/

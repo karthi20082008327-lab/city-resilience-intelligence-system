@@ -1,19 +1,17 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: ucrip_postgres
     environment:
-      POSTGRES_USER: ucrip
-      POSTGRES_PASSWORD: ucrip_secret_2024
-      POSTGRES_DB: ucrip_db
+      POSTGRES_USER: ${POSTGRES_USER:-ucrip}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ucrip_secret_2024}
+      POSTGRES_DB: ${POSTGRES_DB:-ucrip_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ucrip -d ucrip_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ucrip} -d ${POSTGRES_DB:-ucrip_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -35,12 +33,12 @@ services:
       dockerfile: Dockerfile
     container_name: ucrip_backend
     environment:
-      - DATABASE_URL=postgresql+asyncpg://ucrip:ucrip_secret_2024@postgres:5432/ucrip_db
-      - DATABASE_URL_SYNC=postgresql://ucrip:ucrip_secret_2024@postgres:5432/ucrip_db
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-ucrip}:${POSTGRES_PASSWORD:-ucrase_secret_2024}@postgres:5432/${POSTGRES_DB:-ucrip_db}
+      - DATABASE_URL_SYNC=postgresql://${POSTGRES_USER:-ucrip}:${POSTGRES_PASSWORD:-ucrase_secret_2024}@postgres:5432/${POSTGRES_DB:-ucrip_db}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=ucrip-super-secret-key-change-in-production-2024
-      - JWT_SECRET_KEY=ucrip-jwt-secret-key-change-in-production-2024
-      - JWT_REFRESH_SECRET_KEY=ucrip-jwt-refresh-secret-key-change-in-production-2024
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
+      - JWT_REFRESH_SECRET_KEY=${JWT_REFRESH_SECRET_KEY:-change-me-in-production}
       - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://localhost:80","http://localhost"]
     ports:
       - "8000:8000"
@@ -51,6 +49,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3); sys.exit(0)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   frontend:
     build:
@@ -60,7 +63,13 @@ services:
     ports:
       - "5173:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   nginx:
     image: nginx:alpine
