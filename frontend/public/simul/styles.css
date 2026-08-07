@@ -182,6 +182,10 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+@keyframes slideInLeft {
+  from { transform: translateX(-120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
 
 /* Main area */
 .main {

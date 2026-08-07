@@ -3,6 +3,19 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // ─── Smart City Digital Twin Metadata ─────────────────────────────────────
 
+const DEPARTMENT_MAP = {
+  accident: { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "🚨" },
+  fire: { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "🔥" },
+  gas_leak: { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "⚠️" },
+  water_leak: { dept: "water_department", head: "Karthikeyan", label: "Water Dept", color: "#3b82f6", icon: "💧" },
+  power_outage: { dept: "electricity_department", head: "Gowtham", label: "Electricity Dept", color: "#a855f7", icon: "⚡" },
+  road_damage: { dept: "traffic_department", head: "Sunilkumar", label: "Traffic Dept", color: "#eab308", icon: "🛣️" },
+  flood: { dept: "disaster_management", head: "Shanmuga Priyan", label: "Disaster Mgmt", color: "#14b8a6", icon: "🌊" },
+  building_collapse: { dept: "disaster_management", head: "Shanmuga Priyan", label: "Disaster Mgmt", color: "#14b8a6", icon: "🏗️" },
+  overspeed: { dept: "traffic_department", head: "Sunilkumar", label: "Traffic Dept", color: "#eab308", icon: "🚗" },
+};
+const DEPT_DEFAULT = { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "🚨" };
+
 const CCTV_FEEDS = {
   1: { name: "CAM-01 · Avenue Traffic Overview", pos: new THREE.Vector3(0, 26, 36), target: new THREE.Vector3(0, 0, 0) },
   2: { name: "CAM-02 · Road Collapse & Pothole Zone", pos: new THREE.Vector3(-12, 8, 6), target: new THREE.Vector3(1.8, 0, 0) },
@@ -1003,6 +1016,7 @@ this.emergencyVehicles.forEach((ev, i) => {
   // ─── Incident Reporting to UCRIP Backend ────────────────────────────────
 
   reportIncident(category, title, description) {
+    const info = DEPARTMENT_MAP[category] || DEPT_DEFAULT;
     const payload = {
       category: category,
       title: title,
@@ -1011,6 +1025,7 @@ this.emergencyVehicles.forEach((ev, i) => {
       longitude: 78.4867,
       location_address: "Simulation City — Digital Twin",
       reporter_name: "UCRIP Simulation",
+      assigned_department: info.dept,
     };
     fetch("/api/incidents/", {
       method: "POST",
@@ -1021,10 +1036,12 @@ this.emergencyVehicles.forEach((ev, i) => {
       .then((data) => {
         console.log("[UCRIP] Incident reported:", data);
         this.showReportToast(category, title, data.incident_id);
+        this.showDeptNotification(category, title);
       })
       .catch((err) => {
         console.error("[UCRIP] Failed to report incident:", err);
         this.showReportToast(category, title, null, false);
+        this.showDeptNotification(category, title);
       });
   }
 
@@ -1074,6 +1091,7 @@ this.emergencyVehicles.forEach((ev, i) => {
         title: title,
         detection_type: category,
         object_count: opts.object_count ?? 0,
+        assigned_department: (DEPARTMENT_MAP[category] || DEPT_DEFAULT).dept,
       };
 
       fetch("/api/stream/verify", {
@@ -1089,10 +1107,12 @@ this.emergencyVehicles.forEach((ev, i) => {
           } else {
             this.showReportToast(category, title, null, true);
           }
+          this.showDeptNotification(category, title);
         })
         .catch((err) => {
           console.error("[UCRIP] CCTV verify failed:", err);
           this.showReportToast(category, title, null, false);
+          this.showDeptNotification(category, title);
         });
     } catch (e) {
       console.error("[UCRIP] captureAndReport error:", e);
@@ -1120,6 +1140,33 @@ this.emergencyVehicles.forEach((ev, i) => {
     `;
     document.body.appendChild(toast);
     setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 6000);
+  }
+
+  showDeptNotification(category, title) {
+    const info = DEPARTMENT_MAP[category] || DEPT_DEFAULT;
+    const id = "dept-toast-" + Date.now();
+    const toast = document.createElement("div");
+    toast.id = id;
+    toast.style.cssText = `
+      position: fixed; top: 16px; left: 16px; z-index: 99999;
+      background: ${info.color}ee; color: #fff; padding: 14px 18px; border-radius: 12px;
+      font-family: inherit; font-size: 0.85rem; max-width: 360px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.25);
+      animation: slideInLeft 0.35s ease-out;
+    `;
+    toast.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-size:1.3rem">${info.icon}</span>
+        <strong style="font-size:0.9rem">AUTO-ROUTED TO ${info.label.toUpperCase()}</strong>
+      </div>
+      <div style="opacity:0.95;font-size:0.82rem;line-height:1.4">
+        <div><strong>Incident:</strong> ${title}</div>
+        <div><strong>Head:</strong> ${info.head}</div>
+        <div style="margin-top:4px;font-size:0.75rem;opacity:0.8">✅ Response team automatically dispatched</div>
+      </div>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 7000);
   }
 
   // ─── CCTV Collision Verification ─────────────────────────────────────────
@@ -1258,6 +1305,13 @@ this.emergencyVehicles.forEach((ev, i) => {
 
     panel.querySelector("#btn-accident").addEventListener("click", () => {
       this.triggerAccident();
+      this.captureAndReport(
+        "accident",
+        "Head-On Vehicle Collision",
+        "Two vehicles collided head-on in simulation city.",
+        1,
+        { confidence: 0.93, object_count: 2 }
+      );
       app.updateSubsystemGauges();
       app.autoFocusCamera(1);
     });
