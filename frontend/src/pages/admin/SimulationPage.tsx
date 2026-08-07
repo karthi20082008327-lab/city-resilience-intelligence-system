@@ -5,7 +5,7 @@ export default function SimulationPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="h-[calc(100vh-120px)] flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden"
+      className="h-full min-h-0 flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden"
     >
       <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-4">
         <div>

@@ -1,14 +1,15 @@
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
-from alembic import context
 import os
 import sys
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from app.core.database import Base
-from app.core.settings import settings
-from app.models import user, incident
+from app.core.database import Base  # noqa: E402
+from app.core.settings import settings  # noqa: E402
+from app.models import incident, user  # noqa: E402,F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL_SYNC)

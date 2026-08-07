@@ -1,123 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UCRIP — Smart City Urban Cascading Disaster Digital Twin</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>UCRIP — Smart City Digital Twin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-  <div id="app">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo-mark" aria-hidden="true">
-          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-mark-svg">
-            <defs>
-              <linearGradient id="simul-logo" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#3b82f6" />
-                <stop offset="0.5" stop-color="#6366f1" />
-                <stop offset="1" stop-color="#8b5cf6" />
-              </linearGradient>
-            </defs>
-            <rect x="3" y="3" width="58" height="58" rx="15" fill="url(#simul-logo)" />
-            <path d="M32 10.5 49 15.5v13.4c0 11.5-7.2 21.8-17 26.2-9.8-4.4-17-14.7-17-26.2V15.5L32 10.5Z" fill="rgba(255,255,255,0.10)" stroke="#ffffff" stroke-width="2.2" stroke-linejoin="round" />
-            <circle cx="32" cy="27" r="2.6" fill="#ffffff" />
-            <circle cx="32" cy="27" r="5.6" stroke="#ffffff" stroke-opacity="0.65" stroke-width="1.3" />
-            <circle cx="32" cy="27" r="8.8" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.3" />
-            <path d="M17 38c3.75 0 3.75-3.75 7.5-3.75s3.75 3.75 7.5 3.75 3.75-3.75 7.5-3.75 3.75 3.75 7.5 3.75" stroke="#ffffff" stroke-opacity="0.95" stroke-width="2" stroke-linecap="round" />
-            <path d="M17 44c3.75 0 3.75-3.75 7.5-3.75s3.75 3.75 7.5 3.75 3.75-3.75 7.5-3.75 3.75 3.75 7.5 3.75" stroke="#ffffff" stroke-opacity="0.65" stroke-width="2" stroke-linecap="round" />
-            <path d="M17 50c3.75 0 3.75-3.75 7.5-3.75s3.75 3.75 7.5 3.75 3.75-3.75 7.5-3.75 3.75 3.75 7.5 3.75" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
-        <div class="logo-text">
-          <span class="logo-title">UCRIP TWIN</span>
-          <span class="logo-sub">Smart City Disaster Suite</span>
-        </div>
-      </div>
+<div id="app">
 
-      <!-- Subsystem Status Monitor -->
-      <div class="subsystem-monitor">
-        <p class="nav-label">City Subsystems</p>
-        <div class="status-gauge-item">
-          <span class="gauge-name">Traffic Flow</span>
-          <span id="status-traffic" class="gauge-badge status-normal">NORMAL</span>
-        </div>
-        <div class="status-gauge-item">
-          <span class="gauge-name">Power Grid</span>
-          <span id="status-grid" class="gauge-badge status-normal">100% ONLINE</span>
-        </div>
-        <div class="status-gauge-item">
-          <span class="gauge-name">Water Main</span>
-          <span id="status-water" class="gauge-badge status-normal">STABLE</span>
-        </div>
-        <div class="status-gauge-item">
-          <span class="gauge-name">Infrastructure</span>
-          <span id="status-road" class="gauge-badge status-normal">INTACT</span>
-        </div>
-      </div>
-
-      <!-- CCTV Camera Selection -->
-      <div class="cctv-selector">
-        <p class="nav-label">CCTV Security Surveillance</p>
-        <div class="cctv-grid">
-          <button class="cctv-btn active" data-cam="1">CAM-01 · Traffic</button>
-          <button class="cctv-btn" data-cam="2">CAM-02 · Road</button>
-          <button class="cctv-btn" data-cam="3">CAM-03 · Grid</button>
-          <button class="cctv-btn" data-cam="4">CAM-04 · Water</button>
-          <button class="cctv-btn" data-cam="5">CAM-05 · Emergency</button>
-        </div>
-        <label class="auto-track-label">
-          <input type="checkbox" id="chk-auto-track" checked />
-          Auto-Focus Incident Camera
-        </label>
-      </div>
-
-      <div class="sidebar-footer">
-        <button id="btn-reset-sidebar" class="btn btn-ghost" style="width: 100%;">
-          🔄 Reset City & Clear Scene
-        </button>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div class="topbar-left">
-          <h1 id="scene-title">Urban Digital Twin — Cascading Risk Engine</h1>
-          <p id="scene-desc">Autonomous smart city traffic, power grid, water main, and infrastructure operating live.</p>
-        </div>
-        <div class="topbar-right">
-          <button id="btn-reset" class="btn btn-ghost">Reset City</button>
-        </div>
-      </header>
-
-      <div class="viewport-wrap">
-        <canvas id="canvas"></canvas>
-        <div class="viewport-overlay">
-          <div class="camera-badge" id="camera-badge">
-            <span class="cam-rec"></span>
-            CAM-01 · LIVE
-          </div>
-          <div class="scene-tag" id="scene-tag">SYSTEM NORMAL</div>
-        </div>
-      </div>
-
-      <aside class="control-panel" id="control-panel">
-        <!-- Interactive Disaster Engine Controls injected by app.js -->
-      </aside>
-    </main>
+<!-- ─── LEFT SIDEBAR ─────────────────────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg class="logo-svg" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" stroke="#3b82f6" stroke-width="2"/><circle cx="18" cy="18" r="8" fill="#3b82f6" opacity="0.3"/><circle cx="18" cy="18" r="3" fill="#3b82f6"/></svg>
+    <div>
+      <div class="logo-title">UCRIP</div>
+      <span class="logo-sub">Smart City Digital Twin</span>
+    </div>
   </div>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-    }
+  <nav class="panel">
+    <button class="nav-btn active" data-view="city" onclick="switchView('city')">
+      <span class="nav-icon">🏙</span><span>City View</span>
+    </button>
+    <button class="nav-btn" data-view="cctv" onclick="switchView('cctv')">
+      <span class="nav-icon">📹</span><span>CCTV Control</span>
+    </button>
+    <button class="nav-btn" data-view="map" onclick="switchView('map')">
+      <span class="nav-icon">🗺</span><span>Live Map</span>
+    </button>
+    <button class="nav-btn" data-view="events" onclick="switchView('events')">
+      <span class="nav-icon">🚨</span><span>Events</span>
+    </button>
+
+    <div class="divider"></div>
+    <div class="panel-title">Scenario</div>
+    <button class="scenario-btn flood" id="btn-flood" onclick="triggerScenario('flood')">
+      <span class="scenario-icon">🌊</span>
+      <div class="scenario-info"><span class="scenario-name">Flash Flood</span><span class="scenario-sub">Water main burst</span></div>
+    </button>
+    <button class="scenario-btn fire" id="btn-fire" onclick="triggerScenario('fire')">
+      <span class="scenario-icon">🔥</span>
+      <div class="scenario-info"><span class="scenario-name">Building Fire</span><span class="scenario-sub">Structural fire</span></div>
+    </button>
+    <button class="scenario-btn collapse" id="btn-collapse" onclick="triggerScenario('collapse')">
+      <span class="scenario-icon">🕳</span>
+      <div class="scenario-info"><span class="scenario-name">Road Collapse</span><span class="scenario-sub">Sinkhole</span></div>
+    </button>
+    <button class="scenario-btn blackout" id="btn-blackout" onclick="triggerScenario('blackout')">
+      <span class="scenario-icon">🔌</span>
+      <div class="scenario-info"><span class="scenario-name">Power Blackout</span><span class="scenario-sub">Grid failure</span></div>
+    </button>
+
+    <div class="divider"></div>
+    <div class="panel-title">Weather</div>
+    <div class="weather-btns">
+      <button class="weather-btn active" onclick="setWeather('sunny')">☀️</button>
+      <button class="weather-btn" onclick="setWeather('cloudy')">☁️</button>
+      <button class="weather-btn" onclick="setWeather('rain')">🌧</button>
+      <button class="weather-btn" onclick="setWeather('heavyrain')">⛈</button>
+      <button class="weather-btn" onclick="setWeather('storm')">⛈</button>
+      <button class="weather-btn" onclick="setWeather('fog')">🌫</button>
+      <button class="weather-btn" onclick="setWeather('night')">🌙</button>
+      <button class="weather-btn" onclick="setWeather('sunset')">🌅</button>
+    </div>
+    <button class="reset-btn" id="btn-reset" onclick="resetSimulation()">⟳ Reset All</button>
+  </nav>
+
+  <div class="status-bar" id="status-bar">
+    <span class="status-dot green"></span>
+    <span id="status-text">All systems normal</span>
+  </div>
+</aside>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- City View -->
+  <div class="view active" id="view-city">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Smart City Digital Twin</h1>
+        <p id="time-display">—</p>
+      </div>
+      <div class="topbar-right">
+        <div class="stat-pill" id="stat-vehicles"><span class="stat-num" id="vehicle-count">0</span> vehicles</div>
+        <div class="stat-pill" id="stat-people"><span class="stat-num" id="people-count">0</span> people</div>
+        <div class="stat-pill" id="stat-incidents"><span class="stat-num incident" id="incident-count">0</span> incidents</div>
+        <div class="cam-badge">FPS <span id="fps-display">60</span></div>
+      </div>
+    </div>
+    <div class="viewport-wrap">
+      <canvas id="canvas"></canvas>
+      <div class="viewport-overlay">
+        <div class="scene-tag" id="scene-tag">SYSTEM NORMAL</div>
+      </div>
+      <div class="camera-label" id="camera-label" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- CCTV View -->
+  <div class="view" id="view-cctv">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>CCTV Surveillance</h1>
+        <p>8 Live Camera Feeds</p>
+      </div>
+      <div class="topbar-right">
+        <button class="ctrl-btn" onclick="toggleCCTVFullscreen()">⛶ Fullscreen</button>
+        <div class="cam-badge">LIVE</div>
+      </div>
+    </div>
+    <div class="cctv-grid" id="cctv-grid">
+      <div class="cctv-feed" data-cam="1"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-1"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 1</span><span class="cam-loc">Main Junction</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="2"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-2"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 2</span><span class="cam-loc">Hospital</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="3"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-3"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 3</span><span class="cam-loc">Shopping Mall</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="4"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-4"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 4</span><span class="cam-loc">School</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="5"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-5"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 5</span><span class="cam-loc">Highway</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="6"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-6"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 6</span><span class="cam-loc">Bus Station</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="7"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-7"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 7</span><span class="cam-loc">Residential Area</span><span class="cam-time">—</span></div></div>
+      <div class="cctv-feed" data-cam="8"><div class="cctv-canvas-wrap"><canvas class="cctv-canvas" id="cctv-8"></canvas></div><div class="cctv-hud"><span class="cam-num">CAM 8</span><span class="cam-loc">Industrial Area</span><span class="cam-time">—</span></div></div>
+    </div>
+  </div>
+
+  <!-- Map View (placeholder — will be filled by app.js canvas overlay) -->
+  <div class="view" id="view-map">
+    <div class="topbar">
+      <div class="topbar-left"><h1>Live City Map</h1><p>Animated vehicles, people, incidents</p></div>
+      <div class="topbar-right"><div class="cam-badge">LIVE MAP</div></div>
+    </div>
+    <div class="viewport-wrap">
+      <canvas id="map-canvas"></canvas>
+    </div>
+  </div>
+
+  <!-- Events View -->
+  <div class="view" id="view-events">
+    <div class="topbar">
+      <div class="topbar-left"><h1>Simulation Events</h1><p>Trigger emergency scenarios</p></div>
+      <div class="topbar-right"><div class="cam-badge">EVENTS</div></div>
+    </div>
+    <div class="events-panel">
+      <div class="event-card" onclick="triggerEvent('accident')">
+        <div class="event-icon">🚗💥</div><div class="event-name">Road Accident</div><div class="event-sub">Vehicle collision</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('multi_accident')">
+        <div class="event-icon">🚕💥🚗💥🚌</div><div class="event-name">Multi Vehicle</div><div class="event-sub">Pile-up</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('building_fire')">
+        <div class="event-icon">🔥🏢</div><div class="event-name">Building Fire</div><div class="event-sub">Structural</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('flood')">
+        <div class="event-icon">🌊🏚</div><div class="event-name">Flood</div><div class="event-sub">Waterlogging</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('power_failure')">
+        <div class="event-icon">🔌⚡</div><div class="event-name">Power Failure</div><div class="event-sub">Grid down</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('water_burst')">
+        <div class="event-icon">🚰💥</div><div class="event-name">Water Burst</div><div class="event-sub">Pipeline</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('gas_leak')">
+        <div class="event-icon">💨⚠️</div><div class="event-name">Gas Leak</div><div class="event-sub">Chemical</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('crowd_fight')">
+        <div class="event-icon">👥😠</div><div class="event-name">Crowd Fight</div><div class="event-sub">Public disturbance</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('road_block')">
+        <div class="event-icon">🚧⛔</div><div class="event-name">Road Block</div><div class="event-sub">Obstruction</div>
+      </div>
+      <div class="event-card" onclick="triggerEvent('medical')">
+        <div class="event-icon">🚑🏥</div><div class="event-name">Medical Emergency</div><div class="event-sub">Health crisis</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
   }
-  </script>
-  <script type="module" src="app.js"></script>
+}
+</script>
+<script type="module" src="city.js"></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
