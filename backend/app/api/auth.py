@@ -96,6 +96,7 @@ async def department_login(request: Request, data: DepartmentLoginRequest, db: A
         "water_department": "water@cris.gov",
         "electricity_department": "electricity@cris.gov",
         "disaster_management": "disaster@cris.gov",
+        "surveillance_department": "srinidhi@cris.gov",
     }
     email = dept_email_map.get(data.department)
     if not email:
