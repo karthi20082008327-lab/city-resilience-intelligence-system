@@ -50,3 +50,6 @@ htmlcov/
 *.mp4
 *.avi
 *.mkv
+
+# Local Netlify folder
+.netlify

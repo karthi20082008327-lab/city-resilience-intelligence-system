@@ -24,28 +24,8 @@ async def get_db():
 
 
 async def init_db():
-    """Create tables. Prefers running Alembic migrations; falls back to
-    create_all for a fresh development database."""
-    try:
-        from alembic import command
-        from alembic.config import Config
-        from sqlalchemy import create_engine, inspect
-
-        sync_url = settings.DATABASE_URL_SYNC
-        engine_sync = create_engine(sync_url)
-        with engine_sync.connect() as conn:
-            has_target = bool(inspect(conn).get_table_names())
-        engine_sync.dispose()
-
-        if not has_target:
-            cfg = Config("alembic.ini")
-            cfg.set_main_option("script_location", "migrations")
-            cfg.set_main_option("sqlalchemy.url", sync_url)
-            command.upgrade(cfg, "head")
-            logger.info("Database migrated via Alembic (head)")
-            return
-    except Exception as e:
-        logger.warning("Alembic migration skipped (%s). Using create_all.", e)
-
+    """Create all tables using create_all."""
+    logger.info("Creating database tables...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    logger.info("Database tables created successfully.")
