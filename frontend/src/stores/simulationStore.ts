@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { reportSimulationIncident } from '../services/simulationReporter'
 
 /**
@@ -66,7 +67,9 @@ const makeEvent = (
   detail,
 })
 
-export const useSimulationStore = create<SimulationState>((set, get) => ({
+export const useSimulationStore = create<SimulationState>()(
+  persist(
+    (set, get) => ({
   mode: 'normal',
   cameraMode: 'drone',
   underground: false,
@@ -201,7 +204,19 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   setDemoActive: (active, paused = false) =>
     set({ demoActive: active, demoPaused: paused, cameraMode: active ? 'drone' : get().cameraMode }),
   setDemoPaused: (paused) => set({ demoPaused: paused }),
-}))
+}),
+    {
+      name: 'cris-simulation',
+      partialize: (state) => ({
+        mode: state.mode,
+        cameraMode: state.cameraMode,
+        underground: state.underground,
+        timeOfDay: state.timeOfDay,
+        event: state.event,
+      }),
+    }
+  )
+)
 
 /* ---------------------------------------------------------------------------
  * Future IoT / ESP32 integration point.
