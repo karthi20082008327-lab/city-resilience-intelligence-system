@@ -16,6 +16,11 @@ class IncidentCreate(BaseModel):
     reporter_name: str | None = None
     reporter_phone: str | None = None
     reporter_email: str | None = None
+    camera_name: str | None = None
+    # Base64-encoded JPEG image captured from the simulation or mobile detector.
+    snapshot_base64: str | None = None
+    # Base64-encoded MP4 video clip (5-second buffer).
+    video_base64: str | None = None
 
 
 class IncidentUpdate(BaseModel):

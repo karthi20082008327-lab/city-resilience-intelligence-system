@@ -20,7 +20,7 @@ import {
   Home,
 } from 'lucide-react'
 import { incidentAPI } from '../../services/api'
-import { UcripLogo } from '../../components/UcripLogo'
+import { CrisLogo } from '../../components/CrisLogo'
 
 const reportCategories = [
   {
@@ -159,8 +159,8 @@ export default function CitizenPortal() {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-2">
-            <UcripLogo className="w-8 h-8" />
-            <span className="font-bold uc-gradient-text text-sm">UCRIP</span>
+            <CrisLogo className="w-8 h-8" />
+            <span className="font-bold uc-gradient-text text-sm">CRIS</span>
           </div>
           <div className="w-9" />
         </div>

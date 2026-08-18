@@ -1,24 +1,24 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ucrip_postgres
+    container_name: cris_postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-ucrip}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ucrip_secret_2024}
-      POSTGRES_DB: ${POSTGRES_DB:-ucrip_db}
+      POSTGRES_USER: ${POSTGRES_USER:-cris}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cris_secret_2024}
+      POSTGRES_DB: ${POSTGRES_DB:-cris_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ucrip} -d ${POSTGRES_DB:-ucrip_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cris} -d ${POSTGRES_DB:-cris_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: ucrip_redis
+    container_name: cris_redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -31,10 +31,10 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    container_name: ucrip_backend
+    container_name: cris_backend
     environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-ucrip}:${POSTGRES_PASSWORD:-ucrase_secret_2024}@postgres:5432/${POSTGRES_DB:-ucrip_db}
-      - DATABASE_URL_SYNC=postgresql://${POSTGRES_USER:-ucrip}:${POSTGRES_PASSWORD:-ucrase_secret_2024}@postgres:5432/${POSTGRES_DB:-ucrip_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-cris}:${POSTGRES_PASSWORD:-ucrase_secret_2024}@postgres:5432/${POSTGRES_DB:-cris_db}
+      - DATABASE_URL_SYNC=postgresql://${POSTGRES_USER:-cris}:${POSTGRES_PASSWORD:-ucrase_secret_2024}@postgres:5432/${POSTGRES_DB:-cris_db}
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-me-in-production}
@@ -59,7 +59,7 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    container_name: ucrip_frontend
+    container_name: cris_frontend
     ports:
       - "5173:80"
     depends_on:
@@ -73,7 +73,7 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: ucrip_nginx
+    container_name: cris_nginx
     ports:
       - "80:80"
     volumes:

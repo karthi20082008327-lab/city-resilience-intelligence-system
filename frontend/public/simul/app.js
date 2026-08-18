@@ -4,24 +4,24 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 // ─── Smart City Digital Twin Metadata ─────────────────────────────────────
 
 const DEPARTMENT_MAP = {
-  accident: { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "🚨" },
-  fire: { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "🔥" },
-  gas_leak: { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "⚠️" },
-  water_leak: { dept: "water_department", head: "Karthikeyan", label: "Water Dept", color: "#3b82f6", icon: "💧" },
-  power_outage: { dept: "electricity_department", head: "Gowtham", label: "Electricity Dept", color: "#a855f7", icon: "⚡" },
-  road_damage: { dept: "traffic_department", head: "Sunilkumar", label: "Traffic Dept", color: "#eab308", icon: "🛣️" },
-  flood: { dept: "disaster_management", head: "Shanmuga Priyan", label: "Disaster Mgmt", color: "#14b8a6", icon: "🌊" },
-  building_collapse: { dept: "disaster_management", head: "Shanmuga Priyan", label: "Disaster Mgmt", color: "#14b8a6", icon: "🏗️" },
-  overspeed: { dept: "traffic_department", head: "Sunilkumar", label: "Traffic Dept", color: "#eab308", icon: "🚗" },
+  accident: { dept: "emergency_department", head: "Karthiieyan", label: "Emergency Dept", color: "#ef4444", icon: "🚨" },
+  fire: { dept: "emergency_department", head: "Karthiieyan", label: "Emergency Dept", color: "#ef4444", icon: "🔥" },
+  gas_leak: { dept: "emergency_department", head: "Karthiieyan", label: "Emergency Dept", color: "#ef4444", icon: "⚠️" },
+  water_leak: { dept: "water_department", head: "Sarasaran", label: "Water Dept", color: "#3b82f6", icon: "💧" },
+  power_outage: { dept: "electricity_department", head: "Nandhini", label: "Electricity Dept", color: "#a855f7", icon: "⚡" },
+  road_damage: { dept: "traffic_department", head: "Dharsan", label: "Traffic Dept", color: "#eab308", icon: "🛣️" },
+  flood: { dept: "disaster_management", head: "Bommi Harnika", label: "Disaster Mgmt", color: "#14b8a6", icon: "🌊" },
+  building_collapse: { dept: "disaster_management", head: "Bommi Harnika", label: "Disaster Mgmt", color: "#14b8a6", icon: "🏗️" },
+  overspeed: { dept: "traffic_department", head: "Dharsan", label: "Traffic Dept", color: "#eab308", icon: "🚗" },
 };
-const DEPT_DEFAULT = { dept: "emergency_department", head: "Abishek", label: "Emergency Dept", color: "#ef4444", icon: "🚨" };
+const DEPT_DEFAULT = { dept: "emergency_department", head: "Karthiieyan", label: "Emergency Dept", color: "#ef4444", icon: "🚨" };
 
 const CCTV_FEEDS = {
-  1: { name: "CAM-01 · Avenue Traffic Overview", pos: new THREE.Vector3(0, 26, 36), target: new THREE.Vector3(0, 0, 0) },
-  2: { name: "CAM-02 · Road Collapse & Pothole Zone", pos: new THREE.Vector3(-12, 8, 6), target: new THREE.Vector3(1.8, 0, 0) },
-  3: { name: "CAM-03 · Substation Power Grid", pos: new THREE.Vector3(-12, 6, 6), target: new THREE.Vector3(-10, 2, 0) },
-  4: { name: "CAM-04 · Underground Water Main", pos: new THREE.Vector3(10, 6, 6), target: new THREE.Vector3(1.8, 0, 0) },
-  5: { name: "CAM-05 · Emergency Response Dispatch", pos: new THREE.Vector3(16, 12, 18), target: new THREE.Vector3(0, 0, 4) },
+  1: { name: "CAM-01 · Avenue Traffic Overview", pos: new THREE.Vector3(0, 26, 36), target: new THREE.Vector3(0, 0, 0), zoom: { pos: new THREE.Vector3(0, 10, 18), target: new THREE.Vector3(0, 0, 0) } },
+  2: { name: "CAM-02 · Road Collapse & Pothole Zone", pos: new THREE.Vector3(-12, 8, 6), target: new THREE.Vector3(1.8, 0, 0), zoom: { pos: new THREE.Vector3(-6, 4, 9), target: new THREE.Vector3(1.8, 0, 0) } },
+  3: { name: "CAM-03 · Substation Power Grid", pos: new THREE.Vector3(-12, 6, 6), target: new THREE.Vector3(-10, 2, 0), zoom: { pos: new THREE.Vector3(-9, 3.5, 5), target: new THREE.Vector3(-10, 2, 0) } },
+  4: { name: "CAM-04 · Underground Water Main", pos: new THREE.Vector3(10, 6, 6), target: new THREE.Vector3(1.8, 0, 0), zoom: { pos: new THREE.Vector3(4, 3, 7), target: new THREE.Vector3(1.8, 0, 0) } },
+  5: { name: "CAM-05 · Emergency Response Dispatch", pos: new THREE.Vector3(16, 12, 18), target: new THREE.Vector3(0, 0, 4), zoom: { pos: new THREE.Vector3(8, 6, 11), target: new THREE.Vector3(0, 0, 4) } },
 };
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -404,6 +404,7 @@ class SmartCitySimulation {
       v.position.set(laneX, 0, startZ);
       v.rotation.y = dir === 1 ? 0 : Math.PI;
       v.userData.laneIndex = laneIndex;
+      v.userData.laneX = laneX;
       v.userData.targetLaneX = laneX;
       v.userData.direction = dir;
       v.userData.speed = v.userData.baseSpeed;
@@ -432,6 +433,8 @@ class SmartCitySimulation {
         }
         this.emergencyVehicles.push(v);
       } else {
+        v.userData.destinationZ = this.freshDestination(v);
+        v.userData.respawnTimer = 0;
         this.vehicles.push(v);
       }
     });
@@ -603,6 +606,9 @@ class SmartCitySimulation {
   }
 
   update(dt) {
+    // Clamp huge frame gaps (tab switch, background iframes, heavy load) so a
+    // single slow frame can't teleport vehicles or snap the speed ramps.
+    dt = Math.min(dt, 0.1);
     this.strobeTimer += dt;
     const amb = this.scene.children.find((c) => c.name === "ambientLight");
     const sun = this.scene.children.find((c) => c.name === "sunLight");
@@ -652,40 +658,57 @@ class SmartCitySimulation {
       }
 
       // ─── Lane Queue & Distance Keeping Braking ───────────────────────────
-      const isLaneBlocked = this.blockedLanes.has(lane);
+      // NOTE: no blanket "whole lane is blocked" brake — vehicles only stop
+      // when a vehicle is actually ahead of them (see nearest-ahead logic in
+      // the normal-cruising branch). One far-away crash no longer turns the
+      // entire lane into a parking lot.
 
       if (d.state === "crash" || d.state === "fallen") {
         d.isBraking = true;
         d.speed = 0;
-      } else if (isLaneBlocked) {
-        // Vehicle in blocked lane: check if it should stop behind the blockage
-        d.isBraking = true;
-        d.speed = THREE.MathUtils.lerp(d.speed, 0, dt * 2.8);
       } else if (d.state === "outofcontrol") {
         d.speed = Math.min(d.maxSpeed * 1.6, d.speed + dt * 0.15);
-        v.position.z += dir * d.speed;
+        v.position.z += dir * d.speed * dt * 60;
         d.targetLaneX = d.laneX + Math.sin(Date.now() * 0.008 + i) * 1.5; // Swerve slightly
       } else if (d.state === "overspeed") {
         // Reduced tire friction on wet flooded road -> skid!
         const isWet = this.waterLeakActive && Math.abs(v.position.z) < 12.0;
         const accel = isWet ? 0.25 : 0.15;
         d.speed = Math.min(d.maxSpeed * 1.9, d.speed + dt * accel);
-        v.position.z += dir * d.speed;
+        v.position.z += dir * d.speed * dt * 60;
       } else {
-        // Normal Cruising & Tailgating / Queue Check behind vehicle ahead
+        // Normal Cruising & Car-Following. Only react to the NEAREST car ahead
+        // within REACT_DIST, so a stopped car far up the road can't drag the
+        // whole lane into a creeping pile-up.
         let targetSpeed = d.baseSpeed;
 
-        const vehicleAhead = this.vehicles.find((other, j) => {
-          if (i === j) return false;
-          if (other.userData.laneIndex !== lane) return false;
+        let vehicleAhead = null;
+        let aheadDist = Infinity;
+        for (let j = 0; j < this.vehicles.length; j++) {
+          if (j === i) continue;
+          const other = this.vehicles[j];
+          if (other.userData.laneIndex !== lane) continue;
           const distZ = (other.position.z - v.position.z) * dir;
-          return distZ > 0 && distZ < 9.0;
-        });
+          if (distZ > 0 && distZ < aheadDist) {
+            aheadDist = distZ;
+            vehicleAhead = other;
+          }
+        }
 
-        if (vehicleAhead) {
-          const distZ = (vehicleAhead.position.z - v.position.z) * dir;
-          if (distZ < 4.5) {
-            targetSpeed = 0; // Stop behind vehicle ahead!
+        const REACT_DIST = 16;
+        if (vehicleAhead && aheadDist < REACT_DIST) {
+          // Use the REAL bumper-to-bumper gap (center distance minus both
+          // half-lengths). Braking from cruise (~0.13*60 = 7.8 u/s) at the lerp
+          // rate of 2.2/s needs ~3.5 units, so we commit to stop while there is
+          // still margin — the follower always comes to rest clear of the
+          // leader's body. This stops rear-end overlaps that the box-collision
+          // check would otherwise escalate into a cascade of "crash" states.
+          const halfF = (d.length ?? 4.2) / 2;
+          const halfO = (vehicleAhead.userData.length ?? 4.2) / 2;
+          const bumperGap = aheadDist - halfF - halfO;
+
+          if (bumperGap < 4.0) {
+            targetSpeed = 0; // stop behind vehicle ahead
           } else {
             targetSpeed = Math.min(d.baseSpeed, vehicleAhead.userData.speed * 0.85);
           }
@@ -694,20 +717,40 @@ class SmartCitySimulation {
           d.isBraking = false;
         }
 
+        // Frame-rate independent: speed is in units/second (dt * 60 == 1s of
+        // motion at the reference 60 fps that baseSpeed was tuned for).
         d.speed = THREE.MathUtils.lerp(d.speed, targetSpeed, dt * 2.2);
-        v.position.z += dir * d.speed;
+        v.position.z += dir * d.speed * dt * 60;
       }
 
-      // Loop boundary
-      const limit = 70;
-      if (dir === 1 && v.position.z > limit) {
-        v.position.z = -limit;
-        d.targetLaneX = this.lanesX[lane];
-        if (d.state !== "crash" && d.state !== "fallen") d.state = "normal";
-      } else if (dir === -1 && v.position.z < -limit) {
-        v.position.z = limit;
-        d.targetLaneX = this.lanesX[lane];
-        if (d.state !== "crash" && d.state !== "fallen") d.state = "normal";
+      // ─── Continuous wrap-around with edge fade ────────────────────────────
+      // Vehicles drive the full road, then FADE OUT at the edge and FADE IN at
+      // the opposite edge (like a car entering/leaving a highway at an on/off
+      // ramp). No sudden teleports, no stopping, no looping in one area.
+      const ROAD_HALF = 68; // road spans z in [-70, 70]
+      const FADE = 7; // fade zone length at each end
+      let fadeScale = 1;
+      if (d.state !== "crash" && d.state !== "fallen") {
+        if (dir === 1) {
+          if (v.position.z > ROAD_HALF) v.position.z = -ROAD_HALF;
+          if (v.position.z >= ROAD_HALF - FADE) {
+            fadeScale = THREE.MathUtils.clamp((ROAD_HALF - v.position.z) / FADE, 0, 1);
+          } else if (v.position.z <= -ROAD_HALF + FADE) {
+            fadeScale = THREE.MathUtils.clamp((v.position.z + ROAD_HALF) / FADE, 0, 1);
+          }
+        } else {
+          if (v.position.z < -ROAD_HALF) v.position.z = ROAD_HALF;
+          if (v.position.z <= -ROAD_HALF + FADE) {
+            fadeScale = THREE.MathUtils.clamp((v.position.z + ROAD_HALF) / FADE, 0, 1);
+          } else if (v.position.z >= ROAD_HALF - FADE) {
+            fadeScale = THREE.MathUtils.clamp((ROAD_HALF - v.position.z) / FADE, 0, 1);
+          }
+        }
+      }
+      if (v.scale.x !== fadeScale) {
+        v.scale.setScalar(fadeScale);
+        if (d.label) d.label.scale.setScalar(fadeScale);
+        if (d.spotlight) d.spotlight.visible = fadeScale > 0.05;
       }
 
       // Update Label
@@ -893,22 +936,78 @@ class SmartCitySimulation {
     }, 1800);
   }
 
+  // ─── Destination-based traffic (replaces the wrap-around loop) ──────────
+  freshDestination(v) {
+    const d = v.userData;
+    const dir = d.direction || 1;
+    // Longer trip legs than before so traffic keeps flowing and the stop /
+    // teleport cycle is much less frequent.
+    const dest = v.position.z + dir * (45 + Math.random() * 55);
+    return Math.max(-60, Math.min(60, dest));
+  }
+
+  arriveTrafficVehicle(v) {
+    const d = v.userData;
+    if (d.state === "arrived" || d.state === "crash" || d.state === "fallen") return;
+    d.state = "arrived";
+    d.speed = 0;
+    d.isBraking = true;
+    d.respawnTimer = 3;
+    // Snap exactly onto the destination so the vehicle never drifts past it
+    // and reverses direction.
+    v.position.z =
+      d.direction === 1 ? Math.min(v.position.z, d.destinationZ) : Math.max(v.position.z, d.destinationZ);
+  }
+
+  respawnTrafficVehicle(v) {
+    const d = v.userData;
+    const dir = d.direction;
+    const startZ = dir === 1 ? -60 : 60;
+    v.position.set(d.targetLaneX, 0, startZ);
+    v.rotation.y = dir === 1 ? 0 : Math.PI;
+    d.state = "normal";
+    d.speed = d.baseSpeed;
+    d.isBraking = false;
+    d.destinationZ = this.freshDestination(v);
+    d.respawnTimer = 0;
+    if (d.label) d.label.position.set(d.targetLaneX, 3.2, startZ);
+    if (d.brakeLights) d.brakeLights.forEach((bl) => { bl.material.emissiveIntensity = 0.8; });
+  }
+
+  // Find a z position in the given lane that is clear of other vehicles, by
+  // stepping forward in the travel direction until a gap of 7+ units exists.
+  clearLaneSpot(laneIndex, z, dir) {
+    let zz = THREE.MathUtils.clamp(z, -60, 60);
+    for (let attempt = 0; attempt < 25; attempt++) {
+      let blocked = false;
+      for (const o of this.vehicles) {
+        if (o.userData.laneIndex !== laneIndex) continue;
+        if (Math.abs(o.position.z - zz) < 7) { blocked = true; break; }
+      }
+      if (!blocked) return zz;
+      zz = THREE.MathUtils.clamp(zz + dir * 9, -60, 60);
+    }
+    return zz;
+  }
+
   triggerAccident() {
     const candidates = this.vehicles.filter(v => v.userData.state === "normal");
     if (candidates.length < 2) {
       this.reset();
       return this.triggerAccident();
-    }
-    const a = candidates[0];
+    }    const a = candidates[0];
     const b = candidates[1];
     const lane = 1; // use lane index 1 (x = -1.8)
     const laneX = this.lanesX[lane];
 
-    // Clear other traffic out of the collision lane so the two vehicles
-    // have a clean head-on approach.
+    // Clear ONLY the immediate crash zone (between the two approaching cars)
+    // out of the collision lane so A and B get a clean head-on approach. Cars
+    // further back stay put and queue naturally behind the crash — no mass
+    // lane-hopping that would merge them into other lanes and cause collisions.
     this.vehicles.forEach((v) => {
       if (v === a || v === b) return;
       if (v.userData.laneIndex === lane && v.userData.state !== "emergency") {
+        if (Math.abs(v.position.z) > 16) return; // outside the crash zone
         const altLane = lane === 0 ? 2 : 0;
         const altX = this.lanesX[altLane];
         v.userData.laneIndex = altLane;
@@ -916,6 +1015,10 @@ class SmartCitySimulation {
         v.userData.direction = this.lanesDir[altLane];
         v.position.x = altX;
         v.rotation.y = v.userData.direction === 1 ? 0 : Math.PI;
+        v.userData.destinationZ = this.freshDestination(v);
+        v.userData.respawnTimer = 0;
+        // Nudge to a clear spot so it never spawns on top of lane traffic.
+        v.position.z = this.clearLaneSpot(altLane, v.position.z, v.userData.direction);
       }
     });
 
@@ -923,18 +1026,24 @@ class SmartCitySimulation {
     a.position.set(laneX, 0, -12);
     a.rotation.set(0, 0, 0);
     a.userData.laneIndex = lane;
+    a.userData.laneX = laneX;
     a.userData.targetLaneX = laneX;
     a.userData.direction = 1;
     a.userData.speed = 0.12;
     a.userData.state = "overspeed";
+    a.userData.destinationZ = 60; // far enough that it crashes before arriving
+    a.userData.respawnTimer = 0;
 
     b.position.set(laneX, 0, 12);
     b.rotation.set(0, Math.PI, 0);
     b.userData.laneIndex = lane;
+    b.userData.laneX = laneX;
     b.userData.targetLaneX = laneX;
     b.userData.direction = -1;
     b.userData.speed = 0.12;
     b.userData.state = "overspeed";
+    b.userData.destinationZ = -60;
+    b.userData.respawnTimer = 0;
 
     this.accidentPair = { a, b };
     this.trafficState = "WARNING";
@@ -995,7 +1104,10 @@ reset() {
       v.userData.speed = v.userData.baseSpeed;
       v.userData.isBraking = false;
       v.userData.laneIndex = laneIndex;
+      v.userData.laneX = laneX;
       v.userData.targetLaneX = laneX;
+      v.userData.destinationZ = this.freshDestination(v);
+      v.userData.respawnTimer = 0;
     });
 
 this.emergencyVehicles.forEach((ev, i) => {
@@ -1013,7 +1125,7 @@ this.emergencyVehicles.forEach((ev, i) => {
     this.smokeParticles.visible = false;
   }
 
-  // ─── Incident Reporting to UCRIP Backend ────────────────────────────────
+  // ─── Incident Reporting to CRIS Backend ────────────────────────────────
 
   reportIncident(category, title, description) {
     const info = DEPARTMENT_MAP[category] || DEPT_DEFAULT;
@@ -1024,7 +1136,7 @@ this.emergencyVehicles.forEach((ev, i) => {
       latitude: 17.3850,
       longitude: 78.4867,
       location_address: "Simulation City — Digital Twin",
-      reporter_name: "UCRIP Simulation",
+      reporter_name: "CRIS Simulation",
       assigned_department: info.dept,
     };
     fetch("/api/incidents/", {
@@ -1034,12 +1146,12 @@ this.emergencyVehicles.forEach((ev, i) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("[UCRIP] Incident reported:", data);
+        console.log("[CRIS] Incident reported:", data);
         this.showReportToast(category, title, data.incident_id);
         this.showDeptNotification(category, title);
       })
       .catch((err) => {
-        console.error("[UCRIP] Failed to report incident:", err);
+        console.error("[CRIS] Failed to report incident:", err);
         this.showReportToast(category, title, null, false);
         this.showDeptNotification(category, title);
       });
@@ -1101,7 +1213,7 @@ this.emergencyVehicles.forEach((ev, i) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("[UCRIP] CCTV verify result:", data);
+          console.log("[CRIS] CCTV verify result:", data);
           if (data && data.verified) {
             this.showReportToast(category, title, data.incident_id);
           } else {
@@ -1110,12 +1222,12 @@ this.emergencyVehicles.forEach((ev, i) => {
           this.showDeptNotification(category, title);
         })
         .catch((err) => {
-          console.error("[UCRIP] CCTV verify failed:", err);
+          console.error("[CRIS] CCTV verify failed:", err);
           this.showReportToast(category, title, null, false);
           this.showDeptNotification(category, title);
         });
     } catch (e) {
-      console.error("[UCRIP] captureAndReport error:", e);
+      console.error("[CRIS] captureAndReport error:", e);
       this.reportIncident(category, title, description);
     }
   }
@@ -1223,7 +1335,7 @@ this.emergencyVehicles.forEach((ev, i) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log("[UCRIP] CCTV verification result:", data);
+          console.log("[CRIS] CCTV verification result:", data);
           if (data && data.verified) {
             this.showReportToast("accident", "Collision Verified by CCTV — Reported to Admin", data.incident_id);
           } else {
@@ -1231,11 +1343,11 @@ this.emergencyVehicles.forEach((ev, i) => {
           }
         })
         .catch((err) => {
-          console.error("[UCRIP] CCTV verification failed:", err);
+          console.error("[CRIS] CCTV verification failed:", err);
           this.showReportToast("accident", "CCTV Verification Failed", null, false);
         });
     } catch (e) {
-      console.error("[UCRIP] verifyCollisionWithCCTV error:", e);
+      console.error("[CRIS] verifyCollisionWithCCTV error:", e);
       this.reportIncident("accident", "Head-On Vehicle Collision", "Two vehicles collided head-on in simulation city.");
     }
   }
@@ -1300,7 +1412,8 @@ this.emergencyVehicles.forEach((ev, i) => {
         { confidence: 0.96 }
       );
       app.updateSubsystemGauges();
-      app.autoFocusCamera(2);
+      app.autoFocusCamera(2, "Cascading Disaster Triggered");
+      app.publishCameraFocus(2, "Cascading Disaster Triggered");
     });
 
     panel.querySelector("#btn-accident").addEventListener("click", () => {
@@ -1313,7 +1426,8 @@ this.emergencyVehicles.forEach((ev, i) => {
         { confidence: 0.93, object_count: 2 }
       );
       app.updateSubsystemGauges();
-      app.autoFocusCamera(1);
+      app.autoFocusCamera(1, "Head-On Vehicle Collision");
+      app.publishCameraFocus(1, "Head-On Vehicle Collision");
     });
 
     panel.querySelector("#btn-overspeed").addEventListener("click", () => {
@@ -1326,7 +1440,8 @@ this.emergencyVehicles.forEach((ev, i) => {
         { confidence: 0.88, object_count: 1 }
       );
       app.updateSubsystemGauges();
-      app.autoFocusCamera(1);
+      app.autoFocusCamera(1, "Vehicle Overspeed & Tailgating");
+      app.publishCameraFocus(1, "Vehicle Overspeed & Tailgating");
     });
 
     const roadLabels = [
@@ -1353,7 +1468,8 @@ const slider = panel.querySelector("#road-slider");
         );
       }
       app.updateSubsystemGauges();
-      app.autoFocusCamera(2);
+      if (val >= 4) app.autoFocusCamera(2, "Major Road Collapse");
+      if (val >= 4) app.publishCameraFocus(2, "Major Road Collapse");
     });
 
     panel.querySelectorAll(".lane-check input[type='checkbox']").forEach((chk) => {
@@ -1391,7 +1507,8 @@ const slider = panel.querySelector("#road-slider");
         );
       }
       app.updateSubsystemGauges();
-      app.autoFocusCamera(4);
+      app.autoFocusCamera(4, "Underground Pipe Leak");
+      app.publishCameraFocus(4, "Underground Pipe Leak");
     });
 
     panel.querySelector("#btn-blackout").addEventListener("click", () => {
@@ -1406,12 +1523,14 @@ const slider = panel.querySelector("#road-slider");
         );
       }
       app.updateSubsystemGauges();
-      app.autoFocusCamera(3);
+      app.autoFocusCamera(3, "City-Wide Power Blackout");
+      app.publishCameraFocus(3, "City-Wide Power Blackout");
     });
 
     panel.querySelector("#btn-dispatch").addEventListener("click", () => {
       this.dispatchEmergencyResponse();
-      app.autoFocusCamera(5);
+      app.autoFocusCamera(5, "Emergency Response Dispatch");
+      app.publishCameraFocus(5, "Emergency Response Dispatch");
     });
   }
 }
@@ -1424,10 +1543,17 @@ class App {
     const params = new URLSearchParams(window.location.search);
     const camParam = Number(params.get("cam")) || 1;
     const autoTrackParam = params.get("autotrack") === "0" ? false : true;
+    const kioskParam = params.get("kiosk") === "1";
     this.currentCamId = CCTV_FEEDS[camParam] ? camParam : 1;
     this.autoTrack = autoTrackParam;
     this.sim = null;
     this.clock = new THREE.Clock();
+
+    // Scripted camera animation (smooth "go to the incident" transitions).
+    this.cameraAnim = null;
+
+    // Latest camera_focus event received over the socket (for overlay UI).
+    this.focusEvent = null;
 
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1445,8 +1571,19 @@ class App {
     this.sim.init(this.scene);
     this.sim.renderControls(document.getElementById("control-panel"));
 
-this.bindUI();
+    if (kioskParam) {
+      document.body.classList.add("kiosk-mode");
+    }
+    if (params.get("cam")) {
+      // When embedded as a single CCTV tile, hide the auto-track label so the
+      // tile stays locked to its assigned camera unless an incident focuses it.
+      const chkAuto = document.getElementById("chk-auto-track");
+      if (chkAuto) chkAuto.closest(".auto-track-label")?.classList.add("hidden");
+    }
+
+    this.bindUI();
     this.switchCamera(this.currentCamId);
+    this.connectWS();
     this.onResize();
     window.addEventListener("resize", () => this.onResize());
     this.animate();
@@ -1484,20 +1621,154 @@ this.bindUI();
   switchCamera(camId) {
     this.currentCamId = camId;
     const feed = CCTV_FEEDS[camId];
+    if (!feed) return;
     this.camera.position.copy(feed.pos);
     this.controls.target.copy(feed.target);
     this.controls.update();
-
-    document.getElementById("camera-badge").innerHTML = `<span class="cam-rec"></span> ${feed.name}`;
+    this.setCameraBadge(feed.name);
   }
 
-  autoFocusCamera(camId) {
+  setCameraBadge(name) {
+    const badge = document.getElementById("camera-badge");
+    if (badge) badge.innerHTML = `<span class="cam-rec"></span> ${name}`;
+  }
+
+  // Smoothly fly the camera to the incident close-up pose of the given feed,
+  // then settle back on the standard feed pose after a few seconds.
+  focusCamera(camId, title = "") {
+    const feed = CCTV_FEEDS[camId];
+    if (!feed) return;
+    this.currentCamId = camId;
+    this.setCameraBadge(feed.name);
+    document.querySelectorAll(".cctv-btn").forEach((b) => {
+      b.classList.toggle("active", Number(b.dataset.cam) === camId);
+    });
+
+    const zoom = feed.zoom || { pos: feed.pos, target: feed.target };
+    this.startCameraAnimation(zoom.pos, zoom.target, 1.1);
+    this.showIncidentOverlay(camId, title, false);
+
+    if (this.focusResetTimer) clearTimeout(this.focusResetTimer);
+    this.focusResetTimer = setTimeout(() => {
+      if (this.currentCamId === camId && !this.cameraAnim) {
+        const base = CCTV_FEEDS[camId];
+        this.startCameraAnimation(base.pos, base.target, 1.1);
+        this.hideIncidentOverlay();
+      }
+    }, 8000);
+  }
+
+  startCameraAnimation(toPos, toTarget, duration = 1.2) {
+    this.cameraAnim = {
+      fromPos: this.camera.position.clone(),
+      fromTarget: this.controls.target.clone(),
+      toPos: toPos.clone(),
+      toTarget: toTarget.clone(),
+      t: 0,
+      duration,
+    };
+    this.controls.enabled = false;
+  }
+
+  autoFocusCamera(camId, title = "") {
     if (this.autoTrack) {
-      document.querySelectorAll(".cctv-btn").forEach((b) => {
-        b.classList.toggle("active", Number(b.dataset.cam) === camId);
-      });
-      this.switchCamera(camId);
+      this.focusCamera(camId, title);
     }
+  }
+
+  // ─── Real-time live channel (WebSocket) ──────────────────────────────────
+  // Connects to the CRIS backend so every simulation / CCTV tile reacts the
+  // moment an incident is reported, no matter which instance triggered it.
+
+  connectWS() {
+    try {
+      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${proto}//${window.location.host}/ws?client_type=camera`;
+      const ws = new WebSocket(wsUrl);
+      this.ws = ws;
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: "ping" }));
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "camera_focus") {
+            this.handleCameraFocus(msg.data);
+          } else if (msg.type === "incident" && msg.data && msg.data.camera_id) {
+            // Fallback for incidents that carry a camera_id but no camera_focus
+            // event (e.g. created via the plain incident API).
+            this.handleCameraFocus({
+              camera_id: msg.data.camera_id,
+              title: msg.data.title,
+              category: msg.data.category,
+            });
+          }
+        } catch {
+          /* ignore malformed frames */
+        }
+      };
+
+      ws.onclose = () => {
+        setTimeout(() => this.connectWS(), 3000);
+      };
+      ws.onerror = () => ws.close();
+    } catch {
+      /* ignore connection errors */
+    }
+  }
+
+  publishCameraFocus(camId, title = "") {
+    try {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(
+          JSON.stringify({ type: "camera_focus", data: { camera_id: camId, title, source: "simulation" } })
+        );
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  handleCameraFocus(data) {
+    if (!data || !data.camera_id) return;
+    const camId = Number(data.camera_id);
+    if (!CCTV_FEEDS[camId]) return;
+    const title = data.title || "";
+
+    // A locked CCTV tile (autotrack=0) stays live on its own camera but still
+    // surfaces a real-time alert when an incident hits a different camera.
+    if (!this.autoTrack && camId !== this.currentCamId) {
+      this.showIncidentOverlay(camId, title, true);
+      if (this.remoteAlertTimer) clearTimeout(this.remoteAlertTimer);
+      this.remoteAlertTimer = setTimeout(() => this.hideIncidentOverlay(), 8000);
+      return;
+    }
+    this.focusCamera(camId, title);
+  }
+
+  showIncidentOverlay(camId, title = "", isRemote = false) {
+    const overlay = document.getElementById("incident-overlay");
+    if (!overlay) return;
+    this.focusEvent = { camId, title, isRemote, at: Date.now() };
+    const feed = CCTV_FEEDS[camId];
+    const camName = feed ? feed.name : `CAM-${camId}`;
+    const titleEl = document.getElementById("incident-title");
+    const subEl = document.getElementById("incident-sub");
+    if (titleEl) {
+      titleEl.textContent = isRemote ? `INCIDENT · ${camName}` : title || "INCIDENT DETECTED";
+    }
+    if (subEl) {
+      subEl.textContent = isRemote ? (title || "Incident on another camera") : `Auto-focused · ${camName}`;
+    }
+    overlay.classList.toggle("is-remote", isRemote);
+    overlay.classList.add("visible");
+  }
+
+  hideIncidentOverlay() {
+    const overlay = document.getElementById("incident-overlay");
+    if (overlay) overlay.classList.remove("visible");
   }
 
   updateSubsystemGauges() {
@@ -1572,6 +1843,21 @@ this.bindUI();
     if (this.sim) {
       this.sim.update(dt);
       this.updateSubsystemGauges();
+    }
+
+    // Scripted camera fly-to (smooth "go to the incident" transitions).
+    if (this.cameraAnim) {
+      const anim = this.cameraAnim;
+      anim.t = Math.min(anim.t + dt / anim.duration, 1);
+      const ease = 1 - Math.pow(1 - anim.t, 3); // ease-out cubic
+      this.camera.position.lerpVectors(anim.fromPos, anim.toPos, ease);
+      this.controls.target.lerpVectors(anim.fromTarget, anim.toTarget, ease);
+      this.camera.lookAt(this.controls.target);
+      if (anim.t >= 1) {
+        this.cameraAnim = null;
+        this.controls.enabled = true;
+        this.controls.update();
+      }
     }
 
     this.controls.update();

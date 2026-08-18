@@ -15,6 +15,7 @@ from app.core.deps import get_current_user
 from app.core.settings import settings
 from app.models.incident import Incident, IncidentMedia
 from app.models.user import User
+from app.api.incidents import get_department
 
 router = APIRouter(prefix="/api/collision", tags=["Collision Detection"])
 
@@ -202,46 +203,23 @@ async def report_incident(
     timestamp = now.strftime("%m%d%H%M%S")
     random_suffix = str(uuid.uuid4())[:4].upper()
 
-    if incident_type == "fire":
-        incident_id = f"FIR-{timestamp}-{random_suffix}"
-        category = "fire"
-        priority = "critical"
-        title = "Fire Detected - Immediate Response Required"
-        department = "emergency_department"
-        risk_score = 0.95
-        recommendation = (
-            "Automated fire detection triggered from mobile camera. "
-            "Dispatch fire department immediately. Evacuate surrounding area."
-        )
-    elif incident_type == "smoke":
-        incident_id = f"SMK-{timestamp}-{random_suffix}"
-        category = "fire"
-        priority = "high"
-        title = "Smoke Detected - Investigation Required"
-        department = "emergency_department"
-        risk_score = 0.75
-        recommendation = "Smoke detected in camera feed. Investigate potential fire hazard. Monitor for escalation."
-    else:
-        incident_id = f"COL-{timestamp}-{random_suffix}"
-        category = "accident"
-        priority = "critical"
-        title = f"Vehicle Collision Detected - {vehicle_count} vehicles, {people_count} people"
-        department = "emergency_department"
-        risk_score = 0.92
-        recommendation = (
-            "Automated collision detection triggered. Immediate response required. "
-            "Dispatch emergency services to the reported location."
-        )
+    # Only car-to-car collision detection - fire/smoke disabled
+    incident_id = f"COL-{timestamp}-{random_suffix}"
+    category = "accident"
+    priority = "critical"
+    title = f"Vehicle Collision Detected - {vehicle_count} vehicles, {people_count} people"
+    department = get_department("accident")
+    risk_score = 0.92
+    recommendation = (
+        "Automated collision detection triggered from mobile camera. "
+        "AI detected two cars colliding. Immediate response required."
+    )
 
-    description_parts = ["Automated report from mobile CCTV camera."]
+    description_parts = ["Automated report from mobile CCTV camera - Car Collision Detection."]
     if vehicle_count > 0:
         description_parts.append(f"Vehicles detected: {vehicle_count}")
     if people_count > 0:
         description_parts.append(f"People detected: {people_count}")
-    if fire_confidence > 0:
-        description_parts.append(f"Fire confidence: {fire_confidence:.1%}")
-    if smoke_confidence > 0:
-        description_parts.append(f"Smoke confidence: {smoke_confidence:.1%}")
     description_parts.append(f"Coordinates: {latitude:.6f}, {longitude:.6f}")
 
     incident = Incident(
@@ -255,7 +233,7 @@ async def report_incident(
         longitude=longitude,
         location_address=location_address or f"Location: {latitude:.4f}, {longitude:.4f}",
         assigned_department=department,
-        reporter_name="UCRIP Auto-Detect",
+        reporter_name="CRIS Auto-Detect",
         ai_risk_score=risk_score,
         ai_recommendation=recommendation,
     )
@@ -295,7 +273,7 @@ async def report_incident(
         "assigned_department": incident.assigned_department,
         "ai_risk_score": incident.ai_risk_score,
         "ai_recommendation": incident.ai_recommendation,
-        "reporter_name": "UCRIP Auto-Detect",
+        "reporter_name": "CRIS Auto-Detect",
         "vehicle_count": vehicle_count,
         "people_count": people_count,
         "fire_confidence": fire_confidence,

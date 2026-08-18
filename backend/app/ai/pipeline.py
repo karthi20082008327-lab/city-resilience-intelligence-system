@@ -1,5 +1,5 @@
 """
-UCRIP AI Detection Pipeline
+CRIS AI Detection Pipeline
 Orchestrates detection -> tracking -> accident/fire analysis -> incident creation.
 Maintains a circular frame buffer for video clip capture.
 Threaded inference for 25+ FPS.
@@ -83,12 +83,19 @@ class AIPipeline:
         tracked = self.tracker.update(detections)
 
         accident = self.accident_detector.update(tracked)
-        fire_alert = self.fire_detector.detect(frame)
+        # Fire/smoke detection disabled - only car-to-car collision detection
+        fire_alert = None  # self.fire_detector.detect(frame)
 
         if accident:
+            logger.warning(f"🚨 Accident detected in pipeline, handling...")
             self._handle_accident(accident, frame)
-        if fire_alert:
-            self._handle_fire(fire_alert, frame)
+        else:
+            # Debug: log when no accident detected
+            if len([t for t in tracked if t.is_confirmed]) >= 2:
+                logger.debug(f"No accident: {len([t for t in tracked if t.is_confirmed])} vehicles tracked but no collision")
+        # Fire handling disabled
+        # if fire_alert:
+        #     self._handle_fire(fire_alert, frame)
 
         elapsed = time.time() - t0
         self.fps_counter.append(elapsed)
@@ -108,10 +115,15 @@ class AIPipeline:
         clip_path, snapshot_path = self._save_evidence("accident", current_frame)
         incident_id = f"ACC-{datetime.now().strftime('%m%d%H%M%S')}-{str(uuid.uuid4())[:4].upper()}"
 
+        # Build description based on car colors
+        car1 = getattr(event, "car1_color", "unknown")
+        car2 = getattr(event, "car2_color", "unknown")
+        title = f"CAR COLLISION: {car1.upper()} + {car2.upper()} Vehicles"
+
         incident_data = {
             "incident_id": incident_id,
             "category": "accident",
-            "title": "Possible Road Accident Detected",
+            "title": title,
             "description": event.description,
             "priority": "critical",
             "status": "reported",
@@ -120,15 +132,20 @@ class AIPipeline:
             "location_address": f"{self.camera_name} - AI Detected",
             "assigned_department": "emergency_department",
             "ai_risk_score": event.confidence,
-            "ai_recommendation": "Immediate response required. Dispatch emergency services.",
-            "reporter_name": "UCRIP AI Pipeline",
+            "ai_recommendation": (
+                f"AI detected a collision between a {car1} car and a {car2} car. "
+                "Dispatch emergency services immediately."
+            ),
+            "reporter_name": "CRIS AI Pipeline",
             "camera_name": self.camera_name,
+            "camera_id": "mobile",
             "snapshot_path": snapshot_path,
             "video_clip_path": clip_path,
             "detection_type": "accident",
-            "object_count": len([t for t in self.accident_detector.prev_states]),
+            "object_count": 2,  # Two cars involved in collision
             "confidence": event.confidence,
         }
+        logger.warning(f"🚨 Sending collision incident to admin: {title}")
         self._notify_incident(incident_data)
 
     def _handle_fire(self, alert: FireAlert, current_frame: np.ndarray):
@@ -150,7 +167,7 @@ class AIPipeline:
             "assigned_department": "emergency_department",
             "ai_risk_score": alert.confidence,
             "ai_recommendation": f"{'Evacuate area and dispatch fire department.' if alert.alert_type == 'fire' else 'Investigate potential fire hazard.'}",
-            "reporter_name": "UCRIP AI Pipeline",
+            "reporter_name": "CRIS AI Pipeline",
             "camera_name": self.camera_name,
             "snapshot_path": snapshot_path,
             "video_clip_path": clip_path,

@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { UcripLogo } from '../../components/UcripLogo'
+import { CrisLogo } from '../../components/CrisLogo'
 
 interface TrackedObject {
   id: number
@@ -12,6 +12,8 @@ interface StreamAlert {
   type: string
   confidence: number
   description?: string
+  car1_color?: string
+  car2_color?: string
 }
 
 export default function MobileDetectPage() {
@@ -169,8 +171,8 @@ export default function MobileDetectPage() {
     <div className="min-h-screen bg-[#f4f6fb] text-slate-900">
       <header className="bg-white backdrop-blur-xl border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-2.5">
-          <UcripLogo className="w-8 h-8" />
-          <h1 className="text-sm font-bold">UCRIP CCTV</h1>
+          <CrisLogo className="w-8 h-8" />
+          <h1 className="text-sm font-bold">CRIS CCTV</h1>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <span className="text-slate-500 font-mono">{fps} FPS</span>
@@ -220,7 +222,7 @@ export default function MobileDetectPage() {
                   </svg>
                 </div>
                 <p className="text-slate-600 mb-1 text-sm">AI-Powered CCTV</p>
-                <p className="text-slate-400 text-xs mb-5">Accident + Fire Detection via AI Pipeline</p>
+                <p className="text-slate-400 text-xs mb-5">Car Collision Detection (Red + Black)</p>
                 {errorMessage && <p className="text-red-600 text-sm mb-3">{errorMessage}</p>}
                 <button onClick={startCamera} className="uc-btn uc-btn-primary px-6 py-2.5">
                   Start Monitoring
@@ -241,27 +243,19 @@ export default function MobileDetectPage() {
                 </div>
               </div>
 
-              {alert && (
-                <div
-                  className={`absolute bottom-3 left-3 right-3 backdrop-blur-sm rounded-xl p-4 border ${
-                    alert.type === 'accident'
-                      ? 'bg-red-950/90 border-red-500/30'
-                      : 'bg-orange-950/90 border-orange-500/30'
-                  }`}
-                >
-                  <p
-                    className={`font-bold text-sm ${alert.type === 'accident' ? 'text-red-200' : 'text-orange-200'}`}
-                  >
-                    {alert.type === 'accident'
-                      ? 'ACCIDENT DETECTED'
-                      : alert.type === 'fire'
-                        ? 'FIRE DETECTED'
-                        : 'SMOKE DETECTED'}
+              {alert && alert.type === 'accident' && (
+                <div className="absolute bottom-3 left-3 right-3 backdrop-blur-sm rounded-xl p-4 border-2 bg-red-600/95 border-red-400 shadow-lg shadow-red-500/50 animate-pulse">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">&#x1F6A8;</span>
+                    <p className="font-bold text-base text-white">
+                      CAR COLLISION DETECTED!
+                    </p>
+                  </div>
+                  <p className="text-sm text-white/90 font-semibold">
+                    {alert.car1_color?.toUpperCase() || 'CAR'} + {alert.car2_color?.toUpperCase() || 'CAR'} vehicles collided
                   </p>
-                  <p
-                    className={`text-xs ${alert.type === 'accident' ? 'text-red-300/70' : 'text-orange-300/70'}`}
-                  >
-                    Confidence: {(alert.confidence * 100).toFixed(0)}% - Report sent to admin
+                  <p className="text-xs text-white/70 mt-1">
+                    Confidence: {(alert.confidence * 100).toFixed(0)}% — Report sent to admin
                   </p>
                 </div>
               )}

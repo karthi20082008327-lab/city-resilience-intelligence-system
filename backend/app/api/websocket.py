@@ -73,6 +73,16 @@ class ConnectionManager:
         )
         await self.broadcast(message)
 
+    async def broadcast_camera_focus(self, camera_focus_data: dict):
+        message = json.dumps(
+            {
+                "type": "camera_focus",
+                "data": camera_focus_data,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
+        await self.broadcast(message)
+
     async def broadcast_weather(self, weather_data: dict):
         message = json.dumps(
             {
@@ -158,6 +168,8 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str = Query(defa
                     )
                 elif msg_type == "incident_update":
                     await manager.broadcast_incident(message.get("data", {}))
+                elif msg_type == "camera_focus":
+                    await manager.broadcast_camera_focus(message.get("data", {}))
                 elif msg_type == "location_update":
                     await manager.broadcast(
                         json.dumps(

@@ -1,5 +1,5 @@
 """
-UCRIP Fire/Smoke Detector
+CRIS Fire/Smoke Detector
 Multi-channel fire detection: HSV color analysis + motion + texture.
 Not dependent on a single color range - uses multiple fire signatures.
 """

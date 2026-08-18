@@ -18,7 +18,7 @@ export default function SimulationPage() {
       <div className="flex-1 relative min-h-0">
         <iframe
           src="/simul/index.html"
-          title="UCRIP Simulation"
+          title="CRIS Simulation"
           className="absolute inset-0 w-full h-full border-0"
         />
       </div>

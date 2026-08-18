@@ -18,7 +18,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: unknown, info: unknown) {
-    console.error('[UCRIP] Error boundary caught:', error, info)
+    console.error('[CRIS] Error boundary caught:', error, info)
   }
 
   private handleReset = () => this.setState({ hasError: false, message: undefined })

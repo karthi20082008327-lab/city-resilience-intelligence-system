@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /mnt/ExtraSpace/ucrip/frontend
+cd "/mnt/ExtraSpace/City Resilience Intelligence System/frontend"
 setsid node node_modules/.bin/vite --host 0.0.0.0 </dev/null >/tmp/vite.log 2>&1 &
 

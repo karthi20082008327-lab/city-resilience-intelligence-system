@@ -1,11 +1,16 @@
+import base64
+import logging
 import os
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+
+logger = logging.getLogger(__name__)
 
 from app.api.websocket import manager
 from app.core.database import get_db
@@ -135,72 +140,124 @@ def incident_to_response(inc: Incident) -> IncidentResponse:
 async def create_incident(
     data: IncidentCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
-    incident_id = generate_incident_id(data.category)
-    priority = calculate_priority(data.category, data.description)
-    risk_score = calculate_risk_score(data.category, priority)
-    department = get_department(data.category)
+    try:
+        incident_id = generate_incident_id(data.category)
+        priority = calculate_priority(data.category, data.description)
+        risk_score = calculate_risk_score(data.category, priority)
+        department = get_department(data.category)
 
-    incident = Incident(
-        incident_id=incident_id,
-        category=data.category,
-        title=data.title,
-        description=data.description,
-        status="reported",
-        priority=priority,
-        latitude=data.latitude,
-        longitude=data.longitude,
-        location_address=data.location_address,
-        assigned_department=department,
-        reporter_name=data.reporter_name,
-        reporter_phone=data.reporter_phone,
-        reporter_email=data.reporter_email,
-        ai_risk_score=risk_score,
-    )
-    db.add(incident)
-    await db.commit()
-    await db.refresh(incident)
+        # --- save optional base64 snapshot / video clip -------------------------
+        snapshot_url: str | None = None
+        video_url: str | None = None
 
-    await manager.broadcast_incident(
-        {
-            "action": "created",
-            "id": str(incident.id),
-            "incident_id": incident.incident_id,
-            "category": incident.category,
-            "title": incident.title,
-            "description": incident.description,
-            "status": incident.status,
-            "priority": incident.priority,
-            "latitude": incident.latitude,
-            "longitude": incident.longitude,
-            "location_address": incident.location_address,
-            "assigned_department": incident.assigned_department,
-            "ai_risk_score": incident.ai_risk_score,
-            "reporter_name": incident.reporter_name,
-            "created_at": incident.created_at.isoformat() if incident.created_at else None,
-        }
-    )
+        if data.snapshot_base64:
+            try:
+                raw = data.snapshot_base64
+                if "," in raw:
+                    raw = raw.split(",", 1)[1]
+                img_bytes = base64.b64decode(raw)
+                img_dir = Path(settings.UPLOAD_DIR) / incident_id
+                img_dir.mkdir(parents=True, exist_ok=True)
+                img_name = f"snapshot_{uuid.uuid4().hex[:8]}.jpg"
+                (img_dir / img_name).write_bytes(img_bytes)
+                snapshot_url = f"/uploads/{incident_id}/{img_name}"
+            except Exception as img_err:
+                logger.warning(f"Failed to save snapshot (non-fatal): {img_err}")
 
-    return IncidentResponse(
-        id=incident.id,
-        incident_id=incident.incident_id,
-        category=incident.category,
-        title=incident.title,
-        description=incident.description,
-        status=incident.status,
-        priority=incident.priority,
-        latitude=incident.latitude,
-        longitude=incident.longitude,
-        location_address=incident.location_address,
-        assigned_department=incident.assigned_department,
-        assigned_to=incident.assigned_to,
-        reporter_name=incident.reporter_name,
-        reporter_phone=incident.reporter_phone,
-        ai_risk_score=incident.ai_risk_score,
-        ai_recommendation=incident.ai_recommendation,
-        media=[],
-        created_at=incident.created_at,
-        updated_at=incident.updated_at,
-    )
+        if data.video_base64:
+            try:
+                raw = data.video_base64
+                if "," in raw:
+                    raw = raw.split(",", 1)[1]
+                vid_bytes = base64.b64decode(raw)
+                vid_dir = Path(settings.UPLOAD_DIR) / incident_id
+                vid_dir.mkdir(parents=True, exist_ok=True)
+                vid_name = f"clip_{uuid.uuid4().hex[:8]}.mp4"
+                (vid_dir / vid_name).write_bytes(vid_bytes)
+                video_url = f"/uploads/{incident_id}/{vid_name}"
+            except Exception as vid_err:
+                logger.warning(f"Failed to save video clip (non-fatal): {vid_err}")
+
+        incident = Incident(
+            incident_id=incident_id,
+            category=data.category,
+            title=data.title,
+            description=data.description,
+            status="reported",
+            priority=priority,
+            latitude=data.latitude,
+            longitude=data.longitude,
+            location_address=data.location_address,
+            assigned_department=department,
+            reporter_name=data.reporter_name,
+            reporter_phone=data.reporter_phone,
+            reporter_email=data.reporter_email,
+            ai_risk_score=risk_score,
+            camera_name=data.camera_name,
+            snapshot_path=snapshot_url,
+            video_clip_path=video_url,
+        )
+        db.add(incident)
+        await db.commit()
+        await db.refresh(incident)
+
+        try:
+            await manager.broadcast_incident(
+                {
+                    "action": "created",
+                    "id": str(incident.id),
+                    "incident_id": incident.incident_id,
+                    "category": incident.category,
+                    "title": incident.title,
+                    "description": incident.description,
+                    "status": incident.status,
+                    "priority": incident.priority,
+                    "latitude": incident.latitude,
+                    "longitude": incident.longitude,
+                    "location_address": incident.location_address,
+                    "assigned_department": incident.assigned_department,
+                    "ai_risk_score": incident.ai_risk_score,
+                    "camera_name": data.camera_name,
+                    "snapshot_url": snapshot_url,
+                    "video_url": video_url,
+                    "reporter_name": incident.reporter_name,
+                    "created_at": incident.created_at.isoformat() if incident.created_at else None,
+                }
+            )
+        except Exception as ws_err:
+            logger.warning(f"WebSocket broadcast failed (non-fatal): {ws_err}")
+
+        return IncidentResponse(
+            id=incident.id,
+            incident_id=incident.incident_id,
+            category=incident.category,
+            title=incident.title,
+            description=incident.description,
+            status=incident.status,
+            priority=incident.priority,
+            latitude=incident.latitude,
+            longitude=incident.longitude,
+            location_address=incident.location_address,
+            assigned_department=incident.assigned_department,
+            assigned_to=incident.assigned_to,
+            reporter_name=incident.reporter_name,
+            reporter_phone=incident.reporter_phone,
+            ai_risk_score=incident.ai_risk_score,
+            ai_recommendation=incident.ai_recommendation,
+            camera_name=incident.camera_name,
+            snapshot_url=snapshot_url,
+            video_url=video_url,
+            detection_type=incident.detection_type,
+            media=[],
+            created_at=incident.created_at,
+            updated_at=incident.updated_at,
+        )
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        logger.error(f"Failed to create incident: {e}")
+        logger.error(tb)
+        raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
 
 
 @router.post("/{incident_id}/upload")
@@ -250,6 +307,7 @@ async def list_incidents(
     category: str = None,
     status_filter: str = None,
     priority: str = None,
+    department: str = None,
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Incident)
@@ -264,6 +322,9 @@ async def list_incidents(
     if priority:
         query = query.where(Incident.priority == priority)
         count_query = count_query.where(Incident.priority == priority)
+    if department:
+        query = query.where(Incident.assigned_department == department)
+        count_query = count_query.where(Incident.assigned_department == department)
 
     total_result = await db.execute(count_query)
     total = total_result.scalar()

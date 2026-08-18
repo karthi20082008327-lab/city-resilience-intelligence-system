@@ -17,6 +17,7 @@ from app.core.settings import settings
 from app.models.user import Role, User, UserSession
 from app.schemas.auth import (
     ChangePasswordRequest,
+    DepartmentLoginRequest,
     ForgotPasswordRequest,
     LoginRequest,
     RefreshTokenRequest,
@@ -42,6 +43,76 @@ async def login(request: Request, data: LoginRequest, db: AsyncSession = Depends
 
     access_token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": str(user.role_id)})
     expire_days = 30 if data.remember_me else settings.REFRESH_TOKEN_EXPIRE_DAYS
+    refresh_token = create_refresh_token(data={"sub": str(user.id)})
+
+    expire = datetime.now(UTC) + timedelta(days=expire_days)
+    session = UserSession(
+        user_id=user.id,
+        token=access_token,
+        refresh_token=refresh_token,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        is_active=True,
+        expires_at=expire,
+    )
+    db.add(session)
+
+    user.last_login = datetime.now(UTC)
+    await db.commit()
+    await db.refresh(user)
+
+    role_result = await db.execute(select(Role).where(Role.id == user.role_id))
+    role = role_result.scalar_one_or_none()
+
+    user_data = UserResponse(
+        id=user.id,
+        email=user.email,
+        username=user.username,
+        full_name=user.full_name,
+        role={"id": role.id, "name": role.name, "description": role.description}
+        if role
+        else {"id": user.role_id, "name": "unknown", "description": None},
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+        avatar_url=user.avatar_url,
+        last_login=user.last_login,
+        created_at=user.created_at,
+    )
+
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=user_data,
+    )
+
+
+@router.post("/department-login", response_model=TokenResponse)
+async def department_login(request: Request, data: DepartmentLoginRequest, db: AsyncSession = Depends(get_db)):
+    """Login as a department user. Maps department name to the corresponding user email."""
+    dept_email_map = {
+        "emergency_department": "emergency@cris.gov",
+        "traffic_department": "traffic@cris.gov",
+        "water_department": "water@cris.gov",
+        "electricity_department": "electricity@cris.gov",
+        "disaster_management": "disaster@cris.gov",
+        "surveillance_department": "srinidhi@cris.gov",
+    }
+    email = dept_email_map.get(data.department)
+    if not email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid department")
+
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+
+    if not user or not verify_password(data.password, user.hashed_password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password for this department")
+
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is deactivated")
+
+    access_token = create_access_token(data={"sub": str(user.id), "email": user.email, "role": str(user.role_id)})
+    expire_days = settings.REFRESH_TOKEN_EXPIRE_DAYS
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
 
     expire = datetime.now(UTC) + timedelta(days=expire_days)

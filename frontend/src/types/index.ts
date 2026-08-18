@@ -77,6 +77,9 @@ export interface IncidentCreate {
   reporter_name?: string
   reporter_phone?: string
   reporter_email?: string
+  camera_name?: string
+  snapshot_base64?: string
+  video_base64?: string
 }
 
 export interface IncidentUpdate {

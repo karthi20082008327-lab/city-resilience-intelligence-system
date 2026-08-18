@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CRIS - Signing in&hellip;</title>
+    <style>
+      body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; display: grid; place-items: center; height: 100vh; margin: 0; }
+      .box { text-align: center; padding: 2rem; border-radius: 1rem; border: 1px solid #1e293b; }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>Signing you into the CRIS Digital Twin&hellip;</h2>
+      <p id="status">Logging in with the seeded admin account&hellip;</p>
+    </div>
+    <script>
+      (async () => {
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'admin@cris.gov', password: 'Admin@123456' }),
+          });
+          if (!res.ok) throw new Error('login HTTP ' + res.status);
+          const data = await res.json();
+          localStorage.setItem(
+            'cris-auth',
+            JSON.stringify({
+              state: {
+                isAuthenticated: true,
+                user: data.user,
+                accessToken: data.access_token,
+                refreshToken: data.refresh_token,
+              },
+              version: 0,
+            })
+          );
+          document.getElementById('status').textContent = 'Success - opening the city simulation...';
+          location.href = '/admin/simulation';
+        } catch (err) {
+          document.getElementById('status').textContent = 'Login failed: ' + err.message;
+        }
+      })();
+    </script>
+  </body>
+</html>

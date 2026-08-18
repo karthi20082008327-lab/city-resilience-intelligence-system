@@ -1,21 +1,44 @@
 """
-UCRIP Accident Detector
-Analyzes tracked object trajectories to detect vehicle collisions.
-Logic: Two vehicles in close proximity + sudden velocity change = possible accident.
+CRIS Accident Detector — Fast Collision Detection for Toy Cars
+Detects when two car bounding boxes touch or overlap.
+Triggers instantly when a red car and black car collide.
 """
 
 import logging
-import math
 import time
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-PROXIMITY_THRESHOLD = 80
-VELOCITY_DROP_RATIO = 0.6
-MIN_TRACK_FRAMES = 5
-COOLDOWN_SECONDS = 30
-VEHICLE_CLASSES = {"car", "motorcycle", "bus", "truck"}
+# Very tight threshold — detects when bounding boxes are touching or overlapping
+OVERLAP_THRESHOLD = 15  # pixels — if gap < this, it's a collision
+COOLDOWN_SECONDS = 3   # Very fast reset — detect repeated collisions in 3 seconds
+VEHICLE_CLASSES = {"car", "vehicle"}
+
+
+def bbox_touches(box1, box2, threshold=OVERLAP_THRESHOLD) -> bool:
+    """Check if two bounding boxes touch or overlap.
+    box = (x, y, w, h)
+    Returns True if the gap between them is less than threshold.
+    """
+    x1, y1, w1, h1 = box1
+    x2, y2, w2, h2 = box2
+
+    # Edges of each box
+    left1, right1 = x1, x1 + w1
+    top1, bottom1 = y1, y1 + h1
+    left2, right2 = x2, x2 + w2
+    top2, bottom2 = y2, y2 + h2
+
+    # Check for overlap (boxes intersect)
+    if left1 < right2 and right1 > left2 and top1 < bottom2 and bottom1 > top2:
+        return True
+
+    # Check for touching (gap < threshold)
+    gap_x = max(0, max(left1, left2) - min(right1, right2))
+    gap_y = max(0, max(top1, top2) - min(bottom1, bottom2))
+
+    return gap_x <= threshold and gap_y <= threshold
 
 
 @dataclass
@@ -25,136 +48,103 @@ class AccidentEvent:
     confidence: float
     position: tuple[int, int]
     description: str
+    car1_color: str = "unknown"
+    car2_color: str = "unknown"
 
 
 class AccidentDetector:
-    """Detects accidents by analyzing velocity changes and proximity of tracked vehicles."""
+    """Fast collision detector. Triggers when two cars touch or overlap."""
 
     def __init__(self):
-        self.prev_states: dict[int, dict] = {}
         self.cooldown_until: float = 0
-        self.active_accidents: dict[tuple[int, int], float] = {}
-        self.incident_ids: set = set()
+        self.last_trigger_time: float = 0
 
     def reset(self):
-        self.prev_states.clear()
         self.cooldown_until = 0
-        self.active_accidents.clear()
-        self.incident_ids.clear()
+        self.last_trigger_time = 0
 
     def update(self, tracked_objects) -> AccidentEvent | None:
         now = time.time()
         if now < self.cooldown_until:
             return None
 
-        vehicles = [t for t in tracked_objects if t.class_name in VEHICLE_CLASSES and t.is_confirmed]
-        if len(vehicles) < 2:
-            logger.debug(f"Accident check: only {len(vehicles)} confirmed vehicles")
-            self._update_states(vehicles)
+        # Get all confirmed cars (also accept generic "vehicle" class)
+        cars = [
+            t for t in tracked_objects
+            if t.class_name in VEHICLE_CLASSES and t.is_confirmed
+            and t.confidence >= 0.5  # Minimum confidence to avoid fakes
+        ]
+
+        # Debug logging
+        all_classes = [f"{t.class_name}(conf={t.confidence:.2f}, confirmed={t.is_confirmed})" for t in tracked_objects]
+        car_info = [f"#{c.track_id} {c.class_name} bbox={c.bbox} color={c.dominant_color}" for c in cars]
+        logger.warning(f"🔍 ACCIDENT CHECK: {len(tracked_objects)} tracked objects: {all_classes[:5]}")
+        logger.warning(f"🔍 Confirmed cars: {len(cars)} — {car_info[:5]}")
+
+        if len(cars) < 2:
+            logger.debug(f"Need 2+ cars, found {len(cars)}")
             return None
 
-        for i in range(len(vehicles)):
-            for j in range(i + 1, len(vehicles)):
-                v1, v2 = vehicles[i], vehicles[j]
-                dist = self._distance(v1.center, v2.center)
+        # Check every pair of cars for touching/overlap
+        for i in range(len(cars)):
+            for j in range(i + 1, len(cars)):
+                c1, c2 = cars[i], cars[j]
 
-                if dist < PROXIMITY_THRESHOLD:
-                    event = self._check_collision(v1, v2, now, dist)
-                    if event:
-                        pair_key = (min(v1.track_id, v2.track_id), max(v1.track_id, v2.track_id))
-                        if (
-                            pair_key not in self.active_accidents
-                            or (now - self.active_accidents[pair_key]) > COOLDOWN_SECONDS
-                        ):
-                            self.active_accidents[pair_key] = now
-                            self.cooldown_until = now + COOLDOWN_SECONDS
-                            self._update_states(vehicles)
-                            return event
+                # Both must be cars
+                if c1.class_name not in {"car"} and c2.class_name not in {"car"}:
+                    # Accept if at least one is a car
+                    if c1.class_name != "car" and c2.class_name != "car":
+                        continue
 
-        self._cleanup_active(now)
-        self._update_states(vehicles)
-        return None
+                # Check if bounding boxes touch or overlap
+                if not bbox_touches(c1.bbox, c2.bbox):
+                    continue
 
-    def _check_collision(self, v1, v2, now, dist) -> AccidentEvent | None:
-        prev1 = self.prev_states.get(v1.track_id)
-        prev2 = self.prev_states.get(v2.track_id)
+                # Filter: both boxes must be reasonable size for toy cars
+                min_size = 25  # minimum 25 pixels in each dimension
+                max_size = 400  # maximum 400 pixels (not a building)
+                for car in [c1, c2]:
+                    bw, bh = car.bbox[2], car.bbox[3]
+                    if bw < min_size or bh < min_size:
+                        continue
+                    if bw > max_size or bh > max_size:
+                        continue
 
-        if not prev1 or not prev2:
-            return None
-        if v1.age < MIN_TRACK_FRAMES or v2.age < MIN_TRACK_FRAMES:
-            return None
+                # Check colors — must be red and black
+                colors = {c1.dominant_color, c2.dominant_color}
+                is_red_black = "red" in colors and "black" in colors
 
-        speed1 = math.sqrt(v1.velocity[0] ** 2 + v1.velocity[1] ** 2)
-        speed2 = math.sqrt(v2.velocity[0] ** 2 + v2.velocity[1] ** 2)
-        prev_speed1 = prev1.get("speed", 0)
-        prev_speed2 = prev2.get("speed", 0)
+                if not is_red_black:
+                    # Still trigger for any two cars touching, but mark as lower confidence
+                    confidence = 0.7
+                    color_desc = f"{c1.dominant_color} + {c2.dominant_color}"
+                else:
+                    confidence = 0.95
+                    color_desc = "RED + BLACK"
 
-        decel1 = (prev_speed1 - speed1) / max(prev_speed1, 1) if prev_speed1 > 0 else 0
-        decel2 = (prev_speed2 - speed2) / max(prev_speed2, 1) if prev_speed2 > 0 else 0
+                # Calculate collision midpoint
+                cx = (c1.center[0] + c2.center[0]) // 2
+                cy = (c1.center[1] + c2.center[1]) // 2
 
-        stopped = (speed1 < 2 and speed2 < 2) or (decel1 > VELOCITY_DROP_RATIO and decel2 > VELOCITY_DROP_RATIO)
-        was_moving = prev_speed1 > 3 and prev_speed2 > 3
-        converged = self._trajectory_converge(v1.trajectory, v2.trajectory)
-
-        if stopped and (was_moving or converged):
-            confidence = self._calc_confidence(dist, decel1, decel2, was_moving, converged)
-            if confidence > 0.5:
-                mid_x = (v1.center[0] + v2.center[0]) // 2
-                mid_y = (v1.center[1] + v2.center[1]) // 2
-                logger.warning(
-                    f"ACCIDENT DETECTED: {v1.class_name}#{v1.track_id} + {v2.class_name}#{v2.track_id} "
-                    f"confidence={confidence:.2f} pos=({mid_x},{mid_y})"
-                )
-                return AccidentEvent(
-                    track_ids=(v1.track_id, v2.track_id),
+                event = AccidentEvent(
+                    track_ids=(c1.track_id, c2.track_id),
                     timestamp=now,
                     confidence=confidence,
-                    position=(mid_x, mid_y),
+                    position=(cx, cy),
                     description=(
-                        f"Possible collision between {v1.class_name} and {v2.class_name}. "
-                        f"Sudden stop detected with {confidence:.0%} confidence."
+                        f"COLLISION: Car #{c1.track_id} ({c1.dominant_color}) "
+                        f"touched Car #{c2.track_id} ({c2.dominant_color}) "
+                        f"at ({cx}, {cy}). Bounding boxes overlapping."
                     ),
+                    car1_color=c1.dominant_color,
+                    car2_color=c2.dominant_color,
                 )
+
+                logger.warning(f"🚨 COLLISION DETECTED: {color_desc} — {event.description}")
+
+                # Set cooldown
+                self.cooldown_until = now + COOLDOWN_SECONDS
+                self.last_trigger_time = now
+                return event
+
         return None
-
-    def _calc_confidence(self, dist, decel1, decel2, was_moving, converged):
-        c = 0.5
-        if dist < 40:
-            c += 0.2
-        elif dist < 60:
-            c += 0.1
-        if was_moving:
-            c += 0.15
-        if converged:
-            c += 0.1
-        c += min(decel1, decel2) * 0.1
-        return min(c, 0.99)
-
-    def _trajectory_converge(self, traj1, traj2, lookback=10):
-        if len(traj1) < lookback or len(traj2) < lookback:
-            return False
-        recent1 = traj1[-lookback:]
-        recent2 = traj2[-lookback:]
-        dists = [self._distance(p1, p2) for p1, p2 in zip(recent1, recent2)]
-        if len(dists) < 2:
-            return False
-        return dists[-1] < dists[0] * 0.5
-
-    def _update_states(self, vehicles):
-        for v in vehicles:
-            speed = math.sqrt(v.velocity[0] ** 2 + v.velocity[1] ** 2)
-            self.prev_states[v.track_id] = {
-                "speed": speed,
-                "center": v.center,
-                "velocity": v.velocity,
-                "time": time.time(),
-            }
-
-    def _cleanup_active(self, now):
-        expired = [k for k, t in self.active_accidents.items() if now - t > COOLDOWN_SECONDS]
-        for k in expired:
-            del self.active_accidents[k]
-
-    @staticmethod
-    def _distance(p1, p2):
-        return math.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)

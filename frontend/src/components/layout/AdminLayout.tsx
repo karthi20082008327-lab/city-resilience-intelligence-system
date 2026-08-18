@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -20,21 +20,24 @@ import {
   FlaskConical,
 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
-import { UcripLogo } from '../UcripLogo'
+import { CrisLogo } from '../CrisLogo'
+import { getDepartmentName } from '../../utils/helpers'
 
-const navItems = [
+const allNavItems = [
   { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/admin/map', label: 'Live Map', icon: Map },
   { path: '/admin/weather', label: 'Weather', icon: Cloud },
   { path: '/admin/incidents', label: 'Incidents', icon: AlertTriangle },
   { path: '/admin/cctv', label: 'CCTV Feed', icon: Cctv },
   { path: '/admin/ai-prediction', label: 'AI Prediction', icon: Brain },
-  { path: '/admin/simulation', label: 'Simulation', icon: FlaskConical },
+  { path: '/admin/simulation', label: '3D City Simulation', icon: FlaskConical },
   { path: '/admin/departments', label: 'Departments', icon: Building2 },
   { path: '/admin/users', label: 'Users', icon: Users },
   { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/admin/settings', label: 'Settings', icon: Settings },
 ]
+
+const departmentOnlyPaths = new Set(['/admin/dashboard', '/admin/incidents', '/admin/map'])
 
 function LiveClock() {
   const [time, setTime] = useState(new Date())
@@ -61,6 +64,18 @@ export default function AdminLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuthStore()
+
+  const isDepartmentUser = useMemo(() => {
+    const roleName = user?.role?.name || ''
+    return roleName !== 'super_admin' && roleName !== 'admin'
+  }, [user?.role?.name])
+
+  const navItems = useMemo(() => {
+    if (!isDepartmentUser) return allNavItems
+    return allNavItems.filter((item) => departmentOnlyPaths.has(item.path))
+  }, [isDepartmentUser])
+
+  const departmentName = useMemo(() => getDepartmentName(user?.role?.name || ''), [user?.role?.name])
 
   const handleLogout = () => {
     setProfileOpen(false)
@@ -101,7 +116,7 @@ export default function AdminLayout() {
       >
         {/* Logo Area */}
         <div className="flex items-center gap-3 px-4 h-16 border-b border-slate-200/80 flex-shrink-0">
-          <UcripLogo className="w-9 h-9" />
+          <CrisLogo className="w-9 h-9" />
           <AnimatePresence>
             {sidebarOpen && (
               <motion.span
@@ -111,11 +126,30 @@ export default function AdminLayout() {
                 transition={{ duration: 0.2 }}
                 className="text-base font-bold tracking-wide whitespace-nowrap overflow-hidden"
               >
-                <span className="uc-gradient-text">UCRIP</span>
+                <span className="uc-gradient-text">CRIS</span>
               </motion.span>
             )}
           </AnimatePresence>
         </div>
+
+        {/* Department Badge (shown only for department users) */}
+        {isDepartmentUser && (
+          <AnimatePresence>
+            {sidebarOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="px-4 py-3 border-b border-slate-200/80"
+              >
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-700 border border-blue-500/20">
+                  <Building2 className="w-4 h-4" />
+                  <span className="text-sm font-semibold truncate">{departmentName}</span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Navigation */}
         <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto scrollbar-thin">
@@ -211,9 +245,9 @@ export default function AdminLayout() {
               {/* Mobile Logo */}
               <div className="flex items-center justify-between px-4 h-16 border-b border-slate-200/80">
                 <div className="flex items-center gap-3">
-                  <UcripLogo className="w-9 h-9" />
+                  <CrisLogo className="w-9 h-9" />
                   <span className="text-base font-bold tracking-wide">
-                    <span className="uc-gradient-text">UCRIP</span>
+                    <span className="uc-gradient-text">CRIS</span>
                   </span>
                 </div>
                 <button
@@ -223,6 +257,16 @@ export default function AdminLayout() {
                   <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Department Badge (Mobile, shown only for department users) */}
+              {isDepartmentUser && (
+                <div className="px-4 py-3 border-b border-slate-200/80">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-700 border border-blue-500/20">
+                    <Building2 className="w-4 h-4" />
+                    <span className="text-sm font-semibold truncate">{departmentName}</span>
+                  </div>
+                </div>
+              )}
 
               {/* Mobile Navigation */}
               <nav className="px-2.5 py-3 space-y-0.5 overflow-y-auto">

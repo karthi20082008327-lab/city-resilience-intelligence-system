@@ -4,8 +4,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "sqlite+aiosqlite:///./ucrip.db"
-    DATABASE_URL_SYNC: str = "sqlite:///./ucrip.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./cris.db"
+    DATABASE_URL_SYNC: str = "sqlite:///./cris.db"
     REDIS_URL: str = "redis://localhost:6379/0"
     SECRET_KEY: str = "change-me-in-production"
     JWT_SECRET_KEY: str = "change-me-in-production"
@@ -14,12 +14,17 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     CORS_ORIGINS: list[str] = [
+        "*",
         "http://localhost:5173",
         "http://localhost:3000",
         "http://0.0.0.0:5173",
         "https://localhost:5173",
-        "https://10.157.48.198:5173",
+        "http://localhost:8000",
+        "https://localhost:8000",
         "http://10.157.48.198:5173",
+        "http://10.157.48.198:8000",
+        "https://10.157.48.198:5173",
+        "https://10.157.48.198:8000",
     ]
     WEATHER_API_KEY: str = "demo"
     WEATHER_CITY: str = "Vijayamangalam"
@@ -41,7 +46,7 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = ""
     MODEL_DIR: str = ""
 
-    APP_NAME: str = "UCRIP"
+    APP_NAME: str = "CRIS"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
     LOG_LEVEL: str = "INFO"

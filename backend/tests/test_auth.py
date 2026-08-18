@@ -13,7 +13,7 @@ def test_root(client):
 def test_login_success(client):
     resp = client.post(
         "/api/auth/login",
-        json={"email": "admin@ucrip.gov", "password": "Admin@123456"},
+        json={"email": "admin@cris.gov", "password": "Admin@123456"},
     )
     assert resp.status_code == 200
     body = resp.json()
@@ -24,7 +24,7 @@ def test_login_success(client):
 def test_login_invalid(client):
     resp = client.post(
         "/api/auth/login",
-        json={"email": "admin@ucrip.gov", "password": "wrong-password"},
+        json={"email": "admin@cris.gov", "password": "wrong-password"},
     )
     assert resp.status_code == 401
 
@@ -40,7 +40,7 @@ def test_unauth_incident_create_rejected(client):
 def test_me(client, admin_headers):
     resp = client.get("/api/auth/me", headers=admin_headers)
     assert resp.status_code == 200
-    assert resp.json()["email"] == "admin@ucrip.gov"
+    assert resp.json()["email"] == "admin@cris.gov"
 
 
 def test_users_require_auth(client):

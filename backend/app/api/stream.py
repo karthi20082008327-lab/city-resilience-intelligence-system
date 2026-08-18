@@ -1,5 +1,5 @@
 """
-UCRIP Video Stream Endpoint
+CRIS Video Stream Endpoint
 WebSocket endpoint for receiving live video frames from mobile CCTV.
 Processes frames through AI pipeline in a thread pool to avoid blocking.
 """
@@ -87,9 +87,7 @@ async def video_stream(websocket: WebSocket):
                     continue
 
                 if msg.get("type") == "frame":
-                    if processing:
-                        continue
-
+                    # Don't skip frames — queue them for instant collision detection
                     frame_b64 = msg.get("data")
                     if not frame_b64:
                         continue
@@ -100,13 +98,14 @@ async def video_stream(websocket: WebSocket):
                     if frame is None:
                         continue
 
-                    processing = True
+                    # Process every frame — no skipping for fast collision detection
                     try:
                         result = await asyncio.get_event_loop().run_in_executor(
                             executor, process_in_thread, pipe, frame
                         )
-                    finally:
-                        processing = False
+                    except Exception as e:
+                        logger.debug(f"Frame processing error: {e}")
+                        continue
 
                     if result is None:
                         continue
@@ -114,7 +113,37 @@ async def video_stream(websocket: WebSocket):
                     frame_count += 1
                     now = time.time()
 
-                    if now - last_status_time >= 2.0:
+                    # Send collision alert IMMEDIATELY — don't wait for 2s status interval
+                    if result.accident:
+                        annotated = pipe.annotate_frame(frame, result.tracked_objects, result.fps)
+                        _, buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 70])
+                        alert_response = {
+                            "type": "status",
+                            "fps": round(result.fps, 1),
+                            "objects": len([t for t in result.tracked_objects if t.is_confirmed]),
+                            "tracked": [
+                                {
+                                    "id": t.track_id,
+                                    "class": t.class_name,
+                                    "bbox": list(t.bbox),
+                                    "confidence": round(t.confidence, 2),
+                                }
+                                for t in result.tracked_objects if t.is_confirmed
+                            ][:20],
+                            "annotated_frame": base64.b64encode(buf).decode("utf-8"),
+                            "alert": {
+                                "type": "accident",
+                                "confidence": result.accident.confidence,
+                                "description": result.accident.description,
+                                "car1_color": result.accident.car1_color,
+                                "car2_color": result.accident.car2_color,
+                            },
+                        }
+                        await websocket.send_text(json.dumps(alert_response))
+                        logger.warning(f"🚨 Sent collision alert to client: {result.accident.description}")
+
+                    # Regular status update every 2 seconds (without collision)
+                    elif now - last_status_time >= 2.0:
                         confirmed = [t for t in result.tracked_objects if t.is_confirmed]
                         response = {
                             "type": "status",
@@ -130,24 +159,6 @@ async def video_stream(websocket: WebSocket):
                                 for t in confirmed[:20]
                             ],
                         }
-
-                        if result.accident:
-                            annotated = pipe.annotate_frame(frame, result.tracked_objects, result.fps)
-                            _, buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                            response["annotated_frame"] = base64.b64encode(buf).decode("utf-8")
-                            response["alert"] = {
-                                "type": "accident",
-                                "confidence": result.accident.confidence,
-                                "description": result.accident.description,
-                            }
-                        elif result.fire_alert:
-                            annotated = pipe.annotate_frame(frame, result.tracked_objects, result.fps)
-                            _, buf = cv2.imencode(".jpg", annotated, [cv2.IMWRITE_JPEG_QUALITY, 50])
-                            response["annotated_frame"] = base64.b64encode(buf).decode("utf-8")
-                            response["alert"] = {
-                                "type": result.fire_alert.alert_type,
-                                "confidence": result.fire_alert.confidence,
-                            }
 
                         await websocket.send_text(json.dumps(response))
                         last_status_time = now
@@ -267,8 +278,9 @@ async def verify_stream_frame(payload: dict, current_user=Depends(get_optional_u
         "assigned_department": assigned_department,
         "ai_risk_score": confidence,
         "ai_recommendation": ai_recommendation,
-        "reporter_name": "UCRIP CCTV Verification",
+        "reporter_name": "CRIS CCTV Verification",
         "camera_name": camera_name,
+        "camera_id": camera_id,
         "snapshot_path": snapshot_path,
         "detection_type": detection_type,
         "confidence": confidence,

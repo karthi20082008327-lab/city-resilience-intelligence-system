@@ -1,22 +1,35 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Shield, Mail, Lock, Eye, EyeOff, ArrowLeft, Building2 } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { authAPI } from '../../services/api'
-import { UcripLogo } from '../../components/UcripLogo'
+import { CrisLogo } from '../../components/CrisLogo'
+
+const DEPARTMENTS = [
+  { value: 'emergency_department', label: 'Emergency Department', icon: '🚨' },
+  { value: 'traffic_department', label: 'Traffic Department', icon: '🚗' },
+  { value: 'water_department', label: 'Water Department', icon: '💧' },
+  { value: 'electricity_department', label: 'Electricity Department', icon: '⚡' },
+  { value: 'disaster_management', label: 'Disaster Management', icon: '🛡️' },
+  { value: 'surveillance_department', label: 'Surveillance Department', icon: '📹' },
+]
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuthStore()
+  const [loginMode, setLoginMode] = useState<'admin' | 'department'>('admin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [department, setDepartment] = useState('')
+  const [deptPassword, setDeptPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showDeptPassword, setShowDeptPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -27,6 +40,26 @@ export default function LoginPage() {
       navigate('/admin/dashboard')
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDepartmentLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!department) {
+      setError('Please select a department')
+      return
+    }
+    setLoading(true)
+    setError('')
+    try {
+      const res = await authAPI.departmentLogin({ department, password: deptPassword })
+      const { user, access_token, refresh_token } = res.data
+      login(user, access_token, refresh_token)
+      navigate('/admin/dashboard')
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Login failed. Please check your password.')
     } finally {
       setLoading(false)
     }
@@ -76,7 +109,7 @@ export default function LoginPage() {
             transition={{ type: 'spring', stiffness: 200, delay: 0.15 }}
             className="flex items-center justify-center mx-auto mb-6"
           >
-            <UcripLogo className="w-16 h-16" />
+            <CrisLogo className="w-16 h-16" />
           </motion.div>
 
           <div className="text-center mb-8">
@@ -84,7 +117,36 @@ export default function LoginPage() {
             <p className="text-slate-500 mt-2 text-sm">Sign in to the Command Center</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Login Mode Tabs */}
+          <div className="flex gap-2 mb-6 p-1 bg-slate-100 rounded-xl">
+            <button
+              type="button"
+              onClick={() => { setLoginMode('admin'); setError('') }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                loginMode === 'admin'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Shield className="w-4 h-4" />
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginMode('department'); setError('') }}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+                loginMode === 'department'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Building2 className="w-4 h-4" />
+              Department
+            </button>
+          </div>
+
+          {loginMode === 'admin' ? (
+            <form onSubmit={handleAdminLogin} className="space-y-5">
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
@@ -105,7 +167,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="uc-input pl-10"
-                  placeholder="admin@ucrip.gov"
+                  placeholder="admin@cris.gov"
                   required
                 />
               </div>
@@ -189,6 +251,90 @@ export default function LoginPage() {
               )}
             </motion.button>
           </form>
+          ) : (
+          <form onSubmit={handleDepartmentLogin} className="space-y-5">
+            {/* Error */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {/* Department Selection */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Department</label>
+              <div className="relative">
+                <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <select
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                  className="uc-input pl-10 appearance-none"
+                  required
+                >
+                  <option value="">Select your department</option>
+                  {DEPARTMENTS.map((dept) => (
+                    <option key={dept.value} value={dept.value}>
+                      {dept.icon} {dept.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Department Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type={showDeptPassword ? 'text' : 'password'}
+                  value={deptPassword}
+                  onChange={(e) => setDeptPassword(e.target.value)}
+                  className="uc-input pl-10 pr-10"
+                  placeholder="Enter department password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowDeptPassword(!showDeptPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showDeptPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Department Info */}
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200">
+              <p className="text-xs text-blue-700">
+                <strong>Department Login:</strong> Select your department and enter the password. 
+                You will only see incidents assigned to your department.
+              </p>
+            </div>
+
+            {/* Submit */}
+            <motion.button
+              whileHover={{ scale: 1.01, y: -1 }}
+              whileTap={{ scale: 0.99 }}
+              type="submit"
+              disabled={loading || !department}
+              className="w-full uc-btn uc-btn-primary py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <Building2 className="w-4 h-4" />
+                  Sign In as Department
+                </>
+              )}
+            </motion.button>
+          </form>
+          )}
         </div>
       </motion.div>
     </div>

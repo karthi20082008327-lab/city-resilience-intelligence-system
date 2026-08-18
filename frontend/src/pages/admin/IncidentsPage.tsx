@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Filter, MapPin, Clock, User, X, Eye, Camera } from 'lucide-react'
+import { AlertTriangle, Filter, MapPin, Clock, User, X, Eye, Camera, Building2 } from 'lucide-react'
 import { incidentAPI } from '../../services/api'
+import { useAuthStore } from '../../stores/authStore'
 import {
   formatDate,
   getPriorityColor,
@@ -11,6 +12,7 @@ import {
 } from '../../utils/helpers'
 
 export default function IncidentsPage() {
+  const { user } = useAuthStore()
   const [incidents, setIncidents] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -20,17 +22,26 @@ export default function IncidentsPage() {
   const [selectedIncident, setSelectedIncident] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
+  // Determine if user is a department user (not super_admin)
+  const isDepartmentUser = user?.role?.name !== 'super_admin' && user?.role?.name !== 'admin'
+  const userDepartment = user?.role?.name || ''
+
   useEffect(() => {
     const fetchIncidents = async () => {
       setLoading(true)
       try {
-        const res = await incidentAPI.list({
+        const params: any = {
           page,
           per_page: 15,
           category: categoryFilter || undefined,
           status: statusFilter || undefined,
           priority: priorityFilter || undefined,
-        })
+        }
+        // If user is a department user, filter by their department
+        if (isDepartmentUser && userDepartment) {
+          params.department = userDepartment
+        }
+        const res = await incidentAPI.list(params)
         setIncidents(res.data.incidents)
         setTotal(res.data.total)
       } catch (e) {
@@ -39,7 +50,7 @@ export default function IncidentsPage() {
       setLoading(false)
     }
     fetchIncidents()
-  }, [page, categoryFilter, statusFilter, priorityFilter])
+  }, [page, categoryFilter, statusFilter, priorityFilter, isDepartmentUser, userDepartment])
 
   const handleStatusUpdate = async (incidentId: string, newStatus: string) => {
     try {
@@ -58,8 +69,23 @@ export default function IncidentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Incident Management</h1>
-          <p className="text-slate-500 text-sm mt-0.5">{total} total incidents</p>
+          <p className="text-slate-500 text-sm mt-0.5">
+            {isDepartmentUser ? (
+              <span className="flex items-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5" />
+                {getDepartmentName(userDepartment)} — {total} incidents
+              </span>
+            ) : (
+              `${total} total incidents`
+            )}
+          </p>
         </div>
+        {isDepartmentUser && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <Building2 className="w-3.5 h-3.5 text-blue-600" />
+            <span className="text-xs font-medium text-blue-700">{getDepartmentName(userDepartment)}</span>
+          </div>
+        )}
       </div>
 
       {/* Filters */}

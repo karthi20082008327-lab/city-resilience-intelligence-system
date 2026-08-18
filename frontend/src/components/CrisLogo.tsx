@@ -1,8 +1,8 @@
-interface UcripLogoProps {
+interface CrisLogoProps {
   className?: string
 }
 
-export function UcripLogo({ className = 'w-9 h-9' }: UcripLogoProps) {
+export function CrisLogo({ className = 'w-9 h-9' }: CrisLogoProps) {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -12,14 +12,14 @@ export function UcripLogo({ className = 'w-9 h-9' }: UcripLogoProps) {
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="ucrip-tile" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+        <linearGradient id="cris-tile" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
           <stop stopColor="#3b82f6" />
           <stop offset="0.5" stopColor="#6366f1" />
           <stop offset="1" stopColor="#8b5cf6" />
         </linearGradient>
       </defs>
 
-      <rect x="3" y="3" width="58" height="58" rx="15" fill="url(#ucrip-tile)" />
+      <rect x="3" y="3" width="58" height="58" rx="15" fill="url(#cris-tile)" />
 
       {/* shield outline */}
       <path

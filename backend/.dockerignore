@@ -5,7 +5,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 tests/
-ucrip.db
+cris.db
 *.db
 uploads/
 .env

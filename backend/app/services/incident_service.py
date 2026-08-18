@@ -1,5 +1,5 @@
 """
-UCRIP Incident Service
+CRIS Incident Service
 Creates incidents in DB with deduplication, snapshot, and video clip.
 """
 
@@ -16,7 +16,7 @@ from app.models.incident import Incident, IncidentMedia
 
 logger = logging.getLogger(__name__)
 
-DEDUP_WINDOW_SECONDS = 60
+DEDUP_WINDOW_SECONDS = 5  # Fast dedup — allow repeated collisions after 5 seconds
 DEDUP_DISTANCE_METERS = 200
 
 
@@ -43,7 +43,7 @@ class IncidentService:
                 location_address=data.get("location_address", ""),
                 assigned_department=data.get("assigned_department", "emergency_department"),
                 assigned_to=None,
-                reporter_name=data.get("reporter_name", "UCRIP AI"),
+                reporter_name=data.get("reporter_name", "CRIS AI"),
                 reporter_phone=None,
                 reporter_email=None,
                 ai_risk_score=data.get("ai_risk_score", 0.0),
@@ -97,6 +97,7 @@ class IncidentService:
                 "ai_recommendation": incident.ai_recommendation,
                 "reporter_name": incident.reporter_name,
                 "camera_name": data.get("camera_name", ""),
+                "camera_id": data.get("camera_id"),
                 "snapshot_url": f"/uploads/{os.path.basename(os.path.dirname(snapshot_path))}/snapshot.jpg"
                 if snapshot_path
                 else None,
@@ -122,6 +123,22 @@ class IncidentService:
                     "video_url": ws_data.get("video_url"),
                 }
             )
+
+            # Tell every connected simulation / CCTV feed to auto-focus the
+            # camera that observed this incident in real time.
+            camera_id = data.get("camera_id")
+            if camera_id:
+                await manager.broadcast_camera_focus(
+                    {
+                        "camera_id": camera_id,
+                        "camera_name": data.get("camera_name", ""),
+                        "category": data["category"],
+                        "title": incident.title,
+                        "incident_id": incident.incident_id,
+                        "priority": incident.priority,
+                        "snapshot_url": ws_data.get("snapshot_url"),
+                    }
+                )
 
             logger.info(f"Incident created: {incident.incident_id} ({incident.category})")
             return incident

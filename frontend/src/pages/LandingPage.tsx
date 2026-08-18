@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Shield, Users, MapPin, Activity, Brain, ArrowRight } from 'lucide-react'
-import { UcripLogo } from '../components/UcripLogo'
+import { CrisLogo } from '../components/CrisLogo'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -48,9 +48,9 @@ export default function LandingPage() {
           className="flex items-center gap-3"
         >
           <div className="w-10 h-10 flex items-center justify-center">
-            <UcripLogo className="w-10 h-10" />
+            <CrisLogo className="w-10 h-10" />
           </div>
-          <span className="text-xl font-bold uc-gradient-text">UCRIP</span>
+          <span className="text-xl font-bold uc-gradient-text">CRIS</span>
         </motion.div>
       </nav>
 
@@ -171,7 +171,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-8 text-slate-400 text-sm">
-        © 2024 UCRIP — Urban Cascade Risk Intelligence Platform
+        © 2024 CRIS — Urban Cascade Risk Intelligence Platform
       </footer>
     </div>
   )

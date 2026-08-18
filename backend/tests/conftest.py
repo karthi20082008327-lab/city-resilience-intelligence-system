@@ -3,8 +3,8 @@ import sys
 
 import pytest
 
-os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_ucrip.db")
-os.environ.setdefault("DATABASE_URL_SYNC", "sqlite:///./test_ucrip.db")
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///./test_cris.db")
+os.environ.setdefault("DATABASE_URL_SYNC", "sqlite:///./test_cris.db")
 os.environ.setdefault("DEBUG", "false")
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,7 +29,7 @@ def client(app):
 def admin_headers(client):
     resp = client.post(
         "/api/auth/login",
-        json={"email": "admin@ucrip.gov", "password": "Admin@123456"},
+        json={"email": "admin@cris.gov", "password": "Admin@123456"},
     )
     assert resp.status_code == 200, resp.text
     token = resp.json()["access_token"]

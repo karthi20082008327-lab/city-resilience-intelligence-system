@@ -10,6 +10,11 @@ class LoginRequest(BaseModel):
     remember_me: bool = False
 
 
+class DepartmentLoginRequest(BaseModel):
+    department: str = Field(..., min_length=1)
+    password: str = Field(..., min_length=1)
+
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str

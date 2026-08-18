@@ -37,3 +37,16 @@ nohup.out
 .coverage
 htmlcov/
 .ruff_cache/
+
+# Build caches
+.vite/
+
+# Backups
+*.backup-*
+*.bak
+
+# Large media
+*.pptx
+*.mp4
+*.avi
+*.mkv

@@ -36,6 +36,6 @@ export const useAuthStore = create<AuthState>()(
           user: state.user ? { ...state.user, ...userData } : null,
         })),
     }),
-    { name: 'ucrip-auth' }
+    { name: 'cris-auth' }
   )
 )

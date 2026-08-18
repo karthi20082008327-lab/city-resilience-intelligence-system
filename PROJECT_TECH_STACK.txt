@@ -1,0 +1,78 @@
+================================================================================
+PROJECT TECHNOLOGY & APPLICATION OVERVIEW
+================================================================================
+
+1. PROJECT NAME
+* CRIS - Urban Cascade Risk Intelligence Platform (Smart City incident
+  management system).
+
+2. WHAT DOES THIS APPLICATION DO?
+* A web app that helps city departments manage emergencies (accidents,
+  fires, floods, water leaks, power cuts, road damage, gas leaks) from one
+  real-time command center.
+* Users: city admins, department teams, and citizens who report issues.
+* Features: live dashboard, incident map, citizen reporting portal,
+  live weather + flood risk, AI video detection (accident/fire/smoke),
+  3D city simulation, photo/video evidence, real-time alerts, role-based login.
+
+3. PROGRAMMING LANGUAGES
+* Python      - Backend (API + AI detection)
+* TypeScript  - Frontend
+* JavaScript  - 3D simulation
+* HTML/CSS    - Web pages
+* SQL         - Database queries
+
+4. FRAMEWORKS
+* FastAPI  - Python backend framework
+* React    - Frontend UI framework
+* Vite     - Frontend build tool
+* Tailwind CSS - Styling
+* Three.js - 3D city simulation
+
+5. KEY LIBRARIES
+* Backend : SQLAlchemy (database), Pydantic (validation), Uvicorn (server),
+  Alembic (migrations), JWT + bcrypt (login security), OpenCV (AI vision),
+  httpx (weather API calls).
+* Frontend: axios (API calls), React Query (data), Zustand (state),
+  React Router (pages), Leaflet (maps), Recharts (charts), HeroUI (UI kit).
+
+6. DATABASE
+* SQLite for local development, PostgreSQL 16 in Docker.
+* Main tables: users, roles, user_sessions, incidents, incident_media.
+* Stores user accounts, logins, incident reports, and uploaded evidence.
+
+7. APIs & SERVICES
+* Weather: Open-Meteo (free live weather + flood risk).
+* Internal REST APIs: auth, users, incidents, weather, dashboard.
+* WebSockets: push live alerts to dashboards in real time.
+
+8. AUTHENTICATION & SECURITY
+* Login with JWT tokens, bcrypt password hashing, role-based access
+  (admin + departments), CORS, input validation, upload limits.
+
+9. HOW IT WORKS
+* Someone reports an incident OR the AI spots it from a camera / 3D sim.
+* Backend saves it, sets priority and risk score, routes it to the right
+  department, and pushes a live alert.
+* The admin dashboard and map update instantly.
+
+10. BUILD & DEPLOYMENT
+* Backend: cd backend && uvicorn app.main:app --port 8000
+* Frontend: cd frontend && npm install && npm run dev
+* Production: npm run build, then Docker: docker compose up --build
+  (runs PostgreSQL + Redis + backend + nginx frontend + reverse proxy).
+
+11. TESTING
+* Pytest for backend (auth, incidents, weather). No frontend tests.
+
+12. ADVANTAGES
+* One central real-time command center, automatic AI detection with evidence,
+  automatic department routing, live alerts, easy Docker deployment.
+
+13. LIMITATIONS
+* Default secrets must be changed for production, some features are demos,
+  no frontend tests yet.
+
+================================================================================
+END
+================================================================================

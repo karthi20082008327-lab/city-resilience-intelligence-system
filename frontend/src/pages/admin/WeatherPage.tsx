@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Thermometer, Droplets, Wind, Gauge, CloudRain, Sun, AlertTriangle } from 'lucide-react'
+import { Thermometer, Droplets, Wind, Gauge, CloudRain, Sun } from 'lucide-react'
 import { weatherAPI } from '../../services/api'
 
 const weatherIcons: Record<string, string> = {
@@ -113,37 +113,6 @@ export default function WeatherPage() {
         </div>
       </motion.div>
 
-      {/* AI Risk Alert */}
-      {risk && risk.flood_risk > 0.3 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="uc-card p-5 border border-red-200 bg-red-50"
-        >
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-red-600">AI Weather Alert</h3>
-              <p className="text-slate-600 text-sm mt-1">{risk.recommendation}</p>
-              <div className="flex gap-4 mt-2">
-                <span className="text-xs text-slate-500">
-                  Flood Risk:{' '}
-                  <span className="text-red-600 font-semibold">{(risk.flood_risk * 100).toFixed(0)}%</span>
-                </span>
-                <span className="text-xs text-slate-500">
-                  Overall:{' '}
-                  <span className="text-amber-600 font-semibold">
-                    {(risk.overall_risk * 100).toFixed(0)}%
-                  </span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {stats.map((stat, i) => (
@@ -169,43 +138,6 @@ export default function WeatherPage() {
       {/* Risk + UV */}
       {risk && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="uc-card p-6"
-          >
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-5">
-              Risk Assessment
-            </h3>
-            <div className="space-y-4">
-              {[
-                { label: 'Flood Risk', value: risk.flood_risk, color: '#3b82f6' },
-                { label: 'UV Risk', value: risk.uv_risk, color: '#eab308' },
-                { label: 'Wind Risk', value: risk.wind_risk, color: '#06b6d4' },
-                { label: 'Overall Risk', value: risk.overall_risk, color: '#8b5cf6' },
-              ].map((item) => (
-                <div key={item.label}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs text-slate-500">{item.label}</span>
-                    <span className="text-xs font-semibold text-slate-700">
-                      {(item.value * 100).toFixed(0)}%
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.value * 100}%` }}
-                      transition={{ duration: 1, ease: 'easeOut' }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

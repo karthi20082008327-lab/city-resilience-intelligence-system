@@ -9,7 +9,7 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  const stored = localStorage.getItem('ucrip-auth')
+  const stored = localStorage.getItem('cris-auth')
   if (stored) {
     const { state } = JSON.parse(stored)
     if (state?.accessToken) {
@@ -25,7 +25,7 @@ api.interceptors.response.use(
     const originalRequest = error.config
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
-      const stored = localStorage.getItem('ucrip-auth')
+      const stored = localStorage.getItem('cris-auth')
       if (stored) {
         const { state } = JSON.parse(stored)
         if (state?.refreshToken) {
@@ -35,7 +35,7 @@ api.interceptors.response.use(
             })
             const { access_token, refresh_token, user } = res.data
             localStorage.setItem(
-              'ucrip-auth',
+              'cris-auth',
               JSON.stringify({
                 state: { ...state, accessToken: access_token, refreshToken: refresh_token, user },
               })
@@ -43,7 +43,7 @@ api.interceptors.response.use(
             originalRequest.headers.Authorization = `Bearer ${access_token}`
             return api(originalRequest)
           } catch {
-            localStorage.removeItem('ucrip-auth')
+            localStorage.removeItem('cris-auth')
             window.location.href = '/admin/login'
           }
         }
@@ -55,6 +55,7 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: (data: { email: string; password: string; remember_me?: boolean }) => api.post('/auth/login', data),
+  departmentLogin: (data: { department: string; password: string }) => api.post('/auth/department-login', data),
   register: (data: {
     email: string
     username: string
@@ -79,6 +80,7 @@ export const incidentAPI = {
     category?: string
     status?: string
     priority?: string
+    department?: string
   }) => api.get('/incidents/', { params }),
   get: (id: string) => api.get(`/incidents/${id}`),
   create: (data: IncidentCreate) => api.post('/incidents/', data),

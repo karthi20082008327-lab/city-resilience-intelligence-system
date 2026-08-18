@@ -1,5 +1,5 @@
 """
-UCRIP Object Tracker
+CRIS Object Tracker
 Kalman-filter based multi-object tracker (ByteTrack-inspired).
 Assigns persistent IDs and tracks velocity/trajectory for each object.
 """
@@ -15,7 +15,7 @@ from scipy.optimize import linear_sum_assignment
 logger = logging.getLogger(__name__)
 
 MAX_AGE = 30
-MIN_HITS = 3
+MIN_HITS = 2  # Confirm after 2 frames (faster than 3, still filters single-frame noise)
 IOU_THRESHOLD = 0.3
 
 
@@ -56,6 +56,7 @@ class TrackedObject:
     velocity: tuple[float, float] = (0.0, 0.0)
     trajectory: list = field(default_factory=list)
     is_confirmed: bool = False
+    dominant_color: str = "unknown"
     kf: KalmanFilter | None = field(default=None, repr=False)
 
     def __post_init__(self):
@@ -65,11 +66,12 @@ class TrackedObject:
 class KalmanBoxTracker:
     _id_counter = 0
 
-    def __init__(self, bbox, class_name, confidence):
+    def __init__(self, bbox, class_name, confidence, dominant_color="unknown"):
         KalmanBoxTracker._id_counter += 1
         self.track_id = KalmanBoxTracker._id_counter
         self.class_name = class_name
         self.confidence = confidence
+        self.dominant_color = dominant_color
 
         self.kf = KalmanFilter(dim_x=7, dim_z=4)
         self.kf.F = np.array(
@@ -142,8 +144,8 @@ class KalmanBoxTracker:
         return TrackedObject(
             track_id=self.track_id,
             class_name=self.class_name,
-            bbox=(max(0, x), max(0, y), int(abs(w)), int(abs(h))),
-            center=self.last_center if hasattr(self, "last_center") else (int(cx), int(cy)),
+            bbox=tuple(map(int, self.get_state())),
+            center=self.last_center,
             confidence=self.confidence,
             age=self.age,
             hits=self.hits,
@@ -151,6 +153,7 @@ class KalmanBoxTracker:
             velocity=self.velocity,
             trajectory=list(self.trajectory[-30:]),
             is_confirmed=(self.hits >= MIN_HITS),
+            dominant_color=self.dominant_color,
             kf=self.kf,
         )
 
@@ -205,7 +208,12 @@ class ObjectTracker:
 
         for det_idx in unmatched_dets:
             d = detections[det_idx]
-            tracker = KalmanBoxTracker(d.bbox, d.class_name, d.confidence)
+            tracker = KalmanBoxTracker(
+                d.bbox,
+                d.class_name,
+                d.confidence,
+                getattr(d, "dominant_color", "unknown"),
+            )
             self.trackers.append(tracker)
 
         self.trackers = [t for t in self.trackers if t.time_since_update <= MAX_AGE]
