@@ -42,7 +42,6 @@ async def seed_roles():
                 Role(name="electricity_department", description="Power infrastructure"),
                 Role(name="emergency_department", description="Emergency response"),
                 Role(name="disaster_management", description="Disaster response"),
-                Role(name="surveillance_department", description="Surveillance and field operations"),
             ]
             db.add_all(roles)
             await db.commit()
@@ -80,7 +79,6 @@ DEPARTMENT_USERS = [
     {"email": "water@cris.gov", "username": "water", "full_name": "Water Department", "role": "water_department", "department": "Water Department"},
     {"email": "electricity@cris.gov", "username": "electricity", "full_name": "Electricity Department", "role": "electricity_department", "department": "Electricity Department"},
     {"email": "disaster@cris.gov", "username": "disaster", "full_name": "Disaster Management", "role": "disaster_management", "department": "Disaster Management"},
-    {"email": "srinidhi@cris.gov", "username": "srinidhi", "full_name": "Srinidhi Surveillance", "role": "surveillance_department", "department": "Surveillance Department"},
 ]
 
 

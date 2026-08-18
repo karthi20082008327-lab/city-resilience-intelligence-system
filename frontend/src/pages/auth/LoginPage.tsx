@@ -12,7 +12,6 @@ const DEPARTMENTS = [
   { value: 'water_department', label: 'Water Department', icon: '💧' },
   { value: 'electricity_department', label: 'Electricity Department', icon: '⚡' },
   { value: 'disaster_management', label: 'Disaster Management', icon: '🛡️' },
-  { value: 'surveillance_department', label: 'Surveillance Department', icon: '📹' },
 ]
 
 export default function LoginPage() {
