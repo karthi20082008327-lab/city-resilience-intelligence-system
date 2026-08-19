@@ -244,12 +244,14 @@ export default function MapPage() {
             ))}
 
           {/* Incident markers */}
-          {filteredIncidents.map((incident) => (
-            <Marker
-              key={incident.id}
-              position={[incident.location.latitude, incident.location.longitude]}
-              icon={createIncidentIcon(incident.category)}
-            >
+          {filteredIncidents
+            .filter((i) => i.location?.latitude && i.location?.longitude)
+            .map((incident) => (
+              <Marker
+                key={incident.id}
+                position={[incident.location.latitude, incident.location.longitude]}
+                icon={createIncidentIcon(incident.category)}
+              >
               <Popup>
                 <div className="p-1 min-w-[200px]">
                   <p className="font-semibold text-sm mb-1">{incident.title}</p>
@@ -270,7 +272,7 @@ export default function MapPage() {
 
           {/* Warning zones for critical incidents */}
           {filteredIncidents
-            .filter((i) => i.priority === 'CRITICAL')
+            .filter((i) => i.priority === 'CRITICAL' && i.location?.latitude && i.location?.longitude)
             .map((incident) => (
               <Circle
                 key={`zone-${incident.id}`}
