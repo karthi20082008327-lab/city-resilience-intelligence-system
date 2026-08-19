@@ -11,24 +11,24 @@ const CITY_CENTER: [number, number] = [11.2448, 77.5017]
 
 const tileLayers = {
   satellite: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: 'Esri, Maxar, Earthstar Geographics',
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    attribution: 'Google Satellite',
     name: 'Satellite',
+  },
+  hybrid: {
+    url: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+    attribution: 'Google Hybrid',
+    name: 'Hybrid',
   },
   streets: {
     url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap contributors',
     name: 'Streets',
   },
-  topo: {
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attribution: 'OpenTopoMap',
+  terrain: {
+    url: 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',
+    attribution: 'Google Terrain',
     name: 'Terrain',
-  },
-  dark: {
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    attribution: '&copy; CartoDB',
-    name: 'Dark',
   },
 }
 
@@ -313,9 +313,9 @@ export default function MapPage() {
                 }`}
               >
                 {key === 'satellite' && <Satellite className="w-3 h-3" />}
+                {key === 'hybrid' && <Layers className="w-3 h-3" />}
                 {key === 'streets' && <MapIcon className="w-3 h-3" />}
-                {key === 'topo' && <Layers className="w-3 h-3" />}
-                {key === 'dark' && <Layers className="w-3 h-3" />}
+                {key === 'terrain' && <Layers className="w-3 h-3" />}
                 {tileLayers[key].name}
               </button>
             ))}
