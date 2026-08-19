@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Shield, Mail, Lock, Eye, EyeOff, ArrowLeft, Building2 } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Building2, Fingerprint, KeyRound } from 'lucide-react'
 import { useAuthStore } from '../../stores/authStore'
 import { authAPI } from '../../services/api'
 import { CrisLogo } from '../../components/CrisLogo'
@@ -39,7 +39,7 @@ export default function LoginPage() {
       login(user, access_token, refresh_token)
       navigate('/admin/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your credentials.')
+      setError(err.response?.data?.detail || 'Authentication failed. Verify your credentials.')
     } finally {
       setLoading(false)
     }
@@ -59,26 +59,34 @@ export default function LoginPage() {
       login(user, access_token, refresh_token)
       navigate('/admin/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed. Please check your password.')
+      setError(err.response?.data?.detail || 'Authentication failed. Verify your password.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#f4f6fb] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
+        {/* grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: 'linear-gradient(#34d399 1px, transparent 1px), linear-gradient(90deg, #34d399 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
         <motion.div
-          className="absolute -top-48 -right-48 w-[500px] h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)' }}
-          animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+          className="absolute -top-48 -right-48 w-[600px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)' }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 10, repeat: Infinity }}
         />
         <motion.div
-          className="absolute -bottom-48 -left-48 w-[500px] h-[500px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%)' }}
-          animate={{ scale: [1.15, 1, 1.15], opacity: [0.5, 0.8, 0.5] }}
+          className="absolute -bottom-48 -left-48 w-[600px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)' }}
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.4, 0.8, 0.4] }}
           transition={{ duration: 10, repeat: Infinity, delay: 3 }}
         />
       </div>
@@ -88,10 +96,10 @@ export default function LoginPage() {
         initial={{ opacity: 0, x: -16 }}
         animate={{ opacity: 1, x: 0 }}
         onClick={() => navigate('/')}
-        className="fixed top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors z-20 text-sm"
+        className="fixed top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-emerald-400 transition-colors z-20 text-sm"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back
+        Back to Home
       </motion.button>
 
       {/* Login card */}
@@ -101,7 +109,7 @@ export default function LoginPage() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="uc-card p-8 uc-glow-border">
+        <div className="uc-card p-8 backdrop-blur-2xl border-white/[0.06] shadow-2xl shadow-black/40">
           {/* Logo */}
           <motion.div
             initial={{ scale: 0 }}
@@ -113,31 +121,31 @@ export default function LoginPage() {
           </motion.div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-            <p className="text-slate-500 mt-2 text-sm">Sign in to the Command Center</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Secure Access</h1>
+            <p className="text-slate-500 mt-2 text-sm">Authenticate to the Command Center</p>
           </div>
 
           {/* Login Mode Tabs */}
-          <div className="flex gap-2 mb-6 p-1 bg-slate-100 rounded-xl">
+          <div className="flex gap-2 mb-6 p-1 bg-white/[0.04] border border-white/[0.06] rounded-2xl">
             <button
               type="button"
               onClick={() => { setLoginMode('admin'); setError('') }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
                 loginMode === 'admin'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
               }`}
             >
-              <Shield className="w-4 h-4" />
-              Admin
+              <Fingerprint className="w-4 h-4" />
+              Administrator
             </button>
             <button
               type="button"
               onClick={() => { setLoginMode('department'); setError('') }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
                 loginMode === 'department'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
+                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
               }`}
             >
               <Building2 className="w-4 h-4" />
@@ -151,7 +159,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm"
+                className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
               >
                 {error}
               </motion.div>
@@ -159,15 +167,15 @@ export default function LoginPage() {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</label>
+              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="uc-input pl-10"
-                  placeholder="admin@cris.gov"
+                  placeholder="admin@nexus.gov"
                   required
                 />
               </div>
@@ -175,9 +183,9 @@ export default function LoginPage() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -189,7 +197,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -207,10 +215,10 @@ export default function LoginPage() {
                     className="sr-only"
                   />
                   <div
-                    className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
+                    className={`w-5 h-5 rounded-lg border transition-all flex items-center justify-center ${
                       rememberMe
-                        ? 'bg-blue-500 border-blue-500'
-                        : 'border-slate-300 bg-slate-50 group-hover:border-slate-400'
+                        ? 'bg-emerald-500 border-emerald-500'
+                        : 'border-slate-600 bg-slate-800/40 group-hover:border-slate-500'
                     }`}
                   >
                     {rememberMe && (
@@ -226,9 +234,9 @@ export default function LoginPage() {
                     )}
                   </div>
                 </div>
-                <span className="text-sm text-slate-500">Remember me</span>
+                <span className="text-sm text-slate-500">Keep me signed in</span>
               </label>
-              <button type="button" className="text-sm text-blue-600 hover:text-blue-700 transition-colors">
+              <button type="button" className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
                 Forgot password?
               </button>
             </div>
@@ -239,14 +247,14 @@ export default function LoginPage() {
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading}
-              className="w-full uc-btn uc-btn-primary py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full uc-btn-primary py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <Shield className="w-4 h-4" />
-                  Sign In
+                  <KeyRound className="w-4 h-4" />
+                  Authenticate
                 </>
               )}
             </motion.button>
@@ -258,7 +266,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm"
+                className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
               >
                 {error}
               </motion.div>
@@ -266,18 +274,18 @@ export default function LoginPage() {
 
             {/* Department Selection */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Department</label>
+              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Department</label>
               <div className="relative">
-                <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="uc-input pl-10 appearance-none"
                   required
                 >
-                  <option value="">Select your department</option>
+                  <option value="" className="bg-slate-900">Select your department</option>
                   {DEPARTMENTS.map((dept) => (
-                    <option key={dept.value} value={dept.value}>
+                    <option key={dept.value} value={dept.value} className="bg-slate-900">
                       {dept.icon} {dept.label}
                     </option>
                   ))}
@@ -287,9 +295,9 @@ export default function LoginPage() {
 
             {/* Department Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
                 <input
                   type={showDeptPassword ? 'text' : 'password'}
                   value={deptPassword}
@@ -301,7 +309,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeptPassword(!showDeptPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors"
                 >
                   {showDeptPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -309,10 +317,10 @@ export default function LoginPage() {
             </div>
 
             {/* Department Info */}
-            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200">
-              <p className="text-xs text-blue-700">
-                <strong>Department Login:</strong> Select your department and enter the password. 
-                You will only see incidents assigned to your department.
+            <div className="p-3 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20">
+              <p className="text-xs text-emerald-300/80">
+                <strong>Department Access:</strong> Select your department and enter the password.
+                You will only see incidents routed to your department.
               </p>
             </div>
 
@@ -322,14 +330,14 @@ export default function LoginPage() {
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading || !department}
-              className="w-full uc-btn uc-btn-primary py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full uc-btn-primary py-3.5 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <Building2 className="w-4 h-4" />
-                  Sign In as Department
+                  Enter Department
                 </>
               )}
             </motion.button>

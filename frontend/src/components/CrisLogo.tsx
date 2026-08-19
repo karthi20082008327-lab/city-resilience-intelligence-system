@@ -12,14 +12,14 @@ export function CrisLogo({ className = 'w-9 h-9' }: CrisLogoProps) {
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="cris-tile" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#3b82f6" />
-          <stop offset="0.5" stopColor="#6366f1" />
+        <linearGradient id="nexus-tile" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#10b981" />
+          <stop offset="0.5" stopColor="#06b6d4" />
           <stop offset="1" stopColor="#8b5cf6" />
         </linearGradient>
       </defs>
 
-      <rect x="3" y="3" width="58" height="58" rx="15" fill="url(#cris-tile)" />
+      <rect x="3" y="3" width="58" height="58" rx="14" fill="url(#nexus-tile)" />
 
       {/* shield outline */}
       <path
@@ -30,12 +30,12 @@ export function CrisLogo({ className = 'w-9 h-9' }: CrisLogoProps) {
         strokeLinejoin="round"
       />
 
-      {/* radar / signal pulse (intelligence & risk detection) */}
+      {/* radar / signal pulse */}
       <circle cx="32" cy="27" r="2.6" fill="#ffffff" />
       <circle cx="32" cy="27" r="5.6" stroke="#ffffff" strokeOpacity="0.65" strokeWidth="1.3" />
       <circle cx="32" cy="27" r="8.8" stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1.3" />
 
-      {/* cascading waves (cascading disasters / water) */}
+      {/* cascading waves */}
       <path
         d="M17 38c3.75 0 3.75-3.75 7.5-3.75s3.75 3.75 7.5 3.75 3.75-3.75 7.5-3.75 3.75 3.75 7.5 3.75"
         stroke="#ffffff"
@@ -46,14 +46,7 @@ export function CrisLogo({ className = 'w-9 h-9' }: CrisLogoProps) {
       <path
         d="M17 44c3.75 0 3.75-3.75 7.5-3.75s3.75 3.75 7.5 3.75 3.75-3.75 7.5-3.75 3.75 3.75 7.5 3.75"
         stroke="#ffffff"
-        strokeOpacity="0.65"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <path
-        d="M17 50c3.75 0 3.75-3.75 7.5-3.75s3.75 3.75 7.5 3.75 3.75-3.75 7.5-3.75 3.75 3.75 7.5 3.75"
-        stroke="#ffffff"
-        strokeOpacity="0.4"
+        strokeOpacity="0.55"
         strokeWidth="2"
         strokeLinecap="round"
       />
