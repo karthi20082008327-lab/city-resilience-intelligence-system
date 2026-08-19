@@ -1,13 +1,36 @@
-import { useEffect, useState, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet'
+import { useEffect, useState } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { motion } from 'framer-motion'
-import { Maximize2, AlertTriangle, Navigation } from 'lucide-react'
+import { AlertTriangle, Navigation, Layers, Satellite, Map as MapIcon, RotateCcw } from 'lucide-react'
 import { incidentAPI } from '../../services/api'
 import { useWebSocket } from '../../hooks/useWebSocket'
 import { formatDate } from '../../utils/helpers'
 
 const CITY_CENTER: [number, number] = [11.2448, 77.5017]
+
+const tileLayers = {
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Esri, Maxar, Earthstar Geographics',
+    name: 'Satellite',
+  },
+  streets: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    name: 'Streets',
+  },
+  topo: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: 'OpenTopoMap',
+    name: 'Terrain',
+  },
+  dark: {
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; CartoDB',
+    name: 'Dark',
+  },
+}
 
 const categoryColors: Record<string, string> = {
   accident: '#ef4444',
@@ -47,262 +70,310 @@ const departmentLocations = [
   {
     name: 'Ambulance Station',
     type: 'ambulance',
-    position: [11.241, 77.508] as [number, number],
+    position: [11.2465, 77.508] as [number, number],
     icon: '🚑',
   },
 ]
 
-function createIcon(color: string, size: number = 30) {
+function createIncidentIcon(category: string) {
+  const color = categoryColors[category] || '#6b7280'
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="44" viewBox="0 0 36 44">
+    <defs>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.4)"/>
+      </filter>
+    </defs>
+    <path d="M18 0C8.06 0 0 8.06 0 18c0 12.6 18 26 18 26s18-13.4 18-26C36 8.06 27.94 0 18 0z" fill="${color}" filter="url(#shadow)"/>
+    <circle cx="18" cy="17" r="8" fill="white" fill-opacity="0.9"/>
+    <circle cx="18" cy="17" r="4" fill="${color}"/>
+  </svg>`
   return L.divIcon({
+    html: svg,
     className: '',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.9);box-shadow:0 0 12px ${color}80;animation:pulse 2s infinite;"></div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    iconSize: [36, 44],
+    iconAnchor: [18, 44],
+    popupAnchor: [0, -44],
   })
 }
 
-function createLocationIcon() {
+function createDepartmentIcon(emoji: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+    <defs>
+      <filter id="ds" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.3)"/>
+      </filter>
+    </defs>
+    <path d="M16 0C7.16 0 0 7.16 0 16c0 12 16 24 16 24s16-12 16-24C32 7.16 24.84 0 16 0z" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#ds)"/>
+    <text x="16" y="20" text-anchor="middle" font-size="16">${emoji}</text>
+  </svg>`
   return L.divIcon({
+    html: svg,
     className: '',
-    html: `<div style="width:22px;height:22px;border-radius:50%;background:#2563eb;border:3px solid rgba(255,255,255,0.9);box-shadow:0 0 0 6px rgba(37,99,235,0.25);"></div>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
+    iconSize: [32, 40],
+    iconAnchor: [16, 40],
+    popupAnchor: [0, -40],
   })
 }
 
-function createDeptIcon(emoji: string) {
+function createUserIcon() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="#3b82f6" stroke="white" stroke-width="3"/>
+    <circle cx="12" cy="12" r="4" fill="white"/>
+  </svg>`
   return L.divIcon({
+    html: svg,
     className: '',
-    html: `<div style="width:32px;height:32px;border-radius:8px;background:rgba(10,15,26,0.9);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:16px;backdrop-filter:blur(8px);box-shadow:0 2px 8px rgba(0,0,0,0.3);">${emoji}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
   })
 }
 
-function IncidentMarker({
-  position,
-  color,
-  incident,
-}: {
-  position: [number, number]
-  color: string
-  incident: any
-}) {
-  return (
-    <Marker position={position} icon={createIcon(color, 32)}>
-      <Popup>
-        <div className="p-1.5 min-w-[220px] max-w-[280px]" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {incident.snapshot_url && (
-            <img src={incident.snapshot_url} alt="" className="w-full h-28 object-cover rounded-lg mb-2" />
-          )}
-          <h3 className="font-bold text-gray-900 text-sm">{incident.title}</h3>
-          <p className="text-[11px] text-gray-400 font-mono mt-0.5">{incident.incident_id}</p>
-          <div className="flex gap-1.5 mt-1.5 flex-wrap">
-            <span
-              className="px-2 py-0.5 rounded text-[11px] text-white font-medium"
-              style={{ background: color }}
-            >
-              {incident.priority}
-            </span>
-            <span className="px-2 py-0.5 rounded text-[11px] bg-gray-100 text-gray-600 capitalize">
-              {incident.category?.replace('_', ' ')}
-            </span>
-          </div>
-          <p className="text-[11px] text-gray-500 mt-1.5">{incident.location_address || 'No address'}</p>
-          <p className="text-[11px] text-gray-400">{formatDate(incident.created_at)}</p>
-          {incident.ai_risk_score && (
-            <p className="text-[11px] text-blue-600 mt-1">
-              AI Confidence: {(incident.ai_risk_score * 100).toFixed(0)}%
-            </p>
-          )}
-        </div>
-      </Popup>
-    </Marker>
-  )
+function MapViewController({ center }: { center: [number, number] }) {
+  const map = useMap()
+  useEffect(() => {
+    map.setView(center, map.getZoom(), { animate: true })
+  }, [center, map])
+  return null
 }
 
 export default function MapPage() {
   const [incidents, setIncidents] = useState<any[]>([])
-  const [filter, setFilter] = useState<string>('all')
-  const [map, setMap] = useState<L.Map | null>(null)
-  const mapRef = useRef<L.Map | null>(null)
-  const [userPosition, setUserPosition] = useState<[number, number] | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null)
+  const [mapType, setMapType] = useState<keyof typeof tileLayers>('satellite')
+  const [showDepartments, setShowDepartments] = useState(true)
+  const [mapCenter, setMapCenter] = useState<[number, number]>(CITY_CENTER)
 
-  useEffect(() => {
-    if (!('geolocation' in navigator)) return
-    const id = navigator.geolocation.watchPosition(
-      (pos) => setUserPosition([pos.coords.latitude, pos.coords.longitude]),
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 10000 }
-    )
-    return () => navigator.geolocation.clearWatch(id)
-  }, [])
-
-  const centerOnUser = () => {
-    if (userPosition && map) {
-      map.setView(userPosition, 13)
-    } else if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition((p) => {
-        const pos: [number, number] = [p.coords.latitude, p.coords.longitude]
-        setUserPosition(pos)
-        map?.setView(pos, 13)
-      })
-    }
-  }
-
-  useEffect(() => {
-    const fetchIncidents = async () => {
-      try {
-        const res = await incidentAPI.list({ per_page: 100 })
-        setIncidents(res.data.incidents)
-      } catch (e) {
-        console.error(e)
-      }
-    }
-    fetchIncidents()
-    const interval = setInterval(fetchIncidents, 15000)
-    return () => clearInterval(interval)
-  }, [])
-
-  useWebSocket((msg) => {
-    if (msg.type === 'incident' && msg.action === 'created') {
-      setIncidents((prev) => [msg.data, ...prev])
+  useWebSocket((data: any) => {
+    if (data.type === 'new_incident') {
+      setIncidents((prev) => [data.incident, ...prev])
     }
   })
 
-  const filteredIncidents = filter === 'all' ? incidents : incidents.filter((inc) => inc.category === filter)
-  const activeIncidents = filteredIncidents.filter((inc) =>
-    ['reported', 'acknowledged', 'in_progress'].includes(inc.status)
-  )
+  useEffect(() => {
+    loadIncidents()
+  }, [])
+
+  const loadIncidents = async () => {
+    try {
+      const res = await incidentAPI.list({ status: 'active', per_page: 100 })
+      setIncidents(res.data.incidents || res.data || [])
+    } catch (err) {
+      console.error('Failed to load incidents:', err)
+    }
+  }
+
+  const locateUser = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc: [number, number] = [pos.coords.latitude, pos.coords.longitude]
+          setUserLocation(loc)
+          setMapCenter(loc)
+        },
+        () => {
+          setUserLocation(CITY_CENTER)
+          setMapCenter(CITY_CENTER)
+        },
+      )
+    }
+  }
+
+  const filteredIncidents =
+    selectedCategory === 'all' ? incidents : incidents.filter((i) => i.category === selectedCategory)
+
+  const categories = ['all', 'accident', 'fire', 'flood', 'water_leak', 'power_outage', 'road_damage']
+
+  const tile = tileLayers[mapType]
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="h-[calc(100vh-120px)] relative rounded-2xl overflow-hidden border border-slate-100"
-    >
-      {/* Filters */}
-      <div className="absolute top-4 left-4 z-[1000] flex gap-1.5 flex-wrap">
-        {['all', 'accident', 'fire', 'flood', 'water_leak', 'power_outage', 'road_damage'].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all backdrop-blur-md ${
-              filter === cat
-                ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900 hover:border-slate-300'
-            }`}
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-800">Live Incident Map</h1>
+          <p className="text-xs text-slate-400">Real-time monitoring of Coimbatore city</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={locateUser}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
           >
-            {cat === 'all' ? 'All' : cat.replace('_', ' ')}
-          </button>
-        ))}
-      </div>
-
-      {/* Count */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] px-4 py-2 rounded-xl bg-white backdrop-blur-md border border-slate-200 flex items-center gap-2">
-        <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-        <span className="text-xs text-slate-700 font-medium">{activeIncidents.length} Active</span>
-      </div>
-
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 z-[1000] px-3 py-2.5 rounded-xl bg-white backdrop-blur-md border border-slate-200">
-        <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Legend</p>
-        <div className="space-y-1">
-          {Object.entries(categoryColors)
-            .slice(0, 5)
-            .map(([cat, color]) => (
-              <div key={cat} className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
-                <span className="text-[11px] text-slate-500 capitalize">{cat.replace('_', ' ')}</span>
-              </div>
-            ))}
+            <Navigation className="w-3.5 h-3.5" />
+            Locate Me
+          </motion.button>
         </div>
       </div>
 
-      <MapContainer
-        center={CITY_CENTER}
-        zoom={13}
-        className="w-full h-full"
-        ref={(ref) => {
-          if (ref) {
-            mapRef.current = ref
-            setMap(ref)
-          }
-        }}
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-        />
-        {departmentLocations.map((dept, i) => (
-          <Marker key={i} position={dept.position} icon={createDeptIcon(dept.icon)}>
-            <Popup>
-              <div className="p-1">
-                <h3 className="font-bold text-gray-900 text-sm">{dept.name}</h3>
-                <p className="text-[11px] text-gray-500 capitalize">{dept.type}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-        {userPosition && (
-          <Marker position={userPosition} icon={createLocationIcon()}>
-            <Popup>
-              <div className="p-1">
-                <h3 className="font-bold text-gray-900 text-sm">Your Location</h3>
-                <p className="text-[11px] text-gray-500">Live position</p>
-              </div>
-            </Popup>
-          </Marker>
-        )}
-        {activeIncidents.map((inc) => {
-          if (!inc.latitude || !inc.longitude) return null
-          return (
-            <IncidentMarker
-              key={inc.id}
-              position={[inc.latitude, inc.longitude]}
-              color={categoryColors[inc.category] || '#6b7280'}
-              incident={inc}
-            />
-          )
-        })}
-        {activeIncidents
-          .filter((i) => i.priority === 'critical')
-          .map(
-            (inc) =>
-              inc.latitude &&
-              inc.longitude && (
-                <Circle
-                  key={`zone-${inc.id}`}
-                  center={[inc.latitude, inc.longitude]}
-                  radius={500}
-                  pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.08, weight: 1 }}
-                />
-              )
+      {/* Map */}
+      <div className="flex-1 rounded-2xl overflow-hidden border border-slate-200 shadow-lg relative">
+        <MapContainer
+          center={CITY_CENTER}
+          zoom={13}
+          className="h-full w-full"
+          zoomControl={false}
+          attributionControl={false}
+        >
+          <MapViewController center={mapCenter} />
+
+          {/* Tile Layer */}
+          <TileLayer
+            key={mapType}
+            url={tile.url}
+            attribution={tile.attribution}
+            maxZoom={19}
+          />
+
+          {/* Department markers */}
+          {showDepartments &&
+            departmentLocations.map((dept) => (
+              <Marker
+                key={dept.name}
+                position={dept.position}
+                icon={createDepartmentIcon(dept.icon)}
+              >
+                <Popup>
+                  <div className="p-1">
+                    <p className="font-semibold text-sm">{dept.icon} {dept.name}</p>
+                    <p className="text-xs text-gray-500 capitalize">{dept.type} department</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+
+          {/* Incident markers */}
+          {filteredIncidents.map((incident) => (
+            <Marker
+              key={incident.id}
+              position={[incident.location.latitude, incident.location.longitude]}
+              icon={createIncidentIcon(incident.category)}
+            >
+              <Popup>
+                <div className="p-1 min-w-[200px]">
+                  <p className="font-semibold text-sm mb-1">{incident.title}</p>
+                  <div className="space-y-0.5 text-xs text-gray-600">
+                    <p><span className="font-medium">ID:</span> {incident.id?.slice(0, 8)}</p>
+                    <p><span className="font-medium">Priority:</span> {incident.priority}</p>
+                    <p><span className="font-medium">Category:</span> {incident.category}</p>
+                    {incident.address && <p><span className="font-medium">Address:</span> {incident.address}</p>}
+                    <p><span className="font-medium">Time:</span> {formatDate(incident.created_at)}</p>
+                    {incident.ai_confidence && (
+                      <p><span className="font-medium">AI Confidence:</span> {(incident.ai_confidence * 100).toFixed(1)}%</p>
+                    )}
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
+          {/* Warning zones for critical incidents */}
+          {filteredIncidents
+            .filter((i) => i.priority === 'CRITICAL')
+            .map((incident) => (
+              <Circle
+                key={`zone-${incident.id}`}
+                center={[incident.location.latitude, incident.location.longitude]}
+                radius={500}
+                pathOptions={{
+                  color: '#ef4444',
+                  fillColor: '#ef4444',
+                  fillOpacity: 0.1,
+                  weight: 2,
+                  dashArray: '8 4',
+                }}
+              />
+            ))}
+
+          {/* User location */}
+          {userLocation && (
+            <Marker position={userLocation} icon={createUserIcon()}>
+              <Popup>
+                <p className="text-xs font-medium">Your Location</p>
+              </Popup>
+            </Marker>
           )}
-      </MapContainer>
+        </MapContainer>
 
-      {/* Controls */}
-      <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-1.5">
-        <button
-          onClick={() => {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen?.()
-            else document.exitFullscreen?.()
-          }}
-          className="p-2 rounded-lg bg-white backdrop-blur-md border border-slate-200 text-slate-600 hover:text-slate-900 transition-colors"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={centerOnUser}
-          className="p-2 rounded-lg bg-blue-500 border border-slate-300 text-white shadow-lg shadow-blue-500/20 transition-colors hover:bg-blue-600"
-          title="Locate me"
-        >
-          <Navigation className="w-4 h-4" />
-        </button>
+        {/* Map Controls Overlay */}
+        <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-2">
+          {/* Map Type Selector */}
+          <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/80 p-1.5">
+            {(Object.keys(tileLayers) as (keyof typeof tileLayers)[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => setMapType(key)}
+                className={`flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  mapType === key
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                    : 'text-slate-500 hover:bg-slate-50 border border-transparent'
+                }`}
+              >
+                {key === 'satellite' && <Satellite className="w-3 h-3" />}
+                {key === 'streets' && <MapIcon className="w-3 h-3" />}
+                {key === 'topo' && <Layers className="w-3 h-3" />}
+                {key === 'dark' && <Layers className="w-3 h-3" />}
+                {tileLayers[key].name}
+              </button>
+            ))}
+          </div>
+
+          {/* Department Toggle */}
+          <button
+            onClick={() => setShowDepartments(!showDepartments)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium shadow-lg border transition-all ${
+              showDepartments
+                ? 'bg-white/95 backdrop-blur-md text-blue-700 border-blue-200'
+                : 'bg-white/95 backdrop-blur-md text-slate-400 border-slate-200'
+            }`}
+          >
+            <RotateCcw className="w-3 h-3" />
+            Departments
+          </button>
+
+          {/* Legend */}
+          <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/80 p-3">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Legend</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {Object.entries(categoryColors).map(([cat, color]) => (
+                <div key={cat} className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                  <span className="text-[10px] text-slate-500 capitalize">{cat.replace('_', ' ')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[1000]">
+          <div className="flex gap-1.5 p-1.5 bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-slate-200/80">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  selectedCategory === cat
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-500 hover:bg-slate-50'
+                }`}
+              >
+                {cat === 'all' ? 'All' : cat.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Incident Count */}
+        <div className="absolute bottom-3 right-3 z-[1000]">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/95 backdrop-blur-md rounded-xl shadow-lg border border-slate-200/80">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-semibold text-slate-700">{filteredIncidents.length}</span>
+            <span className="text-xs text-slate-400">active</span>
+          </div>
+        </div>
       </div>
-
-      <style>{`@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.7} }`}</style>
-    </motion.div>
+    </div>
   )
 }
