@@ -66,37 +66,47 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0f1a] flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'linear-gradient(#34d399 1px, transparent 1px), linear-gradient(90deg, #34d399 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
-          }}
+        {/* floating particles */}
+        <motion.div
+          className="absolute top-20 left-[10%] w-3 h-3 rounded-full bg-blue-100/50"
+          animate={{ y: [0, -30, 0], x: [0, 15, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute -top-48 -right-48 w-[600px] h-[600px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)' }}
-          animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity }}
+          className="absolute bottom-32 right-[15%] w-2 h-2 rounded-full bg-purple-100/50"
+          animate={{ y: [0, -20, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
         <motion.div
-          className="absolute -bottom-48 -left-48 w-[600px] h-[600px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)' }}
-          animate={{ scale: [1.2, 1, 1.2], opacity: [0.4, 0.8, 0.4] }}
-          transition={{ duration: 10, repeat: Infinity, delay: 3 }}
+          className="absolute top-1/2 left-[5%] w-4 h-4 rounded-full bg-blue-50/60"
+          animate={{ y: [0, -25, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+        />
+
+        <motion.div
+          className="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%)' }}
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 12, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute -bottom-32 -left-32 w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 70%)' }}
+          animate={{ scale: [1.1, 1, 1.1] }}
+          transition={{ duration: 12, repeat: Infinity, delay: 3 }}
         />
       </div>
 
       {/* Back button */}
       <motion.button
-        initial={{ opacity: 0, x: -16 }}
+        initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
         onClick={() => navigate('/')}
-        className="fixed top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-emerald-400 transition-colors z-20 text-sm"
+        className="fixed top-6 left-6 flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors z-20 text-sm"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to Home
@@ -104,36 +114,46 @@ export default function LoginPage() {
 
       {/* Login card */}
       <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        initial={{ opacity: 0, y: 30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="w-full max-w-md relative z-10"
       >
-        <div className="uc-card p-8 backdrop-blur-2xl border-white/[0.06] shadow-2xl shadow-black/40">
+        <div className="uc-card p-8 shadow-xl shadow-slate-200/50">
           {/* Logo */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, delay: 0.15 }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             className="flex items-center justify-center mx-auto mb-6"
           >
             <CrisLogo className="w-16 h-16" />
           </motion.div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Secure Access</h1>
-            <p className="text-slate-500 mt-2 text-sm">Authenticate to the Command Center</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Secure Access</h1>
+            <p className="text-slate-400 mt-2 text-sm">Authenticate to the Command Center</p>
+          </motion.div>
 
           {/* Login Mode Tabs */}
-          <div className="flex gap-2 mb-6 p-1 bg-white/[0.04] border border-white/[0.06] rounded-2xl">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="flex gap-2 mb-6 p-1 bg-slate-50 border border-slate-200/80 rounded-2xl"
+          >
             <button
               type="button"
               onClick={() => { setLoginMode('admin'); setError('') }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
                 loginMode === 'admin'
-                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                  ? 'bg-white text-slate-800 border border-slate-200/60 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600 border border-transparent'
               }`}
             >
               <Fingerprint className="w-4 h-4" />
@@ -142,50 +162,54 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => { setLoginMode('department'); setError('') }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
                 loginMode === 'department'
-                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                  ? 'bg-white text-slate-800 border border-slate-200/60 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600 border border-transparent'
               }`}
             >
               <Building2 className="w-4 h-4" />
               Department
             </button>
-          </div>
+          </motion.div>
 
           {loginMode === 'admin' ? (
-            <form onSubmit={handleAdminLogin} className="space-y-5">
+            <motion.form
+              onSubmit={handleAdminLogin}
+              className="space-y-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                initial={{ opacity: 0, y: -8, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                className="p-3.5 rounded-xl bg-red-50 border border-red-200/60 text-red-600 text-sm"
               >
                 {error}
               </motion.div>
             )}
 
-            {/* Email */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Email</label>
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="uc-input pl-10"
-                  placeholder="admin@nexus.gov"
+                  placeholder="admin@cris.gov"
                   required
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -197,14 +221,13 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Remember me */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2.5 cursor-pointer group">
                 <div className="relative">
@@ -217,12 +240,14 @@ export default function LoginPage() {
                   <div
                     className={`w-5 h-5 rounded-lg border transition-all flex items-center justify-center ${
                       rememberMe
-                        ? 'bg-emerald-500 border-emerald-500'
-                        : 'border-slate-600 bg-slate-800/40 group-hover:border-slate-500'
+                        ? 'bg-blue-500 border-blue-500'
+                        : 'border-slate-300 bg-white group-hover:border-slate-400'
                     }`}
                   >
                     {rememberMe && (
-                      <svg
+                      <motion.svg
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
                         className="w-3 h-3 text-white"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -230,20 +255,19 @@ export default function LoginPage() {
                         strokeWidth={3}
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
+                      </motion.svg>
                     )}
                   </div>
                 </div>
                 <span className="text-sm text-slate-500">Keep me signed in</span>
               </label>
-              <button type="button" className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
+              <button type="button" className="text-sm text-blue-500 hover:text-blue-600 transition-colors">
                 Forgot password?
               </button>
             </div>
 
-            {/* Submit */}
             <motion.button
-              whileHover={{ scale: 1.01, y: -1 }}
+              whileHover={{ scale: 1.01, y: -2 }}
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading}
@@ -258,34 +282,38 @@ export default function LoginPage() {
                 </>
               )}
             </motion.button>
-          </form>
+          </motion.form>
           ) : (
-          <form onSubmit={handleDepartmentLogin} className="space-y-5">
-            {/* Error */}
+          <motion.form
+            onSubmit={handleDepartmentLogin}
+            className="space-y-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
+                className="p-3.5 rounded-xl bg-red-50 border border-red-200/60 text-red-600 text-sm"
               >
                 {error}
               </motion.div>
             )}
 
-            {/* Department Selection */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Department</label>
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Department</label>
               <div className="relative">
-                <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="uc-input pl-10 appearance-none"
                   required
                 >
-                  <option value="" className="bg-slate-900">Select your department</option>
+                  <option value="" className="bg-white">Select your department</option>
                   {DEPARTMENTS.map((dept) => (
-                    <option key={dept.value} value={dept.value} className="bg-slate-900">
+                    <option key={dept.value} value={dept.value} className="bg-white">
                       {dept.icon} {dept.label}
                     </option>
                   ))}
@@ -293,11 +321,10 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Department Password */}
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-400 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-600" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                 <input
                   type={showDeptPassword ? 'text' : 'password'}
                   value={deptPassword}
@@ -309,24 +336,22 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeptPassword(!showDeptPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-300 transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
                 >
                   {showDeptPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Department Info */}
-            <div className="p-3 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20">
-              <p className="text-xs text-emerald-300/80">
+            <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200/40">
+              <p className="text-xs text-blue-600/80">
                 <strong>Department Access:</strong> Select your department and enter the password.
                 You will only see incidents routed to your department.
               </p>
             </div>
 
-            {/* Submit */}
             <motion.button
-              whileHover={{ scale: 1.01, y: -1 }}
+              whileHover={{ scale: 1.01, y: -2 }}
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading || !department}
@@ -341,7 +366,7 @@ export default function LoginPage() {
                 </>
               )}
             </motion.button>
-          </form>
+          </motion.form>
           )}
         </div>
       </motion.div>
