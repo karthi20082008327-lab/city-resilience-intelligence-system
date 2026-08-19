@@ -172,7 +172,7 @@ export default function IncidentAlert({
                   onAccept?.(incident.incident_id)
                   setShow(false)
                 }}
-                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100"
+                className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-300 hover:bg-blue-100"
               >
                 <CheckCircle className="w-3.5 h-3.5" /> Accept
               </button>

@@ -41,7 +41,7 @@ const departments = [
   {
     name: 'Disaster Management',
     icon: Shield,
-    color: 'from-teal-500 to-green-500',
+    color: 'from-blue-500 to-indigo-500',
     head: 'Bommi Harnika',
     staff: 85,
     activeIncidents: 3,

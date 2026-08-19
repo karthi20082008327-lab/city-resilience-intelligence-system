@@ -72,7 +72,7 @@ export default function WeatherPage() {
   ]
 
   const getUVLevel = (uv: number) => {
-    if (uv <= 2) return { label: 'Low', color: 'text-emerald-600' }
+    if (uv <= 2) return { label: 'Low', color: 'text-blue-600' }
     if (uv <= 5) return { label: 'Moderate', color: 'text-amber-600' }
     if (uv <= 7) return { label: 'High', color: 'text-orange-600' }
     if (uv <= 10) return { label: 'Very High', color: 'text-red-600' }
@@ -158,7 +158,7 @@ export default function WeatherPage() {
                       : 'No protection needed.'}
               </p>
             </div>
-            <div className="h-2 rounded-full bg-gradient-to-r from-emerald-500 via-amber-500 via-orange-500 to-red-500 mt-4" />
+            <div className="h-2 rounded-full bg-gradient-to-r from-blue-500 via-amber-500 via-orange-500 to-red-500 mt-4" />
             <div className="flex justify-between mt-1">
               {[0, 3, 6, 8, '11+'].map((v) => (
                 <span key={String(v)} className="text-[10px] text-slate-400">

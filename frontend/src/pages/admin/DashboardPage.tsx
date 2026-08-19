@@ -260,9 +260,9 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold text-slate-900 tracking-tight">Command Center</h1>
           <p className="text-slate-500 text-sm mt-0.5">Real-time city monitoring overview</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-emerald-600 font-medium">Systems Operational</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
+          <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+          <span className="text-xs text-blue-600 font-medium">Systems Operational</span>
         </div>
       </div>
 
@@ -284,7 +284,7 @@ export default function DashboardPage() {
                 <stat.icon className="w-4.5 h-4.5" style={{ color: stat.color }} />
               </div>
               <span
-                className={`text-[11px] font-medium flex items-center gap-0.5 ${stat.up ? 'text-emerald-600' : 'text-red-600'}`}
+                className={`text-[11px] font-medium flex items-center gap-0.5 ${stat.up ? 'text-blue-600' : 'text-red-600'}`}
               >
                 {stat.up ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                 {stat.trend}
@@ -328,7 +328,7 @@ export default function DashboardPage() {
                     ? 'bg-red-50 text-red-700'
                     : insight.severity === 'medium'
                       ? 'bg-amber-50 text-amber-700'
-                      : 'bg-emerald-50 text-emerald-700'
+                      : 'bg-blue-50 text-blue-700'
                 }`}
               >
                 {insight.message}
@@ -460,7 +460,7 @@ export default function DashboardPage() {
                   <span
                     className={`uc-chip ${
                       info.status === 'operational'
-                        ? 'bg-emerald-50 text-emerald-700'
+                        ? 'bg-blue-50 text-blue-700'
                         : info.status === 'stressed'
                           ? 'bg-amber-50 text-amber-700'
                           : 'bg-red-50 text-red-700'

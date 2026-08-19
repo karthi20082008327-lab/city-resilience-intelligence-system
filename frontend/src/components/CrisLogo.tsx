@@ -13,8 +13,8 @@ export function CrisLogo({ className = 'w-9 h-9' }: CrisLogoProps) {
     >
       <defs>
         <linearGradient id="nexus-tile" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#10b981" />
-          <stop offset="0.5" stopColor="#06b6d4" />
+          <stop stopColor="#3b82f6" />
+          <stop offset="0.5" stopColor="#6366f1" />
           <stop offset="1" stopColor="#8b5cf6" />
         </linearGradient>
       </defs>

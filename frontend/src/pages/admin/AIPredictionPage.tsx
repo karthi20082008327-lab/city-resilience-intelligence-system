@@ -137,7 +137,7 @@ export default function AIPredictionPage() {
                           ? 'bg-amber-50 text-amber-700'
                           : factor.impact === 'Medium'
                             ? 'bg-blue-50 text-blue-700'
-                            : 'bg-emerald-50 text-emerald-700'
+                            : 'bg-blue-50 text-blue-700'
                     }`}
                   >
                     {factor.impact}
@@ -186,7 +186,7 @@ export default function AIPredictionPage() {
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-[11px] text-slate-400">{path.dept}</span>
                   <span
-                    className={`text-xs font-semibold font-mono ${path.risk > 0.7 ? 'text-red-600' : path.risk > 0.5 ? 'text-amber-600' : 'text-emerald-600'}`}
+                    className={`text-xs font-semibold font-mono ${path.risk > 0.7 ? 'text-red-600' : path.risk > 0.5 ? 'text-amber-600' : 'text-blue-600'}`}
                   >
                     {(path.risk * 100).toFixed(0)}%
                   </span>

@@ -46,7 +46,7 @@ const performanceData = [
     value: '94%',
     change: '+8%',
     icon: Target,
-    color: 'from-green-500 to-emerald-500',
+    color: 'from-blue-500 to-indigo-500',
   },
   {
     metric: 'Avg Risk Score',

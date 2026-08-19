@@ -47,7 +47,7 @@ function SimulatorFeed({
         <SimulationCameraFeed preset={preset} cameraId={camera.id} />
         {/* Camera label */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded bg-black/60 backdrop-blur-sm z-10">
-          <span className={`w-1.5 h-1.5 rounded-full ${isIncident ? 'bg-red-500 animate-pulse' : 'bg-emerald-400'}`} />
+          <span className={`w-1.5 h-1.5 rounded-full ${isIncident ? 'bg-red-500 animate-pulse' : 'bg-blue-400'}`} />
           <span className="text-[10px] font-mono text-white/80">{camera.name.split('·')[0].trim()}</span>
         </div>
         {isIncident && (
@@ -111,9 +111,9 @@ function MobileCameraFeed({ alert }: { alert: CameraFocusEvent | null }) {
         <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
         {/* Label */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-1 rounded bg-black/60 backdrop-blur-sm z-10">
-          <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-red-500'}`} />
+          <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-blue-400' : 'bg-red-500'}`} />
           <span className="text-[10px] font-mono text-white/80">MOBILE</span>
-          {connected ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-red-400" />}
+          {connected ? <Wifi className="w-3 h-3 text-blue-400" /> : <WifiOff className="w-3 h-3 text-red-400" />}
         </div>
 
         {/* Collision Alert Overlay */}
@@ -298,7 +298,7 @@ export default function CCTVPage() {
                         {inc.created_at ? new Date(inc.created_at).toLocaleTimeString() : ''}
                       </span>
                       {inc.snapshot_url && (
-                        <span className="text-[10px] text-emerald-600 font-medium">Has Image</span>
+                        <span className="text-[10px] text-blue-600 font-medium">Has Image</span>
                       )}
                     </div>
                   </div>
